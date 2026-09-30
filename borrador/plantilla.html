@@ -1,0 +1,837 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seguimiento y Optimización</title>
+<style>
+:root{
+  --bg:#fafafa; --panel:#ffffff; --line:#ebebeb; --line2:#f3f3f3;
+  --tx:#141414; --tx2:#5f6368; --tx3:#9aa0a6;
+  --accent:#141414; --hover:#f5f5f5;
+  --verde:#1f9d55; --amarillo:#e3a008; --naranja:#f07b1d; --rojo:#d93025; --gris:#d5d7da;
+  --auto:#1a73e8; --banda:#eef1f4;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{margin:0;color:var(--tx);font:14px/1.5 Inter,"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer}
+a{color:inherit;text-decoration:none}
+textarea{font:inherit}
+.top{position:sticky;top:0;z-index:5;background:rgba(250,250,250,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1180px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.marca{font-weight:600;font-size:13px;color:var(--tx2)}
+.miga{font-size:13px;color:var(--tx3)} .miga a{color:var(--tx2)} .miga a:hover{color:var(--tx)} .miga b{color:var(--tx);font-weight:600}
+.der{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:2px}
+.seg button{border:0;background:transparent;padding:4px 12px;border-radius:6px;color:var(--tx2);font-size:13px}
+.seg button.on{background:var(--accent);color:#fff}
+.fecha{font-size:12px;color:var(--tx3)}
+.tlink{font-size:13px;color:var(--tx2);border:0;background:transparent;padding:4px 6px}
+.tlink:hover{color:var(--tx)}
+.tlink b{background:var(--accent);color:#fff;border-radius:10px;padding:0 7px;font-size:11px;font-weight:600;margin-left:4px}
+main{max-width:1180px;margin:0 auto;padding:32px 24px 80px}
+h1{font-size:24px;font-weight:600;letter-spacing:-.02em;margin:0}
+h2{font-size:13px;font-weight:600;margin:0;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em}
+h3{font-size:15px;margin:0 0 6px;font-weight:600}
+.sub{color:var(--tx2);margin:4px 0 0}
+.cab{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.cab .der{align-self:center}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:0 0 28px;align-items:center}
+.tabs a{padding:8px 12px;color:var(--tx2);border-bottom:2px solid transparent;margin-bottom:-1px;font-size:14px}
+.tabs a:hover{color:var(--tx)}
+.tabs a.on{color:var(--tx);border-color:var(--accent);font-weight:500}
+.tabs .fin{margin-left:auto}
+.btn-acc{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);font-size:13px}
+.btn-acc:hover{background:var(--hover)}
+.btn-acc b{background:var(--accent);color:#fff;border-radius:10px;padding:0 7px;font-size:12px;font-weight:600}
+.bloque{margin:0 0 40px}
+.bloque>.bh{display:flex;align-items:baseline;gap:12px;margin:0 0 6px;flex-wrap:wrap}
+.bloque>.bh .nota{font-size:12px;color:var(--tx3)}
+.ayuda{font-size:13px;color:var(--tx2);margin:0 0 12px;max-width:860px}
+details.como{margin:-6px 0 12px;font-size:12px;color:var(--tx2)}
+details.como summary{cursor:pointer;color:var(--tx3);list-style:none}
+details.como summary::before{content:"ⓘ ";}
+details.como[open] summary{color:var(--tx2)}
+details.como div{margin-top:6px;padding:10px 12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;max-width:860px}
+.caja{background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.vacio{padding:28px;text-align:center;color:var(--tx3);font-size:13px}
+.muted{color:var(--tx3)} .small{font-size:12px} .tx2{color:var(--tx2)}
+/* semáforos */
+.luces{display:inline-flex;gap:10px;align-items:center;white-space:nowrap;flex-wrap:wrap}
+.luz{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--tx2)}
+.luz i{width:9px;height:9px;border-radius:50%;display:inline-block;background:var(--gris);flex:none}
+.luz i.verde{background:var(--verde)} .luz i.amarillo{background:var(--amarillo)} .luz i.naranja{background:var(--naranja)} .luz i.rojo{background:var(--rojo)}
+.luz i.vacia{background:transparent;border:1.5px solid var(--gris)}
+.luz.solo span{display:none}
+.efi{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2);white-space:nowrap}
+.efi i{width:9px;height:9px;border-radius:2px;display:inline-block;flex:none;background:var(--gris)}
+.efi i.verde{background:var(--verde)} .efi i.amarillo{background:var(--amarillo)} .efi i.naranja{background:var(--naranja)} .efi i.rojo{background:var(--rojo)}
+.delta{font-size:11px;white-space:nowrap} .delta.bien{color:var(--verde)} .delta.mal{color:var(--rojo)} .delta.neutro{color:var(--tx3)}
+/* portada */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;cursor:pointer;transition:border-color .15s, box-shadow .15s}
+.card:hover{border-color:#d6d6d6;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.card h3{margin:0 0 4px;font-size:17px;font-weight:600;letter-spacing:-.01em}
+.card .fila{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-top:1px solid var(--line2);font-size:13px;gap:8px}
+.card .fila:first-of-type{border-top:0}
+.card .fila span{color:var(--tx2)}
+.card .fila b{font-weight:600;text-align:right}
+.card .rend{display:flex;justify-content:space-between;align-items:center;margin:10px 0 12px}
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(7,1fr)}
+@media (max-width:1000px){.kpis{grid-template-columns:repeat(4,1fr)}}
+.kpi{padding:16px;border-left:1px solid var(--line2)}
+.kpi:first-child{border-left:0}
+.kpi .k{font-size:12px;color:var(--tx2)}
+.kpi .v{font-size:21px;font-weight:600;letter-spacing:-.02em;margin:4px 0 6px;white-space:nowrap}
+.kpi .d{font-size:12px;color:var(--tx3);margin-top:6px}
+.kpi.principal{background:#fcfcfc}
+.kpi.principal .k{color:var(--tx);font-weight:600}
+.kpi .l2{display:flex;flex-direction:column;gap:3px}
+.kpi .tag{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em}
+.sec2{display:flex;flex-wrap:wrap;border-top:1px solid var(--line2)}
+.sec2 .m{padding:12px 16px;border-left:1px solid var(--line2);min-width:140px;flex:1}
+.sec2 .m:first-child{border-left:0}
+.sec2 .m .k{font-size:11px;color:var(--tx3)}
+.sec2 .m .v{font-weight:600;margin-top:2px;display:flex;align-items:center;gap:8px}
+.sim{font-size:11px;color:var(--tx3);border:1px dashed var(--gris);border-radius:6px;padding:0 5px;white-space:nowrap}
+.video{display:grid;grid-template-columns:repeat(3,1fr) 2fr;border-top:1px solid var(--line2)}
+.video .m{padding:12px 16px;border-left:1px solid var(--line2)}
+.video .m:first-child{border-left:0}
+.video .m .k{font-size:11px;color:var(--tx3)}
+.video .m .v{font-weight:600;margin-top:2px;display:flex;align-items:center;gap:8px}
+.curva{display:flex;align-items:flex-end;gap:10px;height:54px;margin-top:6px}
+.curva .c{flex:1;position:relative;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.curva .c i{display:block;width:100%;background:#cfd4da;border-radius:3px 3px 0 0}
+.curva .c s{position:absolute;left:-2px;right:-2px;height:2px;background:var(--tx)}
+.curva .c span{font-size:10px;color:var(--tx3);position:absolute;bottom:-16px}
+/* listas */
+.lista>.it{display:grid;align-items:center;gap:16px;padding:14px 18px;border-top:1px solid var(--line2)}
+.lista>.it:first-child{border-top:0}
+.lista>.it.click{cursor:pointer} .lista>.it.click:hover{background:var(--hover)}
+.nom{font-weight:500} .meta{font-size:12px;color:var(--tx3);margin-top:2px}
+.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.th{display:grid;gap:16px;padding:0 18px 8px;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em}
+.estado{font-size:12px;color:var(--tx2);white-space:nowrap}
+.estado.por{color:var(--amarillo)} .estado.sin{color:var(--rojo)}
+.chip{display:inline-block;font-size:12px;color:var(--tx2);border:1px solid var(--line);border-radius:12px;padding:1px 8px;margin:2px 4px 2px 0;white-space:nowrap}
+.chip.auto{color:var(--auto);border-color:#cfe0fb}
+.chip.rojo{color:var(--rojo);border-color:#f5c6c2} .chip.amarillo{color:#a36f00;border-color:#f3dca0}
+.senal{font-weight:500} .senal.v{color:var(--verde)} .senal.a{color:var(--amarillo)}
+.filtros{display:flex;gap:6px;margin:0 0 14px;flex-wrap:wrap;align-items:center}
+.fb{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:3px 12px;font-size:12px;color:var(--tx2)}
+.fb.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.post{font-size:12px;color:var(--auto);border:0;background:transparent;padding:0}
+.post:hover{text-decoration:underline}
+/* gasto */
+.consumo{display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));gap:16px}
+.cons{padding:20px}
+.cons .cifras{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-end;margin:6px 0 10px}
+.cons .cifras div span{display:block;font-size:12px;color:var(--tx2)}
+.cons .cifras div b{font-size:28px;font-weight:600;letter-spacing:-.02em}
+.badge{display:inline-block;font-size:12px;font-weight:600;border-radius:12px;padding:2px 10px}
+.badge.verde{background:#e5f5ea;color:var(--verde)} .badge.amarillo{background:#fdf3e1;color:#a36f00} .badge.rojo{background:#fde4e4;color:var(--rojo)}
+.mini{height:4px;border-radius:2px;background:var(--line2);position:relative;margin-top:6px;min-width:80px}
+.mini i{position:absolute;left:0;top:0;bottom:0;border-radius:2px;background:var(--tx2)}
+.peso{height:6px;border-radius:3px;background:var(--line2);position:relative;min-width:60px}
+.peso i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:#b9bfc6}
+.leyline{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--tx2);margin-top:8px}
+.leyline span{display:inline-flex;align-items:center;gap:6px}
+.leyline i{width:14px;height:3px;border-radius:2px;display:inline-block}
+/* acciones */
+.acc{padding:18px 20px;border-top:1px solid var(--line2)}
+.acc:first-child{border-top:0}
+.acc .tipo{font-size:12px;color:var(--tx3);margin-bottom:4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.acc .tit{font-weight:600;font-size:15px;letter-spacing:-.01em}
+.acc .que{color:var(--tx2);margin:4px 0 10px}
+.acc .hacer{display:flex;gap:8px;align-items:baseline}
+.acc .hacer b{font-weight:600}
+.acc .porque{font-size:12px;color:var(--tx3);margin-top:8px;padding-left:12px;border-left:2px solid var(--line)}
+.acc .porque em{font-style:normal;color:var(--tx2);font-weight:500}
+.acc .piezas{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center}
+.b{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:6px 12px;font-size:13px;color:var(--tx)}
+.b:hover{background:var(--hover)}
+.b.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.b.pri:hover{background:#333}
+.b[disabled]{opacity:.35;cursor:not-allowed}
+.b.link{border:0;background:transparent;color:var(--tx2);padding:6px 4px}
+.b.link:hover{color:var(--tx);background:transparent}
+.b.sm{padding:3px 10px;font-size:12px}
+.b.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.desc{display:inline-flex;gap:6px;align-items:center}
+.desc select{border:1px solid var(--line);border-radius:8px;padding:5px 8px;font:inherit;font-size:13px;background:var(--panel);color:var(--tx)}
+.opinion{margin-top:14px;padding:12px;border:1px dashed var(--line);border-radius:10px;background:#fcfcfc}
+.opinion .fila{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--tx2)}
+.opinion textarea{width:100%;margin-top:8px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;min-height:54px;resize:vertical;background:#fff}
+.hecha{display:flex;gap:10px;align-items:center;padding:10px 20px;border-top:1px solid var(--line2);font-size:13px;color:var(--tx2)}
+.hecha:first-child{border-top:0}
+.hecha .que{flex:1}
+/* insights */
+.ins{padding:18px 20px;border-top:1px solid var(--line2)}
+.ins:first-child{border-top:0}
+.ins .t{font-weight:600;letter-spacing:-.01em}
+.ins .x{color:var(--tx2);margin-top:4px;font-size:13px}
+.ins .f{font-size:12px;color:var(--tx3);margin-top:6px}
+.ins .signo{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:middle}
+.cruce{display:grid;grid-template-columns:1fr 1fr 16px;gap:24px;padding:16px 20px;border-top:1px solid var(--line2);align-items:start}
+.cruce:first-child{border-top:0}
+.cruce .lab{font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.cruce .ahora{font-weight:500}
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.tres{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media (max-width:900px){.dos,.tres{grid-template-columns:1fr}.cruce{grid-template-columns:1fr}.video{grid-template-columns:1fr 1fr}.consumo{grid-template-columns:1fr}}
+/* piezas */
+.pieza{padding:14px;display:flex;flex-direction:column;gap:10px}
+.pieza iframe{width:100%;border:0;border-radius:8px;background:var(--line2)}
+.pieza .datos{font-size:12px;color:var(--tx2);display:flex;gap:10px;flex-wrap:wrap}
+/* campaña */
+.subtabs{display:flex;gap:6px;margin:0 0 14px}
+.spark{display:block}
+.leyenda{display:flex;gap:14px;font-size:12px;color:var(--tx3);align-items:center;flex-wrap:wrap}
+.hist{padding:20px}
+.hist .txt{display:flex;gap:32px;flex-wrap:wrap;margin-bottom:14px;font-size:13px}
+.hist .txt div span{display:block;font-size:12px;color:var(--tx3)}
+.hist .txt div b{font-weight:600}
+/* modal */
+.velo{position:fixed;inset:0;background:rgba(20,20,20,.35);z-index:20;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
+.modal{background:var(--panel);border-radius:14px;max-width:820px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal .mh{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.modal .mh .x{margin-left:auto}
+.modal textarea{width:100%;min-height:140px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px}
+.embeds{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.embeds iframe{width:100%;border:0;border-radius:8px;background:var(--line2)}
+/* guía */
+.guia h3{margin-top:22px}
+.guia p,.guia li{color:var(--tx2);max-width:820px}
+.guia dl{display:grid;grid-template-columns:220px 1fr;gap:8px 20px;max-width:900px}
+.guia dt{font-weight:600} .guia dd{margin:0;color:var(--tx2)}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <span class="marca">Seguimiento y Optimización</span>
+  <span class="miga" id="miga"></span>
+  <div class="der">
+    <div class="seg" id="canal"><button data-c="Oficial">Oficial</button><button data-c="Informativo">Informativo</button></div>
+    <a class="tlink" href="#guia">Cómo leer</a>
+    <button class="tlink" onclick="comentarPantalla()">Comentar esta pantalla</button>
+    <button class="tlink" id="exportar" onclick="exportarComentarios()">Exportar comentarios</button>
+    <span class="fecha" id="fecha"></span>
+  </div>
+</div></header>
+<main id="app"></main>
+<div id="capa"></div>
+
+<script>
+const D = /*__DATA__*/null;
+
+// ---------- utilidades ----------
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const enc = (x) => encodeURIComponent(x).replace(/'/g, '%27');
+const go = (r) => { location.hash = r; };
+const M = (n) => { n = n || 0; const a = Math.abs(n); return a >= 1e6 ? '$' + (a / 1e6).toLocaleString('es-AR', { maximumFractionDigits: 1 }) + ' M' : a >= 1e3 ? '$' + Math.round(a / 1e3).toLocaleString('es-AR') + ' k' : '$' + Math.round(a); };
+const N = (n) => { n = n || 0; return n >= 1e6 ? (n / 1e6).toLocaleString('es-AR', { maximumFractionDigits: 1 }) + ' M' : n >= 1e4 ? Math.round(n / 1e3).toLocaleString('es-AR') + ' k' : Math.round(n).toLocaleString('es-AR'); };
+const $$ = (n) => n == null || !isFinite(n) ? '—' : n < 100 ? '$' + n.toLocaleString('es-AR', { maximumFractionDigits: 2 }) : '$' + Math.round(n).toLocaleString('es-AR');
+const pct = (x, d = 2) => x == null || !isFinite(x) ? '—' : x.toLocaleString('es-AR', { minimumFractionDigits: d, maximumFractionDigits: d }) + ' %';
+const veces = (x) => x == null || !isFinite(x) ? '—' : x.toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '×';
+const dm = (f) => f ? f.slice(8, 10) + '/' + f.slice(5, 7) : '—';
+const dmy = (f) => f ? f.slice(8, 10) + '/' + f.slice(5, 7) + '/' + f.slice(2, 4) : '—';
+const hash = (s) => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; };
+const dias = (a, b) => Math.round((new Date(b) - new Date(a)) / 864e5);
+const MESES = { '01': 'enero', '02': 'febrero', '03': 'marzo', '04': 'abril', '05': 'mayo', '06': 'junio', '07': 'julio', '08': 'agosto', '09': 'septiembre', '10': 'octubre', '11': 'noviembre', '12': 'diciembre' };
+const mesTxt = (m) => MESES[m.slice(5, 7)];
+const leer = (k, def) => { try { return JSON.parse(localStorage.getItem(k) || JSON.stringify(def)); } catch (e) { return def; } };
+const grabar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+function ayuda(texto, como) {
+  return `<p class="ayuda">${texto}</p>${como ? `<details class="como"><summary>Cómo se calcula</summary><div>${como}</div></details>` : ''}`;
+}
+
+let CANAL = leer('seg-canal', 'Oficial');
+function setCanal(c) { CANAL = c; grabar('seg-canal', c); render(); }
+
+// ---------- métricas y semáforos ----------
+// o = sumas { g, i, r, c, e, co, sh, vi, vw, v25..v100 } + esperado con la mediana de la referencia: x* (general) y p* (proyecto)
+// ±20 % contra la referencia (igual que el tablero de Dirección): rojo = 20 % o más peor, verde = 20 % o más mejor
+const UMB_TASA = [1 / 1.2, 1.2], UMB_CPM = [1 / 1.2, 1.2];
+const color = (ix, u = UMB_TASA) => ix == null || !isFinite(ix) ? 'gris' : ix < u[0] ? 'rojo' : ix < u[1] ? 'amarillo' : 'verde';
+function kp(o) {
+  const i = o.i || 0;
+  const div = (a, b) => (a != null && b ? a / b : null);
+  const ix = (p) => {
+    const precio = div(o[p + 'g'], o.g); // >1 = más barato que la referencia
+    const reac = div(o.r, o[p + 'r']), comp = div(o.sh, o[p + 'sh']), clk = div(o.c, o[p + 'c']);
+    return { cpm: precio, r: reac, sh: comp, co: div(o.co, o[p + 'co']), e: div(o.e, o[p + 'e']), c: clk,
+      cr: reac != null && precio != null && o.r ? reac * precio : null, cpc: clk != null && precio != null && o.c ? clk * precio : null,
+      csh: comp != null && precio != null && o.sh ? comp * precio : null,
+      vw: div(o.vw, o[p + 'vw']), r25: div(o.v25, o[p + '25']), r100: div(o.v100, o[p + '100']) };
+  };
+  return { g: o.g, i, r: o.r, e: o.e, c: o.c, sh: o.sh, co: o.co, alc: i / (1.6 + (hash(o.g) % 18) / 10),
+    cpm: i ? o.g / i * 1000 : null, cr: o.r ? o.g / o.r : null, cpc: o.c ? o.g / o.c : null, csh: o.sh ? o.g / o.sh : null,
+    treac: i ? o.r / i * 100 : null, tcomp: i ? o.sh / i * 100 : null, tcom: i ? o.co / i * 100 : null, etr: i ? o.e / i * 100 : null, ctr: i ? o.c / i * 100 : null,
+    video: o.vi > 0 && o.vw > 0, trepro: o.vi ? o.vw / o.vi * 100 : null,
+    ret: o.vw ? [o.v25, o.v50, o.v75, o.v100].map((v) => v / o.vw * 100) : null, vtr: o.vi ? o.v100 / o.vi * 100 : null,
+    G: ix('x'), P: ix('p') };
+}
+function luces(g, p, u, conNum = false, prop) {
+  const t = (lab, ix) => `<span class="luz" title="${lab}: ${veces(ix)} la referencia"><i class="${color(ix, u)}"></i><span>${lab}${conNum ? ' ' + veces(ix) : ''}</span></span>`;
+  return `<span class="luces">${t('General', g)}${t('Proyecto', p)}${prop ? t(prop.lab, prop.ix) : ''}</span>`;
+}
+const lucesLuz = (lg, lp) => `<span class="luces"><span class="luz"><i class="${lg}"></i><span>General</span></span><span class="luz"><i class="${lp}"></i><span>Proyecto</span></span></span>`;
+const puntos = (cs, titulos = []) => `<span class="luces" style="gap:5px">${cs.map((c, i) => `<span class="luz solo" title="${titulos[i] || ''}"><i class="${c}"></i></span>`).join('')}</span>`;
+const umbObj = () => UMB_TASA;
+function principal(o, obj) {
+  const k = kp(o);
+  if (obj === 'Interacción') return { lab: 'Costo por reacción', val: $$(k.cr), G: k.G.cr, P: k.P.cr, u: UMB_TASA };
+  if (obj === 'Tráfico') return { lab: 'CTR', val: pct(k.ctr), G: k.G.c, P: k.P.c, u: UMB_TASA };
+  return { lab: 'CPM', val: $$(k.cpm), G: k.G.cpm, P: k.P.cpm, u: UMB_CPM };
+}
+// luz "Propia": estacionales contra su temporada anterior (salvo que el equipo diga que no es estacional); el resto contra su propia historia
+function propiaDe(c) {
+  const p = c.propia;
+  if (!p) return null;
+  const temporada = p.tipo === 'temporada' && estacional(c.uid) !== false;
+  const ix = temporada ? p.idxTemporada : p.idxPropio;
+  return { lab: temporada ? 'Temporada anterior' : 'Propia', ix: ix ?? null, temporada, u: UMB_TASA, color: ix == null ? 'vacia' : color(ix, UMB_TASA) };
+}
+// variación contra el mismo tramo del mes anterior; en costos, subir es malo
+function deltaTxt(d, costo, mesAnt) {
+  if (d == null || !isFinite(d)) return '';
+  const sube = d > 0, n = Math.abs(d) >= 10 ? '×' + (1 + d).toLocaleString('es-AR', { maximumFractionDigits: 1 }) : Math.round(Math.abs(d) * 100) + ' %';
+  const clase = Math.abs(d) < 0.05 ? 'neutro' : (sube !== !!costo) ? 'bien' : 'mal';
+  return `<div class="delta ${clase}" title="Contra los mismos días de ${mesAnt}">${sube ? '▲' : '▼'} ${n} vs ${mesAnt}</div>`;
+}
+const efiChip = (e, corto = false) => !e ? '<span class="muted small">—</span>' : `<span class="efi" title="Eficacia (regla de Looker): ${e.rojos} de ${e.n} anuncios en rojo · ${e.pctGastoRojo} % del gasto en rojo"><i class="${e.color}"></i>${corto ? `${e.pctGastoRojo} %` : `${e.pctGastoRojo} % del gasto en rojo <span class="muted">(${e.rojos} de ${e.n})</span>`}</span>`;
+const KPI_DE = { 'Alcance': 'i', 'Interacción': 'cr', 'Tráfico': 'ctr' };
+function kpis(o, obj, prop, deltas, mesAnt) {
+  const k = kp(o), d = deltas || {};
+  const p = KPI_DE[obj];
+  const t = (id, lab, val, g, pp, u, extra, dlt) => `<div class="kpi ${p === id ? 'principal' : ''}">${p === id ? '<div class="tag">KPI principal</div>' : ''}<div class="k">${lab}</div><div class="v">${val}</div><div class="l2">${g === undefined ? '' : luces(g, pp, u, true, p === id ? prop : null)}</div>${dlt || ''}${extra ? `<div class="d">${extra}</div>` : ''}</div>`;
+  const m2 = (lab, val, g, pp, u) => `<div class="m"><div class="k">${lab}</div><div class="v">${val}${g !== undefined ? puntos([color(g, u), color(pp, u)], ['General ' + veces(g), 'Proyecto ' + veces(pp)]) : ''}</div></div>`;
+  let video = '';
+  if (k.video && k.ret) {
+    const bandaRet = [k.G.r25 ? k.ret[0] / k.G.r25 : null, null, null, k.G.r100 ? k.ret[3] / k.G.r100 : null];
+    const max = Math.max(...k.ret, ...bandaRet.filter(Boolean), 1);
+    video = `<div class="video">
+      ${m2('Tasa de reproducción', pct(k.trepro, 1), k.G.vw, k.P.vw, UMB_TASA)}
+      ${m2('Retención al 25 %', pct(k.ret[0], 1), k.G.r25, k.P.r25, UMB_TASA)}
+      ${m2('VTR (video completo)', pct(k.vtr, 2), k.G.r100, k.P.r100, UMB_TASA)}
+      <div class="m"><div class="k">Curva de retención <span class="muted">· raya = lo normal</span></div><div class="curva">${['25 %', '50 %', '75 %', '100 %'].map((l, i) => `<div class="c"><i style="height:${k.ret[i] / max * 100}%"></i>${bandaRet[i] ? `<s style="bottom:${bandaRet[i] / max * 100}%"></s>` : ''}<span>${l}</span></div>`).join('')}</div></div></div>`;
+  }
+  const ma = mesAnt || '';
+  return `<div class="caja"><div class="kpis">
+    ${t('i', 'Impresiones', N(k.i), k.G.cpm, k.P.cpm, UMB_CPM, `CPM ${$$(k.cpm)}`, deltaTxt(d.i, false, ma))}
+    ${t('alc', 'Alcance', N(k.alc), undefined, undefined, null, '<span class="sim">simulado · llega con la API</span>')}
+    ${t('cr', 'Costo por reacción', $$(k.cr), k.G.cr, k.P.cr, UMB_TASA, `${N(k.r)} reacciones`, deltaTxt(d.cr, true, ma))}
+    ${t('treac', 'Tasa de reacción', pct(k.treac), k.G.r, k.P.r, UMB_TASA, '', deltaTxt(d.treac, false, ma))}
+    ${t('tcomp', 'Tasa de compartido', pct(k.tcomp, 3), k.G.sh, k.P.sh, UMB_TASA, `${N(k.sh)} compartidas`)}
+    ${t('etr', 'ETR', pct(k.etr), k.G.e, k.P.e, UMB_TASA, `Engagement ${N(k.e)}`, deltaTxt(d.etr, false, ma))}
+    ${t('ctr', 'CTR', pct(k.ctr), k.G.c, k.P.c, UMB_TASA, `${N(k.c)} clicks`, deltaTxt(d.ctr, false, ma))}
+  </div>
+  <div class="sec2">${m2('Gasto', M(k.g))}${m2('CPM', $$(k.cpm), k.G.cpm, k.P.cpm, UMB_CPM)}${m2('Costo por click', $$(k.cpc), k.G.cpc, k.P.cpc, UMB_TASA)}${m2('Costo por compartida', $$(k.csh), k.G.csh, k.P.csh, UMB_TASA)}${m2('Tasa de comentario', pct(k.tcom, 3), k.G.co, k.P.co, UMB_TASA)}</div>
+  ${video}</div>`;
+}
+function spark(vals, w = 160, h = 32) {
+  const m = Math.max(1, ...vals), bw = w / Math.max(1, vals.length);
+  return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${vals.map((v, i) => `<rect x="${(i * bw).toFixed(1)}" y="${(h - v / m * h).toFixed(1)}" width="${Math.max(1, bw - 1).toFixed(1)}" height="${(v / m * h).toFixed(1)}" fill="#c4c4c4"/>`).join('')}</svg>`;
+}
+const estadoTxt = (e) => `<span class="estado ${e === 'Por vencer' ? 'por' : e === 'Sin entrega' ? 'sin' : ''}">${e === 'Por vencer' ? 'Termina esta semana' : e}</span>`;
+const RED_COLOR = { Facebook: '#1877F2', Instagram: '#D6249F', DV360: '#1E8E3E', YouTube: '#E62117', TikTok: '#111111', 'Google Display': '#F9AB00', 'Google Search': '#4285F4', Threads: '#6b6b6b', WhatsApp: '#25D366', SMS: '#9aa0a6', Gmail: '#c5221f', 'Google Discover': '#8ab4f8' };
+
+// ---------- piezas: vista previa embebida (Facebook / Instagram) ----------
+function embedDe(url) {
+  if (!url) return null;
+  const ig = url.match(/instagram\.com\/(p|reel|tv)\/([^/?#]+)/);
+  if (ig) return { src: `https://www.instagram.com/${ig[1]}/${ig[2]}/embed/`, h: 560, red: 'Instagram', url };
+  if (/facebook\.com|fb\.watch/.test(url)) {
+    const video = /\/(reel|videos|watch)\b|fb\.watch/.test(url);
+    return { src: `https://www.facebook.com/plugins/${video ? 'video' : 'post'}.php?href=${encodeURIComponent(url)}&show_text=true&width=340`, h: video ? 600 : 520, red: 'Facebook', url };
+  }
+  return null;
+}
+function iframesPieza(pz, alto) {
+  const es = [embedDe(pz.fb), embedDe(pz.ig)].filter(Boolean);
+  if (!es.length && pz.otro) es.push(embedDe(pz.otro));
+  const vistos = es.filter(Boolean);
+  return vistos.length ? vistos.map((e) => `<div><iframe src="${esc(e.src)}" height="${alto || e.h}" loading="lazy" scrolling="no" allowfullscreen></iframe><div class="small"><a class="post" href="${esc(e.url)}" target="_blank" rel="noopener">abrir en ${e.red} ↗</a></div></div>`).join('')
+    : '<div class="muted small">Esta pieza no tiene link en DataJunta.</div>';
+}
+let PIEZAS = [];
+function verPieza(i) {
+  const pz = PIEZAS[i];
+  if (!pz) return;
+  abrirModal(`<div class="mh"><div><div class="small muted">${esc(pz.rol || 'Pieza')}</div><h3>${esc(pz.nombre)}</h3></div><button class="b x" onclick="cerrarModal()">Cerrar</button></div><div class="embeds">${iframesPieza(pz)}</div><p class="small muted" style="margin-top:12px">La vista previa la sirve Facebook / Instagram: si el posteo es privado o se borró, no se ve.</p>`);
+}
+const botonPieza = (pz, texto) => { if (!pz || !(pz.fb || pz.ig || pz.otro)) return ''; PIEZAS.push(pz); return `<button class="post" onclick="event.stopPropagation();verPieza(${PIEZAS.length - 1})">${texto || 'ver pieza'} ▸</button>`; };
+function abrirModal(html) { $('#capa').innerHTML = `<div class="velo" onclick="if(event.target===this)cerrarModal()"><div class="modal">${html}</div></div>`; }
+function cerrarModal() { $('#capa').innerHTML = ''; }
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') cerrarModal(); });
+
+// ---------- decisiones, opiniones y confirmaciones (lo que usa el agente para aprender) ----------
+let REG = leer('seg-registro', []), EST = leer('seg-estacionales', {}), OPI = leer('seg-opiniones', {}), PANT = leer('seg-pantallas', {}), LOOKER = leer('seg-looker', {});
+const guardar = () => { grabar('seg-registro', REG); grabar('seg-estacionales', EST); grabar('seg-opiniones', OPI); grabar('seg-pantallas', PANT); grabar('seg-looker', LOOKER); contarComentarios(); };
+const decision = (id) => REG.find((r) => r.id === id);
+const estacional = (id) => (id in EST ? EST[id] : null);
+function marcarEstacional(id, v) { EST[id] = v; guardar(); render(); }
+function accionPorId(id) { for (const p of D.proyectos) for (const [canal, b] of Object.entries(p.canales)) { const a = b.acciones.find((x) => x.id === id); if (a) return { ...a, proyecto: p.nombre, canal }; } return null; }
+function decidir(id, d, motivo) {
+  const a = accionPorId(id);
+  if (!a) return;
+  REG.push({ id, d, motivo: motivo || null, tipo: a.tipo, titulo: a.titulo, proyecto: a.proyecto, canal: a.canal, fecha: new Date().toISOString() });
+  guardar(); render();
+}
+function deshacer(id) { REG = REG.filter((r) => r.id !== id); guardar(); render(); }
+function abrirDescarte(id) {
+  document.getElementById('d-' + id).innerHTML = `<select id="m-${id}"><option>No aplica</option><option>Ya estaba resuelto</option><option>Decisión del cliente</option><option>El dato está mal</option><option>Esperar unos días</option></select><button class="b" onclick="decidir('${id}','descartada',document.getElementById('m-${id}').value)">Confirmar</button>`;
+}
+function opinar(id, campo, valor) {
+  const a = accionPorId(id);
+  OPI[id] = { ...(OPI[id] || {}), [campo]: valor, titulo: a ? a.titulo : '', tipo: a ? a.tipo : '', proyecto: a ? a.proyecto : '', canal: a ? a.canal : '', fecha: new Date().toISOString() };
+  guardar();
+  if (campo === 'voto') render();
+}
+let RUTA_COMENTARIO = '', PANTALLA_COMENTARIO = '';
+function comentarPantalla() {
+  RUTA_COMENTARIO = location.hash || '#';
+  PANTALLA_COMENTARIO = $('#miga').textContent || 'Mis proyectos';
+  abrirModal(`<div class="mh"><div><div class="small muted">Comentario sobre esta pantalla</div><h3>${esc(PANTALLA_COMENTARIO)}</h3></div><button class="b x" onclick="cerrarModal()">Cerrar</button></div>
+    <textarea id="txtPantalla" placeholder="Qué sobra, qué falta, qué no se entiende, qué cambiarías…">${esc((PANT[RUTA_COMENTARIO] || {}).texto || '')}</textarea>
+    <div class="btns"><button class="b pri" onclick="guardarPantalla()">Guardar</button><span class="small muted">Se guarda en este navegador; compartilo con “Exportar comentarios”.</span></div>`);
+}
+function guardarPantalla() {
+  PANT[RUTA_COMENTARIO] = { texto: document.getElementById('txtPantalla').value, pantalla: PANTALLA_COMENTARIO, fecha: new Date().toISOString() };
+  guardar(); cerrarModal();
+}
+function contarComentarios() {
+  const n = Object.values(OPI).filter((o) => o.voto || o.texto).length + Object.values(PANT).filter((o) => o.texto).length + REG.length;
+  const el = $('#exportar'); if (el) el.innerHTML = `Exportar comentarios${n ? `<b>${n}</b>` : ''}`;
+}
+function exportarComentarios() {
+  const hoy = new Date().toISOString().slice(0, 10);
+  const L = [`# Comentarios sobre Seguimiento y Optimización (${hoy})`, '', `Datos del borrador al ${dmy(D.datosHasta)}.`, ''];
+  const ops = Object.entries(OPI).filter(([, o]) => o.voto || o.texto);
+  L.push('## Recomendaciones', '');
+  if (!ops.length && !REG.length) L.push('_Sin comentarios._', '');
+  const ids = [...new Set([...ops.map(([id]) => id), ...REG.map((r) => r.id)])];
+  for (const id of ids) {
+    const o = OPI[id] || {}, r = decision(id), a = accionPorId(id) || {};
+    L.push(`### [${a.tipo || o.tipo || r?.tipo}] ${a.titulo || o.titulo || r?.titulo}`);
+    L.push(`- Proyecto: ${a.proyecto || o.proyecto || r?.proyecto} · ${a.canal || o.canal || r?.canal}`);
+    if (a.hacer) L.push(`- Acción sugerida: ${a.hacer}`);
+    if (o.voto) L.push(`- ¿Sirve?: **${o.voto}**`);
+    if (r) L.push(`- Decisión: ${r.d === 'pautador' ? 'Enviar a PAUTADOR' : r.d === 'manual' ? 'Hecho a mano' : 'Descartada'}${r.motivo ? ` (${r.motivo})` : ''}`);
+    if (o.texto) L.push(`- Comentario: ${o.texto.replace(/\n/g, ' ')}`);
+    L.push('');
+  }
+  const ps = Object.entries(PANT).filter(([, o]) => o.texto);
+  L.push('## Pantallas', '');
+  if (!ps.length) L.push('_Sin comentarios._', '');
+  for (const [ruta, o] of ps) L.push(`### ${o.pantalla || ruta}`, `- Ruta: \`${ruta}\``, `- Comentario: ${o.texto.replace(/\n/g, ' ')}`, '');
+  const est = Object.entries(EST);
+  if (est.length) { L.push('## Campañas estacionales', ''); for (const [uid, v] of est) L.push(`- ${uid.split('|').join(' · ')}: ${v ? 'es estacional' : 'no es estacional'}`); L.push(''); }
+  const blob = new Blob([L.join('\n')], { type: 'text/markdown;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `comentarios-seguimiento-${hoy}.md`; document.body.appendChild(a); a.click(); a.remove();
+}
+function abrirLooker(pid) {
+  const k = `${pid}|${CANAL}`;
+  let url = LOOKER[k];
+  if (!url) { url = prompt(`Pegá el link del tablero de Looker de este proyecto (${CANAL}). Queda guardado para la próxima.`); if (!url) return; LOOKER[k] = url.trim(); guardar(); }
+  window.open(LOOKER[k], '_blank', 'noopener');
+}
+function olvidarLooker(pid) { delete LOOKER[`${pid}|${CANAL}`]; guardar(); render(); }
+// una acción "Peor que la temporada anterior" deja de valer si el equipo dijo que la campaña no es estacional
+const vigente = (a) => !(a.tipo === 'Peor que la temporada anterior' && estacional(a.uid) === false);
+const pendientes = (b) => b.acciones.filter((a) => !decision(a.id) && vigente(a));
+
+// ---------- navegación ----------
+const proyecto = (id) => D.proyectos.find((p) => p.id === id);
+const bloque = (p) => p.canales[CANAL];
+function miga(partes) {
+  $('#miga').innerHTML = partes.map((x, i) => i === partes.length - 1 ? `<b>${esc(x[0])}</b>` : `<a href="${x[1]}">${esc(x[0])}</a>`).join(' <span class="muted">/</span> ');
+}
+
+// ---------- PORTADA ----------
+function vistaPortada() {
+  miga([['Mis proyectos']]);
+  const ps = D.proyectos.filter((p) => bloque(p));
+  const cards = ps.map((p) => {
+    const b = bloque(p), t = b.tarjeta, pend = pendientes(b).length;
+    const cierre = t.cierre != null ? `<span class="badge ${t.cierre < 0.85 ? 'amarillo' : t.cierre > 1.02 ? 'rojo' : 'verde'}">cierra en ${Math.round(t.cierre * 100)} %</span>` : '';
+    return `<div class="card" onclick="go('p/${p.id}')">
+      <h3>${esc(p.nombre)}</h3>
+      <div class="rend"><span class="small tx2">Rendimiento del mes</span>${lucesLuz(t.luzG, t.luzP)}</div>
+      <div class="fila"><span>Gasto del mes</span><b>${M(t.gastado)}${t.presu ? ` <span class="muted small" style="font-weight:400">de ${M(t.presu)}</span>` : ''}</b></div>
+      ${cierre ? `<div class="fila"><span>Proyección</span><b>${cierre}</b></div>` : ''}
+      <div class="fila"><span>Campañas vivas</span><b>${t.vivas}${t.porVencer ? ` <span class="muted small" style="font-weight:400">· ${t.porVencer} terminan esta semana</span>` : ''}</b></div>
+      <div class="fila"><span>Acciones pendientes</span><b>${pend}</b></div>
+    </div>`;
+  }).join('');
+  return `<div class="cab"><div><h1>Mis proyectos</h1><p class="sub">${mesTxt(D.datosHasta)[0].toUpperCase() + mesTxt(D.datosHasta).slice(1)} · canal ${CANAL} · datos al ${dm(D.datosHasta)}</p></div>
+    <div class="der leyenda">Semáforo: <span class="luz"><i class="verde"></i>20 % o más mejor que lo normal</span><span class="luz"><i class="amarillo"></i>dentro de ±20 %</span><span class="luz"><i class="rojo"></i>20 % o más peor</span></div></div>
+    ${ayuda('Una tarjeta por proyecto. El semáforo resume cómo rinden las campañas del mes contra lo normal: <b>General</b> compara con todos los gobiernos (último año) y <b>Proyecto</b> con la historia del propio proyecto en este canal. Entrá a un proyecto para ver qué pasa y qué hacer.',
+      'Para cada campaña del mes se toma su KPI principal según el objetivo (Alcance → CPM, Interacción → costo por reacción, Tráfico → CTR) y se compara con la mediana de su referencia. El semáforo del proyecto es el promedio de esas comparaciones ponderado por gasto. El gasto del mes suma todas las plataformas; la proyección usa el promedio de los últimos 2 días completos, igual que el tablero de Dirección.')}
+    <div class="grid">${cards}</div>`;
+}
+
+// ---------- PROYECTO ----------
+function cabProyecto(p, b, tab) {
+  const t = b.tarjeta, pend = pendientes(b).length;
+  const tabs = [['resumen', 'Resumen'], ['campanas', 'Campañas'], ['activos', 'Activos'], ['insights', 'Insights']];
+  const lk = LOOKER[`${p.id}|${CANAL}`];
+  return `<div class="cab"><div><h1>${esc(p.nombre)}</h1><p class="sub">${CANAL} · ${mesTxt(D.datosHasta)} · datos al ${dm(b.datosHasta)}</p></div>
+    <div class="der">${lucesLuz(t.luzG, t.luzP)}<button class="b sm" onclick="abrirLooker('${p.id}')">Explorar en Looker ↗</button>${lk ? `<button class="b link small" title="Cambiar el link" onclick="olvidarLooker('${p.id}')">cambiar link</button>` : ''}</div></div>
+    <nav class="tabs">${tabs.map(([k, n]) => `<a href="#p/${p.id}${k === 'resumen' ? '' : '/' + k}" class="${tab === k ? 'on' : ''}">${n}</a>`).join('')}
+    <a class="fin" href="#p/${p.id}/acciones"><span class="btn-acc">Acciones <b>${pend}</b></span></a></nav>`;
+}
+function tablaCostoObjetivo(pl) {
+  if (!pl || !pl.costoObjetivo.length) return '<div class="caja vacio">Sin datos de plataformas.</div>';
+  const cols = 'grid-template-columns:minmax(0,1.3fr) 1.3fr 1fr 1.1fr .8fr';
+  return `<div class="th" style="${cols}"><div>Red · objetivo</div><div>Métrica</div><div class="num">Este mes / habitual</div><div>Peso en el gasto</div><div class="num">Δ</div></div>
+    <div class="caja lista">${pl.costoObjetivo.map((x) => `<div class="it" style="${cols}">
+      <div><span class="luz"><i style="background:${RED_COLOR[x.red] || '#999'}"></i></span> <span class="nom">${esc(x.red)}</span> <span class="tx2">· ${esc(x.obj)}</span></div>
+      <div class="small tx2">${esc(x.metrica)}</div>
+      <div class="num small">${$$(x.valor)} <span class="muted">/ ${$$(x.ref)}</span></div>
+      <div style="display:flex;align-items:center;gap:8px"><div class="peso" style="flex:1"><i style="width:${Math.min(100, x.peso * 100 / Math.max(...pl.costoObjetivo.map((y) => y.peso)) )}%"></i></div><span class="small tx2">${Math.round(x.peso * 100)} %</span></div>
+      <div class="num"><span class="luz"><i class="${x.color}"></i><span style="color:${x.color === 'rojo' ? 'var(--rojo)' : x.color === 'verde' ? 'var(--verde)' : 'var(--tx2)'}">${x.delta == null ? '—' : (x.delta > 0 ? '+' : '') + Math.round(x.delta * 100) + ' %'}</span></span></div></div>`).join('')}</div>`;
+}
+function graficoConsumo(x, diasMes) {
+  const W = 520, H = 200, pad = 28, max = Math.max(x.presu, x.proyeccion, ...x.acum) * 1.05;
+  const X = (d) => pad + (d / diasMes) * (W - pad - 8), Y = (v) => H - 22 - (v / max) * (H - 36);
+  const tiempo = `<polygon points="${X(0)},${Y(0)} ${X(diasMes)},${Y(x.presu)} ${X(diasMes)},${Y(0)}" fill="#ececec"/>`;
+  const linea = x.acum.map((v, i) => `${X(i + 1).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');
+  const ult = x.acum.length;
+  const proy = `<line x1="${X(ult)}" y1="${Y(x.gastado)}" x2="${X(diasMes)}" y2="${Y(x.proyeccion)}" stroke="#141414" stroke-width="2" stroke-dasharray="5 5"/>`;
+  const presu = `<line x1="${X(0)}" x2="${X(diasMes)}" y1="${Y(x.presu)}" y2="${Y(x.presu)}" stroke="#c9c9c9" stroke-dasharray="2 4"/><text x="${X(0) + 4}" y="${Y(x.presu) - 4}" font-size="10" fill="#9aa0a6">presupuesto ${M(x.presu)}</text>`;
+  const ejes = [1, 15, diasMes].map((d) => `<text x="${X(d)}" y="${H - 6}" font-size="10" fill="#9aa0a6" text-anchor="middle">${d}</text>`).join('');
+  return `<svg width="100%" viewBox="0 0 ${W} ${H}">${tiempo}${presu}<polyline fill="none" stroke="#141414" stroke-width="2.2" points="${linea}"/>${proy}${ejes}</svg>`;
+}
+let impactoCampo = 'i', impactoModo = 'diario';
+function graficoImpacto(pl) {
+  const I = pl.impacto[impactoCampo], W = 520, H = 200;
+  const series = I.meses.map((m) => { let s = 0; return impactoModo === 'acum' ? m.dias.map((v) => (s += v)) : m.dias; });
+  const max = Math.max(1, ...series.flat()), X = (d) => 28 + (d / 30) * (W - 36), Y = (v) => H - 22 - (v / max) * (H - 36);
+  const col = ['#c9c9c9', '#e8837a', '#141414'];
+  const lineas = series.map((s, k) => `<polyline fill="none" stroke="${col[k]}" stroke-width="${k === 2 ? 2.4 : 1.8}" points="${s.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ')}"/>`).join('');
+  const ejes = [1, 10, 20, 31].map((d) => `<text x="${X(d - 1)}" y="${H - 6}" font-size="10" fill="#9aa0a6" text-anchor="middle">día ${d}</text>`).join('');
+  const tot = I.meses.map((m) => m.dias.reduce((a, b) => a + b, 0));
+  const f = (k, n) => `<button class="fb ${impactoCampo === k ? 'on' : ''}" onclick="impactoCampo='${k}';render()">${n}</button>`;
+  const g = (k, n) => `<button class="fb ${impactoModo === k ? 'on' : ''}" onclick="impactoModo='${k}';render()">${n}</button>`;
+  return `<div class="filtros">${f('i', 'Impresiones')}${f('vw', 'Reproducciones')}${f('r', 'Reacciones')}${f('g', 'Gasto')}<span class="muted small">·</span>${g('diario', 'Diario')}${g('acum', 'Acumulado')}</div>
+    <svg width="100%" viewBox="0 0 ${W} ${H}">${lineas}${ejes}</svg>
+    <div class="leyline">${I.meses.map((m, k) => `<span><i style="background:${col[k]}"></i>${mesTxt(m.mes)} <b>${impactoCampo === 'g' ? M(tot[k]) : N(tot[k])}</b>${k === 2 ? ' (en curso)' : ''}</span>`).join('')}</div>`;
+}
+function graficoPicos(pl) {
+  const W = 1040, H = 220, dias = pl.diaAct, max = 4;
+  const X = (d) => 36 + (d / Math.max(1, dias - 1)) * (W - 50), Y = (v) => H - 22 - (Math.min(v, max) / max) * (H - 36);
+  const lineas = pl.picos.map((p) => `<polyline fill="none" stroke="${RED_COLOR[p.red] || '#999'}" stroke-width="1.8" points="${p.serie.map((v, i) => v == null ? '' : `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).filter(Boolean).join(' ')}"><title>${esc(p.red)}</title></polyline>`).join('');
+  const guias = [0, 1, 2, 3, 4].map((v) => `<line x1="36" x2="${W - 14}" y1="${Y(v)}" y2="${Y(v)}" stroke="${v === 1 ? '#9aa0a6' : '#f0f0f0'}" ${v === 1 ? 'stroke-dasharray="4 4"' : ''}/><text x="30" y="${Y(v) + 3}" font-size="10" fill="#9aa0a6" text-anchor="end">${v}×</text>`).join('');
+  const ejes = [1, 15, dias].map((d) => `<text x="${X(d - 1)}" y="${H - 6}" font-size="10" fill="#9aa0a6" text-anchor="middle">${d}/${pl.mesAct.slice(5)}</text>`).join('');
+  const alertas = pl.picos.filter((p) => p.ultimo != null && (p.ultimo > 2 || p.ultimo < 0.5));
+  return `<div class="caja" style="padding:16px 18px"><svg width="100%" viewBox="0 0 ${W} ${H}">${guias}${lineas}${ejes}</svg>
+    <div class="leyline">${pl.picos.map((p) => `<span><i style="background:${RED_COLOR[p.red] || '#999'}"></i>${esc(p.red)} <b>${veces(p.ultimo)}</b></span>`).join('')}</div>
+    ${alertas.length ? `<div class="small" style="margin-top:12px;padding:10px 12px;background:#f7f7f7;border-radius:8px">⚠ ${alertas.map((p) => `<b>${esc(p.red)}</b> ${p.ultimo > 2 ? 'muy por encima' : 'muy por debajo'} del mes anterior: ${veces(p.ultimo)} su día típico`).join(' · ')}.</div>` : ''}</div>`;
+}
+function vistaResumen(p, b) {
+  PIEZAS = [];
+  const pl = b.plat, mesAnt = pl ? mesTxt(pl.meses[1]) : '';
+  const vivas = b.campanas.filter((c) => ['Activa', 'Por vencer'].includes(c.estado));
+  const rojas = (c) => (c.luzG === 'rojo') + (c.luzP === 'rojo') + ((propiaDe(c) || {}).color === 'rojo');
+  const malas = vivas.filter((c) => rojas(c) > 0).sort((a, c) => rojas(c) - rojas(a) || (c.deMas || 0) - (a.deMas || 0)).slice(0, 5);
+  const accDe = (c) => pendientes(b).find((a) => a.camp === c.id);
+  const malasHtml = malas.length ? `<div class="caja lista">${malas.map((c) => {
+    const pr = principal(c.m, c.obj), a = accDe(c), prop = propiaDe(c);
+    return `<div class="it click" style="grid-template-columns:minmax(0,2.1fr) .9fr 1.7fr minmax(0,2fr)" onclick="go('p/${p.id}/c/${enc(c.id)}')">
+      <div><div class="nom">${esc(c.nombre)}</div><div class="meta">${esc(c.obj)} · ${esc(c.eje || 'sin eje')} · ${M(c.g7)} en 7 días${c.deMas > 0 ? ` · <b style="color:var(--rojo);font-weight:500">${M(c.deMas)} de más</b>` : ''}</div><div style="margin-top:4px">${efiChip(c.efi)}</div></div>
+      <div><div class="small tx2">${pr.lab}</div><div class="nom">${pr.val}</div></div>
+      <div>${luces(pr.G, pr.P, pr.u, true, prop)}</div>
+      <div class="small">${a ? `<span class="tx2">→</span> ${esc(a.hacer)}` : '<span class="muted">Sin acción sugerida</span>'}</div></div>`;
+  }).join('')}</div>` : '<div class="caja vacio">Ninguna campaña viva rinde por debajo de lo normal.</div>';
+  const piezas = b.topPiezas && b.topPiezas.length ? `<div class="tres">${b.topPiezas.map((x, i) => { const k = kp(x); return `<div class="caja pieza"><div class="small muted">#${i + 1} por impresiones · ${esc(x.fmt)}</div><div class="nom">${esc(x.nombre)}</div>
+      <div class="datos"><span>${N(x.i)} impresiones</span><span>Costo por reacción ${$$(k.cr)}</span>${efiChip(x.efi, true)}</div>${iframesPieza({ ...x.pieza, ig: x.pieza.fb ? null : x.pieza.ig }, 460)}</div>`; }).join('')}</div>` : '<div class="caja vacio">Sin piezas con link este mes.</div>';
+  const consumo = pl && pl.proyectos.length ? `<div class="consumo">${pl.proyectos.map((x) => {
+    const est = x.pctCierre < 0.85 ? ['amarillo', 'por debajo del presupuesto'] : x.pctCierre > 1.02 ? ['rojo', 'por encima del presupuesto'] : ['verde', 'en línea con el presupuesto'];
+    return `<div class="caja cons"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h3 style="margin:0">${esc(x.proy)}</h3><span class="badge ${est[0]}">cierra en ${Math.round(x.pctCierre * 100)} % · ${est[1]}</span></div>
+      <div class="cifras"><div><b>${Math.round(x.pctInv * 100)} %</b><span>inversión · ${M(x.gastado)} de ${M(x.presu)}</span></div><div><b>${Math.round(x.pctTiempo * 100)} %</b><span>tiempo · día ${pl.diaAct} de ${pl.diasMes}</span></div></div>
+      ${graficoConsumo(x, pl.diasMes)}
+      <div class="small muted">Cierra en ${M(x.proyeccion)} al ritmo de ${M(x.ritmo)} por día (promedio de los últimos 2 días completos). Gris = tiempo transcurrido.</div></div>`;
+  }).join('')}</div>` : '<div class="caja vacio">Este proyecto no tiene PresupuestoMensual cargado en DataJunta.</div>';
+  return `${cabProyecto(p, b, 'resumen')}
+    <section class="bloque"><div class="bh"><h2>Rendimiento del mes</h2><span class="nota">Meta · al ${dm(b.datosHasta)}</span></div>
+      ${ayuda(`Los números clave del mes en Meta. Cada uno tiene dos luces: <b>General</b> (lo normal en todos los gobiernos) y <b>Proyecto</b> (lo normal en ${esc(p.nombre)}). Abajo, la variación contra los mismos días de ${mesAnt}.`,
+        'Las luces comparan contra la mediana de la referencia de cada anuncio según su objetivo, formato y placement (así una mezcla distinta de formatos no confunde). Verde: 20 % o más mejor; rojo: 20 % o más peor. <b>ETR</b> = engagement ÷ impresiones; <b>CTR</b> = clicks ÷ impresiones; <b>tasa de reacción</b> y <b>de compartido</b> = reacciones o compartidas ÷ impresiones. El alcance es simulado hasta conectar la API de Meta.')}
+      ${kpis(b.kpis, null, null, pl ? pl.deltas : null, mesAnt)}</section>
+    <section class="bloque"><div class="bh"><h2>Costo por objetivo</h2><span class="nota">Todas las plataformas · contra ${pl ? `${mesTxt(pl.ref[0])}–${mesTxt(pl.ref[1])}` : 'los 3 meses anteriores'}</span></div>
+      ${ayuda('Cada red y objetivo se evalúa con la métrica de lo que compra. Muestra cuánto pesa en el gasto del mes y si está más caro o más barato que lo habitual.',
+        'Alcance → CPM · Interacción → costo por reacción · Tráfico → costo por click · Reproducciones → costo por reproducción. “Habitual” = los 3 meses anteriores completos. Verde: 20 % o más barato; rojo: 20 % o más caro (mismo criterio que el tablero de Dirección).')}
+      ${tablaCostoObjetivo(pl)}</section>
+    <section class="bloque"><div class="bh"><h2>Campañas que rinden mal</h2><span class="nota">Vivas · ordenadas por plata en juego</span></div>
+      ${ayuda('Las campañas vivas con alguna luz en rojo en su KPI principal. Al lado, la acción sugerida; entrá a la campaña para ver sus piezas y audiencias.',
+        '<b>$ de más</b> = lo que se gastó por encima de lo que habría costado el mismo resultado al costo habitual del proyecto. <b>Eficacia</b> (cuadradito) = % del gasto de la campaña en anuncios rojos según la regla de Looker (costo por reacción de cada anuncio contra los de su mismo objetivo y placement).')}
+      ${malasHtml}</section>
+    <section class="bloque"><div class="bh"><h2>Piezas destacadas del mes</h2><span class="nota">Las 3 con más impresiones</span></div>
+      ${ayuda('Las piezas que más se vieron este mes, con su costo por reacción y su eficacia. La vista previa viene de Facebook / Instagram.')}
+      ${piezas}</section>
+    <section class="bloque"><div class="bh"><h2>Gasto del mes</h2><span class="nota">Todas las plataformas · presupuesto de DataJunta</span></div>
+      ${ayuda('Cuánto se invirtió contra cuánto tiempo pasó del mes, y cómo cierra al ritmo actual. Si la línea negra va por debajo de la zona gris, se está gastando más lento que el tiempo.',
+        'Presupuesto = PresupuestoMensual de cada proyecto en DataJunta (el último cargado del mes). Proyección = gastado + promedio de los últimos 2 días completos × días que faltan. Amarillo: cierra por debajo del 85 %; rojo: por encima del 102 %.')}
+      ${consumo}</section>
+    ${pl ? `<section class="bloque"><div class="bh"><h2>Impacto comparado</h2><span class="nota">El mes en curso contra los dos anteriores, día a día</span></div>
+      ${ayuda('Si este mes se está logrando más o menos impacto que los anteriores a la misma altura.')}
+      <div class="caja" style="padding:16px 18px">${graficoImpacto(pl)}</div></section>
+    <section class="bloque"><div class="bh"><h2>Picos y apagones</h2><span class="nota">Gasto diario por red contra su día típico de ${mesAnt}</span></div>
+      ${ayuda(`Detecta cortes de entrega o gastos fuera de plan. 1× = lo mismo que un día típico de ${mesAnt}.`, 'Día típico = mediana del gasto diario de cada red en el mes anterior. Se marca cuando los últimos 2 días completos están por encima de 2× (pico) o por debajo de 0,5× (apagón). El detalle por activo está en la pestaña Activos.')}
+      ${graficoPicos(pl)}</section>` : ''}`;
+}
+let filtroCamp = 'vivas';
+function vistaCampanas(p, b) {
+  const orden = (c) => { const pr = propiaDe(c); const cs = [c.luzG, c.luzP, pr ? pr.color : 'gris']; return cs.filter((x) => x === 'rojo').length + cs.filter((x) => x === 'amarillo').length * 0.4; };
+  const cs = b.campanas.filter((c) => filtroCamp === 'todas' || (filtroCamp === 'largas' ? c.propia && ['Activa', 'Por vencer', 'Sin entrega'].includes(c.estado) : ['Activa', 'Por vencer', 'Sin entrega'].includes(c.estado)))
+    .sort((a, c) => filtroCamp === 'todas' ? c.hasta.localeCompare(a.hasta) || c.m.g - a.m.g : orden(c) - orden(a) || (c.deMas || 0) - (a.deMas || 0));
+  const f = (k, n) => `<button class="fb ${filtroCamp === k ? 'on' : ''}" onclick="filtroCamp='${k}';render()">${n}</button>`;
+  const cols = 'grid-template-columns:minmax(0,2.2fr) .85fr .75fr .85fr 1.45fr .75fr .4fr';
+  const filas = cs.map((c) => {
+    const pr = principal(c.m, c.obj), na = pendientes(b).filter((a) => a.camp === c.id).length, prop = propiaDe(c);
+    return `<div class="it click" style="${cols}" onclick="go('p/${p.id}/c/${enc(c.id)}')">
+      <div><div class="nom">${esc(c.nombre)}</div><div class="meta">${esc(c.obj)} · ${esc(c.eje || 'sin eje')} · ${dm(c.desde)} → ${dm(c.fin || c.hasta)}${prop ? ` · ${prop.temporada ? 'estacional' : 'larga'}` : ''}${c.deMas > 100000 ? ` · <span style="color:var(--rojo)">${M(c.deMas)} de más</span>` : ''}</div></div>
+      <div>${estadoTxt(c.estado)}</div><div class="num">${M(c.m.g)}</div>
+      <div class="num"><span class="small muted">${pr.lab}</span><br>${pr.val}</div>
+      <div>${puntos([color(pr.G, pr.u), color(pr.P, pr.u), prop ? prop.color : null].filter(Boolean), ['General ' + veces(pr.G), 'Proyecto ' + veces(pr.P), prop ? prop.lab + ' ' + veces(prop.ix) : ''])} <span class="small muted">${veces(pr.G)} · ${veces(pr.P)}${prop ? ' · ' + veces(prop.ix) : ''}</span></div>
+      <div>${efiChip(c.efi, true)}</div>
+      <div class="num">${na ? `<span class="btn-acc" style="padding:1px 8px"><b>${na}</b></span>` : ''}</div></div>`;
+  }).join('');
+  return `${cabProyecto(p, b, 'campanas')}
+    ${ayuda('Todas las campañas del proyecto, de peor a mejor. Tres luces sobre el KPI principal: <b>General</b>, <b>Proyecto</b> y <b>Propia</b> (solo campañas de 30+ días: contra su propia historia, o contra la temporada anterior si se repiten cada año). <b>Eficacia</b> = % del gasto en anuncios rojos (regla de Looker).',
+      'KPI principal según objetivo: Alcance → CPM, Interacción → costo por reacción, Tráfico → CTR. Los números muestran cuántas veces lo normal (1,0× = igual; en costos, más de 1 es más barato).')}
+    <div class="filtros">${f('vivas', 'Vivas')}${f('largas', 'Largas y estacionales')}${f('todas', 'Últimos 180 días')}</div>
+    <div class="th" style="${cols}"><div>Campaña</div><div>Estado</div><div class="num">Gasto</div><div class="num">KPI principal</div><div>General · Proyecto · Propia</div><div>Eficacia</div><div class="num">Acc.</div></div>
+    <div class="caja lista">${filas || '<div class="vacio">Sin campañas.</div>'}</div>`;
+}
+function vistaActivos(p, b) {
+  const cols = 'grid-template-columns:minmax(0,1.5fr) 1.3fr minmax(0,1.9fr) .8fr 1fr 1fr';
+  const filas = b.activos.map((a) => {
+    const rest = a.pedido ? `${M(a.restante)}<div class="mini"><i style="width:${Math.min(100, a.gastado / a.pedido * 100)}%"></i></div><div class="meta">${M(a.gastado)} de ${M(a.pedido)}</div>` : '<span class="muted small">Sin pedido cargado</span>';
+    const pk = a.pico;
+    const ritmo = !pk || pk.idx == null ? '<span class="muted small">—</span>' : pk.estado ? `<span class="chip ${pk.estado === 'Apagón' ? 'rojo' : 'amarillo'}">${pk.estado} · ${veces(pk.idx)}</span>` : `<span class="small tx2">${veces(pk.idx)} su día típico</span>`;
+    return `<div class="it" style="${cols}">
+      <div><div class="nom">${esc(a.nombre)}</div><div class="meta">${a.auto ? '<span class="chip auto">Automatizado</span>' : ''}${[...new Set(a.cuentas.map((c) => c.plataforma))].join(' · ')}</div></div>
+      <div class="num">${rest}</div>
+      <div>${a.vivas.length ? `<b>${a.vivas.length}</b> <span class="small tx2">${a.vivas.slice(0, 3).map(esc).join(' · ')}${a.vivas.length > 3 ? '…' : ''}</span>` : '<span class="muted small">Ninguna</span>'}</div>
+      <div class="num">${M(a.g7)}</div>
+      <div>${ritmo}</div>
+      <div>${a.m.g ? puntos([color(a.idxG), color(a.idxP)], ['General', 'Proyecto']) + ` <span class="small muted">${veces(a.idxG)} · ${veces(a.idxP)}</span>` : '<span class="muted small">—</span>'}</div></div>`;
+  }).join('');
+  return `${cabProyecto(p, b, 'activos')}
+    <section class="bloque"><div class="bh"><h2>Estado de los activos</h2></div>
+    ${ayuda('Cada voz del proyecto: cuánto le queda del pedido del mes, qué campañas tiene activas, cuánto gastó en la última semana y si su ritmo de gasto se cortó (apagón) o se disparó (pico).',
+      'Restante = pedido de la planilla de pedidos (solo “Aplicado”) − gastado en todas las plataformas. Ritmo = gasto de los últimos 2 días completos contra el día típico del mes anterior (mediana). Apagón: menos de 0,5× y venía gastando casi todos los días. Pico: más de 2×. La base de pedidos está en revisión: el restante es referencia.')}
+    <div class="th" style="${cols}"><div>Activo</div><div class="num">Presupuesto restante</div><div>Campañas activas</div><div class="num">Gasto 7 días</div><div>Ritmo</div><div>Rendimiento</div></div>
+    <div class="caja lista">${filas || '<div class="vacio">Sin activos.</div>'}</div></section>`;
+}
+function eficaciaCat(b) {
+  const e = b.insights.eficacia;
+  if (!e || !e.total) return '';
+  const lista = (xs, tit) => `<div><div class="th"><div>${tit}</div></div><div class="caja lista">${xs.map((x) => `<div class="it" style="grid-template-columns:minmax(0,1.6fr) .8fr 1.4fr"><div class="nom" style="font-size:13px">${esc(x.k.length > 45 ? x.k.slice(0, 43) + '…' : x.k)}</div><div class="num small">${M(x.g)}</div><div>${efiChip(x)}</div></div>`).join('') || '<div class="vacio">—</div>'}</div></div>`;
+  return `<section class="bloque"><div class="bh"><h2>Eficacia por eje, formato y audiencia</h2><span class="nota">Últimos 30 días · total: ${e.total.pctGastoRojo} % del gasto en anuncios rojos (${e.total.rojos} de ${e.total.n})</span></div>
+    ${ayuda('La lectura de “Ejes, Campañas y Audiencias” de Looker: qué parte del gasto de cada categoría fue a anuncios con costo por reacción alto.',
+      'Cada anuncio (en cada placement) se compara con los de su mismo objetivo y placement del proyecto en su misma época: verde si está entre el 25 % más barato, rojo si está entre el 25 % más caro. Por construcción, ~25 % de los anuncios son rojos; lo que cambia es cuánta plata se llevan. Color: menos de 25 % del gasto en rojo, verde; menos de 50 %, amarillo; menos de 75 %, naranja; más, rojo.')}
+    <div class="dos">${lista(e.ejes, 'Eje')}<div style="display:flex;flex-direction:column;gap:18px">${lista(e.formatos, 'Formato')}${lista(e.audiencias, 'Audiencia')}</div></div></section>`;
+}
+function vistaInsights(p, b) {
+  const proy = b.insights.proyecto.length ? `<div class="caja">${b.insights.proyecto.map((i) => `<div class="ins"><div class="t"><span class="signo" style="background:${i.signo === 'mas' ? 'var(--verde)' : 'var(--rojo)'}"></span>${esc(i.titulo)}</div><div class="x">${esc(i.texto)}</div></div>`).join('')}</div>` : '<div class="caja vacio">Todavía no hay suficiente historia para aprendizajes propios.</div>';
+  const cruces = b.insights.cruces.length ? `<div class="caja">${b.insights.cruces.map((c) => `<div class="cruce"><div><div class="lab">Lo aprendido</div>${esc(c.aprendizaje)}</div><div><div class="lab">Lo que pasa ahora</div><div class="ahora">${esc(c.ahora)}</div></div><div><span class="luz" title="${c.alerta ? 'Conviene revisar' : 'En línea con lo aprendido'}"><i class="${c.alerta ? 'amarillo' : 'verde'}"></i></span></div></div>`).join('')}</div>` : '<div class="caja vacio">Sin cruces este mes.</div>';
+  const est = b.insights.estacionales;
+  const estHtml = est.length ? `<div class="caja lista">${est.map((e) => {
+    const v = estacional(e.uid);
+    return `<div class="it" style="grid-template-columns:minmax(0,2fr) 1.6fr .8fr auto"><div><div class="nom" style="cursor:pointer" onclick="go('p/${p.id}/c/${enc(e.campana)}')">${esc(e.campana)}</div><div class="meta">${esc(e.obj)}</div></div>
+      <div class="small tx2">Temporada anterior: ${dmy(e.previa.desde)} → ${dmy(e.previa.hasta)} · ${e.previa.semanasComparadas} ${e.previa.semanasComparadas === 1 ? 'semana comparada' : 'semanas comparadas'}</div>
+      <div>${puntos([v === false ? 'gris' : e.luz])} <span class="small muted">${veces(e.idx)}</span></div>
+      <div style="display:flex;gap:6px"><button class="b sm ${v === true ? 'on' : ''}" onclick="marcarEstacional(decodeURIComponent('${enc(e.uid)}'), true)">Es estacional</button><button class="b sm ${v === false ? 'on' : ''}" onclick="marcarEstacional(decodeURIComponent('${enc(e.uid)}'), false)">No es</button></div></div>`;
+  }).join('')}</div>` : '<div class="caja vacio">No se detectaron campañas que se repitan en la misma época.</div>';
+  const gen = `<div class="caja">${D.generales.map((g) => `<div class="ins"><div class="t">${esc(g.titulo)}</div><div class="x">${esc(g.texto)}</div><div class="f">${esc(g.fuente)}</div></div>`).join('')}</div>`;
+  const tipos = {};
+  for (const r of REG) { const t = tipos[r.tipo] = tipos[r.tipo] || { hechas: 0, desc: 0, motivos: {} }; if (r.d === 'descartada') { t.desc++; t.motivos[r.motivo] = (t.motivos[r.motivo] || 0) + 1; } else t.hechas++; }
+  for (const o of Object.values(OPI)) if (o.voto) { const t = tipos[o.tipo] = tipos[o.tipo] || { hechas: 0, desc: 0, motivos: {} }; t.votos = t.votos || {}; t.votos[o.voto] = (t.votos[o.voto] || 0) + 1; }
+  const uso = Object.keys(tipos).length ? `<div class="caja">${Object.entries(tipos).map(([k, t]) => { const top = Object.entries(t.motivos).sort((a, c) => c[1] - a[1])[0]; const vt = t.votos ? Object.entries(t.votos).map(([v, n]) => `${v}: ${n}`).join(' · ') : ''; return `<div class="ins"><div class="t">${esc(k)}</div><div class="x">${t.hechas} hechas · ${t.desc} descartadas${top ? ` · motivo más común: “${esc(top[0])}”` : ''}${vt ? ` · ¿sirve? ${vt}` : ''}${top && top[1] >= 2 ? '. Baja su prioridad.' : t.hechas >= 2 ? '. Sube su prioridad.' : ''}</div></div>`; }).join('')}</div>` : '<div class="caja vacio">Cuando se resuelvan, descarten u opinen recomendaciones, acá se ve qué aprende el agente de cada decisión.</div>';
+  return `${cabProyecto(p, b, 'insights')}
+    ${ayuda('Lo que aprendimos de DataJunta cruzado con lo que pasa ahora en este proyecto, y lo que el agente aprende de las decisiones del equipo.')}
+    <section class="bloque"><div class="bh"><h2>Lo que pasa vs lo aprendido</h2><span class="nota">Mes en curso</span></div>${ayuda('Cada fila toma un aprendizaje del último año y muestra cómo está este proyecto en eso. El punto amarillo marca lo que conviene revisar.')}${cruces}</section>
+    ${eficaciaCat(b)}
+    <section class="bloque"><div class="bh"><h2>Campañas estacionales detectadas</h2><span class="nota">A confirmar por el equipo</span></div>${ayuda('Campañas que vuelven en la misma época del año. Si confirmás que son estacionales, su luz Propia se compara contra la temporada anterior; si no, contra su propia historia reciente.', 'Se detectan cuando la campaña tuvo una tanda de 2+ semanas que arrancó en la misma época (±6 semanas) hace uno o dos años, separada por 16+ semanas sin pauta. Se comparan las mismas primeras semanas de cada temporada; en Interacción y Tráfico los costos se ajustan +2 % por mes.')}${estHtml}</section>
+    <div class="dos"><section class="bloque"><div class="bh"><h2>De ${esc(p.nombre)}</h2><span class="nota">${CANAL} contra todos los gobiernos</span></div>${proy}</section>
+    <section class="bloque"><div class="bh"><h2>Del uso</h2><span class="nota">Decisiones y opiniones del equipo</span></div>${uso}</section></div>
+    <section class="bloque"><div class="bh"><h2>Generales</h2><span class="nota">Todos los gobiernos · 365 días</span></div>${gen}</section>`;
+}
+const COMO = {
+  'Rinde por debajo': 'KPI principal de la campaña (en 180 días) 20 % o más peor que la referencia general Y que la del proyecto, con al menos $100 mil o 5 % del gasto en juego. La pieza a pausar es la de peor costo por reacción contra lo normal.',
+  'Se desgastó': 'Campaña de 30+ días: sus últimas 2 semanas completas quedaron debajo del 25 % peor de sus propias semanas anteriores y el KPI principal está 20 % o más abajo de su mediana.',
+  'Mejor momento': 'Campaña de 30+ días: sus últimas 2 semanas completas quedaron arriba del 25 % mejor de sus propias semanas anteriores.',
+  'Presión acumulada alta': 'Más de 20 impresiones por habitante en el último mes de esta campaña (umbral provisorio) y el KPI principal de las últimas 4 semanas 15 % o más abajo que el de las 8 anteriores.',
+  'Peor que la temporada anterior': 'Campaña estacional: en las mismas primeras semanas rinde 20 % o más peor que la temporada anterior (costos ajustados por inflación).',
+  'Se comparte': 'Contenido vivo con 300+ reacciones y más de 10 compartidas cada 100 reacciones (el 10 % más compartido del último año).',
+  'Genera conversación': 'Contenido vivo con 300+ reacciones y más de 13 comentarios cada 100 reacciones (el 10 % más comentado del último año).',
+  'Se abandona temprano': 'Video vivo con 20 mil+ reproducciones y $50 mil+ de gasto cuya retención al 25 % está 20 % por debajo del cuartil bajo de su objetivo.',
+  'Sumar Facebook Reels': 'Campaña de Alcance con más de $500 mil y menos de 5 % del gasto en Facebook Reels.',
+  'Placements débiles': 'Campaña de Interacción con 5 % o más del gasto (y $50 mil+) en Instream, Threads o Explore.',
+  'Rotar contenidos': 'Contenidos vivos que pasaron su umbral de fatiga: 15 días en video, 12 en placa o carrusel.',
+  'Sin entrega': 'Campaña con fecha de fin por delante que no gasta hace más de 2 días.',
+};
+function tarjetaAccion(a, p, conCamp = true) {
+  const pau = a.via === 'pautador';
+  const o = OPI[a.id] || {};
+  const voto = (v) => `<button class="b sm ${o.voto === v ? 'on' : ''}" onclick="opinar('${a.id}','voto','${v}')">${v}</button>`;
+  const piezas = (a.piezas || []).filter((x) => x && (x.fb || x.ig || x.otro));
+  return `<div class="acc"><div class="tipo">${esc(a.tipo)}${conCamp && a.camp ? ` · <a class="tx2" href="#p/${p.id}/c/${enc(a.camp)}">ver campaña</a>` : ''}${pau ? ' · <span class="chip auto">se puede hacer desde PAUTADOR</span>' : ''}</div>
+    <div class="tit">${esc(a.titulo)}</div><div class="que">${esc(a.que)}</div>
+    <div class="hacer"><span class="tx2">→</span><b>${esc(a.hacer)}</b></div>
+    ${piezas.length ? `<div class="piezas">${piezas.map((x) => botonPieza(x, `ver pieza: ${esc((x.rol ? x.rol + ' — ' : '') + (x.nombre.length > 40 ? x.nombre.slice(0, 38) + '…' : x.nombre))}`)).join('')}</div>` : ''}
+    <div class="porque"><em>Por qué:</em> ${esc(a.porque)}</div>
+    <details class="como" style="margin-top:8px"><summary>Cómo lo detectamos</summary><div>${esc(a.como || COMO[a.tipo] || '')}</div></details>
+    <div class="btns"><button class="b pri" ${pau ? '' : 'disabled title="Algún activo de la campaña no está automatizado: se hace a mano"'} onclick="decidir('${a.id}','pautador')">Enviar a PAUTADOR</button>
+      <button class="b" onclick="decidir('${a.id}','manual')">Hecho a mano</button>
+      <span class="desc" id="d-${a.id}"><button class="b link" onclick="abrirDescarte('${a.id}')">Descartar</button></span></div>
+    <div class="opinion"><div class="fila">¿Te sirve esta recomendación? ${voto('Sí')}${voto('No')}${voto('Falta un dato')}</div>
+      <textarea placeholder="Comentario: qué harías distinto, qué dato falta, si el diagnóstico es correcto…" oninput="opinar('${a.id}','texto',this.value)">${esc(o.texto || '')}</textarea></div></div>`;
+}
+function vistaAcciones(p, b) {
+  PIEZAS = [];
+  const pend = pendientes(b), hechas = b.acciones.filter((a) => decision(a.id));
+  const lista = pend.length ? `<div class="caja">${pend.map((a) => tarjetaAccion(a, p)).join('')}</div>` : '<div class="caja vacio">No hay acciones pendientes.</div>';
+  const res = hechas.length ? `<section class="bloque"><div class="bh"><h2>Resueltas</h2></div><div class="caja">${hechas.map((a) => { const r = decision(a.id); return `<div class="hecha"><span class="chip">${r.d === 'pautador' ? 'PAUTADOR' : r.d === 'manual' ? 'A mano' : 'Descartada'}</span><span class="que">${esc(a.titulo)}${r.motivo ? ` <span class="muted">· ${esc(r.motivo)}</span>` : ''}</span><button class="b link small" onclick="deshacer('${a.id}')">deshacer</button></div>`; }).join('')}</div></section>` : '';
+  return `${cabProyecto(p, b, 'acciones')}
+    ${ayuda('Lo que conviene hacer hoy en este proyecto, ordenado por prioridad y por plata en juego. Cada acción dice qué pasa, qué hacer y por qué. Se resuelve enviándola a PAUTADOR (si los activos están automatizados), marcándola como hecha a mano o descartándola con un motivo. Abajo de cada una podés opinar: eso es lo que usa el agente para aprender.')}
+    <section class="bloque"><div class="bh"><h2>Pendientes</h2><span class="nota">${pend.length} acciones</span></div>${lista}</section>${res}`;
+}
+
+// ---------- CAMPAÑA ----------
+function historiaPropia(c) {
+  const pr = c.propia, prop = propiaDe(c);
+  if (!pr) return '';
+  const ws = pr.semanas.filter((w) => w.x != null);
+  const W = 720, H = 150, max = Math.max(1.2, ...ws.map((w) => w.x), pr.ref ? pr.ref.p75 * 1.2 : 0), bw = W / Math.max(1, ws.length);
+  const y = (v) => H - 20 - v / max * (H - 30);
+  const banda = pr.ref ? `<rect x="0" y="${y(pr.ref.p75).toFixed(1)}" width="${W}" height="${(y(pr.ref.p25) - y(pr.ref.p75)).toFixed(1)}" fill="var(--banda)"/><line x1="0" x2="${W}" y1="${y(pr.ref.p50).toFixed(1)}" y2="${y(pr.ref.p50).toFixed(1)}" stroke="#b9c0c8" stroke-dasharray="4 4"/>` : '';
+  const barras = ws.map((w, i) => `<rect x="${(i * bw + 2).toFixed(1)}" y="${y(w.x).toFixed(1)}" width="${Math.max(2, bw - 4).toFixed(1)}" height="${(H - 20 - y(w.x)).toFixed(1)}" rx="2" fill="${i >= ws.length - 2 ? '#141414' : '#c4c4c4'}"><title>Semana del ${dm(w.s)}: ${veces(w.x)} · ${M(w.g)}</title></rect>`).join('');
+  const labs = ws.map((w, i) => i % Math.ceil(ws.length / 8) === 0 ? `<text x="${(i * bw + bw / 2).toFixed(1)}" y="${H - 4}" font-size="10" text-anchor="middle" fill="#9aa0a6">${dm(w.s)}</text>` : '').join('');
+  const lectura = prop.temporada
+    ? `Contra la temporada que arrancó el <b>${dmy(pr.previa.desde)}</b>: en las mismas ${pr.previa.semanasComparadas} semanas rinde <b>${veces(pr.idxTemporada)}</b> (costos ajustados por inflación).`
+    : pr.ref ? `Las últimas 2 semanas (en negro) rinden <b>${veces(pr.idxPropio)}</b> su mediana propia. La franja gris es su rango normal (cuartiles de ${pr.ref.semanas} semanas anteriores).` : 'Todavía tiene poca historia: la luz aparece desde la tercera semana.';
+  const conf = pr.tipo === 'temporada' ? `<div style="display:flex;gap:6px;align-items:center;margin-top:12px"><span class="small tx2">¿Es estacional?</span><button class="b sm ${estacional(c.uid) === true ? 'on' : ''}" onclick="marcarEstacional(decodeURIComponent('${enc(c.uid)}'), true)">Sí</button><button class="b sm ${estacional(c.uid) === false ? 'on' : ''}" onclick="marcarEstacional(decodeURIComponent('${enc(c.uid)}'), false)">No</button></div>` : '';
+  return `<section class="bloque"><div class="bh"><h2>${prop.temporada ? 'Contra la temporada anterior' : 'Contra su propia historia'}</h2><span class="nota">KPI principal por semana</span></div>
+    ${ayuda('Las campañas largas se comparan contra sí mismas: así se ve si se están desgastando o si están en su mejor momento, más allá del promedio.', 'Cada barra es una semana completa: su KPI principal contra la referencia general (1,0× = la mediana de todos los gobiernos), así un cambio de formato no se confunde con un desgaste. La franja gris va del 25 % peor al 25 % mejor de sus semanas anteriores; la línea punteada es su mediana. Tendencia = últimas 4 semanas contra las 8 anteriores. Presión = impresiones de la campaña por habitante.')}
+    <div class="caja hist"><div class="txt">
+      <div><span>Luz ${esc(prop.lab)}</span><b>${puntos([prop.color])} ${veces(prop.ix)}</b></div>
+      <div><span>Al aire</span><b>${Math.round(pr.span / 7)} semanas</b></div>
+      ${pr.tendencia != null ? `<div><span>Tendencia (4 vs 8 semanas)</span><b>${veces(pr.tendencia)}</b></div>` : ''}
+      ${pr.presion != null ? `<div><span>Presión del último mes</span><b>${pr.presion.toLocaleString('es-AR', { maximumFractionDigits: 1 })} imp./hab.</b></div>` : ''}
+      ${pr.presionAcum != null ? `<div><span>Presión acumulada</span><b>${pr.presionAcum.toLocaleString('es-AR', { maximumFractionDigits: 0 })} imp./hab.</b></div>` : ''}</div>
+      ${ws.length ? `<svg width="100%" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="max-height:${H}px">${banda}${barras}${labs}</svg>` : ''}
+      <div class="small tx2" style="margin-top:10px">${lectura}</div>${conf}</div></section>`;
+}
+let subCamp = 'contenidos';
+function vistaCampana(p, b, id) {
+  PIEZAS = [];
+  const c = b.campanas.find((x) => x.id === id);
+  if (!c) return `${cabProyecto(p, b, 'campanas')}<div class="caja vacio">Campaña sin datos en ${CANAL}.</div>`;
+  miga([['Mis proyectos', '#'], [p.nombre, '#p/' + p.id], [c.nombre]]);
+  const acc = pendientes(b).filter((a) => a.camp === c.id || (a.campanas || []).includes(c.id));
+  const prop = propiaDe(c);
+  const f = (k, n) => `<button class="fb ${subCamp === k ? 'on' : ''}" onclick="subCamp='${k}';render()">${n}</button>`;
+  let cuerpo = '';
+  if (subCamp === 'contenidos') {
+    const cols = 'grid-template-columns:minmax(0,2.4fr) .7fr .5fr 1fr 1.2fr .8fr .8fr';
+    cuerpo = `${ayuda('Cada pieza de la campaña, de la más efectiva a la menos. El costo por reacción es la medida de efectividad del contenido.', '<b>General</b> = costo por reacción contra lo normal en todos los gobiernos para su objetivo, formato y placement. <b>Eficacia</b> = % del gasto de la pieza en anuncios rojos según la regla de Looker. <b>Compartido</b> = compartidas ÷ impresiones. <b>Retención 25 %</b> = reproducciones que llegan al 25 % del video ÷ reproducciones.')}` + (c.contenidos && c.contenidos.length ? `<div class="th" style="${cols}"><div>Contenido</div><div class="num">Gasto</div><div class="num">Días</div><div class="num">Costo por reacción</div><div>General · Eficacia</div><div class="num">Compartido</div><div class="num">Retención 25 %</div></div><div class="caja lista">${c.contenidos.slice().sort((a, z) => (z.crG ?? -1) - (a.crG ?? -1)).map((x) => {
+      const k = kp(x);
+      const sh = x.r >= 300 ? x.sh / x.r * 100 : 0, co = x.r >= 300 ? x.co / x.r * 100 : 0;
+      const ret = k.video && k.ret ? `${pct(k.ret[0], 1)} ${puntos([color(k.G.r25)], ['vs lo normal ' + veces(k.G.r25)])}` : '<span class="muted">—</span>';
+      return `<div class="it" style="${cols}"><div><div class="nom">${esc(x.nombre)}</div><div class="meta">${esc(x.fmt)} · ${dm(x.desde)} → ${dm(x.hasta)} · ${botonPieza({ ...x.pieza, nombre: x.nombre, rol: c.nombre })}${sh >= 10.2 ? ' · <span class="senal v">se comparte</span>' : ''}${co >= 13.4 ? ' · <span class="senal a">genera conversación</span>' : ''}</div></div>
+        <div class="num">${M(x.g)}</div><div class="num">${dias(x.desde, x.hasta) + 1}</div>
+        <div class="num">${x.soloStories ? '<span class="small muted">Stories: sin reacciones</span>' : $$(k.cr)}</div>
+        <div>${x.soloStories ? '' : `<span class="luces" style="gap:8px">${puntos([color(x.crG)], ['General ' + veces(x.crG)])}<span class="small muted">${veces(x.crG)}</span>${efiChip(x.efi, true)}</span>`}</div>
+        <div class="num">${pct(k.tcomp, 3)}</div><div class="num">${ret}</div></div>`;
+    }).join('')}</div>` : '<div class="caja vacio">Sin detalle de contenidos (campaña de hace más de 60 días).</div>');
+  } else if (subCamp === 'audiencias') {
+    const pr = principal(c.m, c.obj);
+    const cols = 'grid-template-columns:minmax(0,2.8fr) .8fr 1fr 1.3fr';
+    cuerpo = `${ayuda('A quién le habló la campaña y cómo respondió cada audiencia.', 'KPI principal por audiencia contra la referencia General y la del Proyecto, más su eficacia (regla de Looker). La cobertura (alcance único ÷ tamaño) es simulada hasta conectar la API de Meta.')}` + (c.audiencias && c.audiencias.length ? `<div class="th" style="${cols}"><div>Audiencia</div><div class="num">Gasto</div><div class="num">${pr.lab}</div><div>General · Proyecto · Eficacia</div></div><div class="caja lista">${c.audiencias.map((x) => {
+      const px = principal(x, c.obj);
+      return `<div class="it" style="${cols}"><div><div class="nom">${esc(x.k)}</div><div class="meta">${N(x.i)} impresiones · costo por reacción ${$$(kp(x).cr)} · cobertura ${20 + hash(c.id + x.k) % 60} % <span class="sim">simulada</span></div></div>
+        <div class="num">${M(x.g)}</div><div class="num">${px.val}</div><div>${puntos([color(px.G, px.u), color(px.P, px.u)])} <span class="small muted">${veces(px.G)} · ${veces(px.P)}</span> ${efiChip(x.efi, true)}</div></div>`;
+    }).join('')}</div>` : '<div class="caja vacio">Sin detalle de audiencias.</div>');
+  } else {
+    const pls = c.porPl || [];
+    const tot = pls.reduce((s, x) => s + x.g, 0) || 1;
+    cuerpo = `${ayuda('Por qué voces sale la campaña y en qué placements se gasta.', 'Aprendido: en Alcance el mismo contenido saca 1,8× reacciones en Facebook Reels; los clicks salen de Facebook; Stories no registra reacciones; en Interacción, Instream, Threads y Explore rinden entre 0,01× y 0,57×.')}<div class="dos"><div><div class="th"><div>Desde qué activos habla</div></div><div class="caja lista">${c.voces.map((v) => `<div class="it" style="grid-template-columns:1fr auto"><div class="nom">${esc(v.k)} ${v.auto ? '<span class="chip auto">Automatizado</span>' : ''}</div><div class="num">${M(v.g)}</div></div>`).join('')}</div></div>
+      <div><div class="th"><div>Placements</div></div><div class="caja lista">${pls.map((x) => `<div class="it" style="grid-template-columns:1fr auto auto"><div class="nom">${esc(x.k)}${/Stories/.test(x.k) ? ' <span class="small muted">no registra reacciones</span>' : ''}</div><div class="small muted">${Math.round(x.g / tot * 100)} %</div><div class="num">${M(x.g)}</div></div>`).join('') || '<div class="vacio">Sin datos.</div>'}</div></div></div>`;
+  }
+  return `<div class="cab"><div><h1>${esc(c.nombre)}</h1><p class="sub">${esc(c.obj)} · ${esc(c.eje || 'sin eje')} · ${dm(c.desde)} → ${dm(c.fin || c.hasta)} · ${estadoTxt(c.estado)}${prop ? ` · ${prop.temporada ? 'estacional' : 'campaña larga'}` : ''}</p></div>
+      <div class="der">${c.serie ? `<div><div class="small muted" style="text-align:right">Gasto diario · 45 días</div>${spark(c.serie)}</div>` : ''}</div></div>
+    <section class="bloque"><div class="bh"><h2>Rendimiento</h2><span class="nota">${esc(p.nombre)} · ${CANAL} · 180 días</span>${c.efi ? `<span style="margin-left:auto">Eficacia: ${efiChip(c.efi)}</span>` : ''}${c.deMas > 0 ? `<span class="small" style="color:var(--rojo)">${M(c.deMas)} de más contra lo habitual del proyecto</span>` : ''}</div>
+      ${ayuda(`El KPI principal de esta campaña es <b>${principal(c.m, c.obj).lab}</b> (por su objetivo, ${esc(c.obj)}). Las luces dicen si está mejor o peor que lo normal${prop ? '; la tercera la compara contra su propia historia' : ''}.`)}
+      ${kpis(c.m, c.obj, prop)}</section>
+    ${acc.length ? `<section class="bloque"><div class="bh"><h2>Acciones</h2></div><div class="caja">${acc.map((a) => tarjetaAccion(a, p, false)).join('')}</div></section>` : ''}
+    ${historiaPropia(c)}
+    <section class="bloque"><div class="subtabs">${f('contenidos', 'Contenidos')}${f('audiencias', 'Audiencias')}${f('activos', 'Activos y placements')}</div>${cuerpo}</section>`;
+}
+
+// ---------- GUÍA ----------
+function vistaGuia() {
+  miga([['Mis proyectos', '#'], ['Cómo leer esta pantalla']]);
+  return `<div class="guia"><h1>Cómo leer Seguimiento y Optimización</h1>
+    <p class="sub">Qué muestra cada cosa, de dónde sale y cómo se calcula.</p>
+    <h3>Las luces</h3>
+    <dl><dt><span class="luz"><i class="verde"></i></span> General</dt><dd>Contra lo normal en todos los gobiernos (último año), para el mismo objetivo, formato y placement.</dd>
+    <dt><span class="luz"><i class="verde"></i></span> Proyecto</dt><dd>Contra lo normal en este mismo proyecto y canal (último año).</dd>
+    <dt><span class="luz"><i class="verde"></i></span> Propia</dt><dd>Solo campañas de 30+ días: contra sus propias semanas anteriores. Si la campaña es estacional y el equipo lo confirma, contra la temporada anterior.</dd>
+    <dt>Colores</dt><dd>Verde: 20 % o más mejor que la referencia. Amarillo: dentro de ±20 %. Rojo: 20 % o más peor. Los números (1,3×) dicen cuántas veces lo normal; en costos, más de 1 significa más barato.</dd>
+    <dt><span class="efi"><i class="naranja"></i></span> Eficacia</dt><dd>La regla de Looker: cada anuncio (en cada placement) se compara con los de su mismo objetivo y placement del proyecto en su misma época; rojo si está entre el 25 % más caro por reacción. Se resume como % del gasto en anuncios rojos: menos de 25 % verde, 50 % amarillo, 75 % naranja, más rojo.</dd></dl>
+    <h3>KPI principal según objetivo</h3>
+    <dl><dt>Alcance</dt><dd>CPM (costo cada mil impresiones) e impresiones.</dd><dt>Interacción</dt><dd>Costo por reacción.</dd><dt>Tráfico</dt><dd>CTR (clicks ÷ impresiones).</dd><dt>Reproducciones</dt><dd>Costo por reproducción (en Costo por objetivo).</dd></dl>
+    <p>Aprendido: el mismo contenido en Interacción paga 3,3× el CPM que en Alcance, pero cada reacción sale 7× más barata. Por eso cada campaña se juzga con la métrica de lo que compra.</p>
+    <h3>Métricas</h3>
+    <dl><dt>Costo por reacción</dt><dd>Gasto ÷ reacciones. La medida de efectividad de los contenidos.</dd>
+    <dt>Tasa de reacción</dt><dd>Reacciones ÷ impresiones.</dd><dt>Tasa de compartido</dt><dd>Compartidas ÷ impresiones: difusión orgánica.</dd><dt>Tasa de comentario</dt><dd>Comentarios ÷ impresiones: conversación (o polémica).</dd>
+    <dt>ETR</dt><dd>Engagement ÷ impresiones. En video casi todo el engagement son reproducciones; en placas, clicks: se compara dentro del mismo formato.</dd><dt>CTR</dt><dd>Clicks ÷ impresiones.</dd>
+    <dt>Tasa de reproducción</dt><dd>Reproducciones ÷ impresiones (video).</dd><dt>Retención 25 / 50 / 75 / 100 %</dt><dd>Reproducciones que llegan a ese punto ÷ reproducciones.</dd><dt>VTR</dt><dd>Reproducciones completas ÷ impresiones.</dd>
+    <dt>Alcance</dt><dd>Personas únicas. Hoy simulado: llega cuando se conecte la API de Meta.</dd><dt>$ de más</dt><dd>Lo gastado por encima de lo que habría costado el mismo resultado al costo habitual del proyecto.</dd></dl>
+    <h3>Bloques</h3>
+    <dl><dt>Costo por objetivo</dt><dd>Red × objetivo, mes en curso contra los 3 meses anteriores; todas las plataformas.</dd>
+    <dt>Gasto del mes</dt><dd>Inversión contra tiempo, con el PresupuestoMensual de DataJunta. Proyección = promedio de los últimos 2 días completos.</dd>
+    <dt>Impacto comparado</dt><dd>El mes en curso contra los dos anteriores, día a día.</dd>
+    <dt>Picos y apagones</dt><dd>Gasto diario de cada red o activo contra su día típico del mes anterior. Pico: más de 2×. Apagón: menos de 0,5×.</dd>
+    <dt>Acciones</dt><dd>Qué pasa, qué hacer y por qué. Se envían a PAUTADOR (activos automatizados), se marcan como hechas a mano o se descartan con motivo. El agente aprende de esas decisiones y de las opiniones.</dd></dl>
+    <h3>Datos</h3>
+    <p>DataJunta (Meta: copia diaria de 180 días; todas las plataformas desde junio), tabla de eficacia (automatizado.eficacia_anuncios, se regenera todos los días), planilla de pedidos de presupuesto (en revisión). Se usa el último día completo: DataJunta carga a las 8:00 el día anterior. Las referencias salen del análisis del último año (analisis-datajunta, tandas 5 y 6).</p>
+    <h3>Comentarios</h3>
+    <p>En cada recomendación podés marcar si sirve y dejar un comentario; con “Comentar esta pantalla” opinás sobre la pantalla entera. “Exportar comentarios” descarga un archivo con todo para compartir.</p></div>`;
+}
+
+// ---------- router ----------
+function render() {
+  document.querySelectorAll('#canal button').forEach((x) => x.classList.toggle('on', x.dataset.c === CANAL));
+  const partes = location.hash.slice(1).split('/');
+  let html;
+  if (partes[0] === 'guia') html = vistaGuia();
+  else if (partes[0] === 'p' && proyecto(partes[1])) {
+    const p = proyecto(partes[1]);
+    const b = bloque(p);
+    if (!b) { html = `<div class="caja vacio">${esc(p.nombre)} no tiene ${CANAL}. <a class="tx2" href="#">Volver a mis proyectos</a></div>`; miga([['Mis proyectos', '#'], [p.nombre]]); }
+    else {
+      miga([['Mis proyectos', '#'], [p.nombre]]);
+      const tab = partes[2] || 'resumen';
+      html = tab === 'c' ? vistaCampana(p, b, decodeURIComponent(partes.slice(3).join('/')))
+        : tab === 'campanas' ? vistaCampanas(p, b) : tab === 'activos' ? vistaActivos(p, b) : tab === 'insights' ? vistaInsights(p, b)
+          : tab === 'acciones' ? vistaAcciones(p, b) : vistaResumen(p, b);
+    }
+  } else html = vistaPortada();
+  $('#app').innerHTML = html;
+  $('#fecha').textContent = 'Datos al ' + dm(D.datosHasta);
+  contarComentarios();
+}
+document.querySelectorAll('#canal button').forEach((x) => x.addEventListener('click', () => setCanal(x.dataset.c)));
+window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); });
+render();
+</script>
+</body>
+</html>

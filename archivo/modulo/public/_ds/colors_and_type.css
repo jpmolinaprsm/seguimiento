@@ -1,0 +1,229 @@
+/* =============================================================
+   Prosumia Design System — Foundations
+   Colors + Typography tokens
+   ============================================================= */
+
+@font-face { font-family: 'Poppins'; src: url("../fonts/0a81add8-a00c-4af9-bc4c-ae26b334e298.ttf") format('truetype');      font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url("../fonts/0ee8a8c9-837a-4e97-8f69-555b25e0595d.ttf") format('truetype');    font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url("../fonts/7a460055-e279-4750-b619-426848106789.ttf") format('truetype');     font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url("../fonts/8fb2b010-6f52-4201-8914-1df90d43ae63.ttf") format('truetype');     font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url("../fonts/d989a460-a6ad-4ce5-85ae-34482a3bae26.ttf") format('truetype');   font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url("../fonts/cb84d991-6b28-4073-881e-ffd3464b4db9.ttf") format('truetype');       font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url("../fonts/f9308cc7-6ab6-48f8-af8e-0a750f96416f.ttf") format('truetype'); font-weight: 700; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url("../fonts/042bdfa4-7f7a-443f-ac38-11c41bf21526.ttf") format('truetype');  font-weight: 800; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url("../fonts/a12b3d13-b9e4-4fea-b58c-15c5e6a64d9c.ttf") format('truetype');      font-weight: 900; font-style: normal; font-display: swap; }
+
+/* Adenda — pesos adicionales subidos por el equipo (italics + Thin/ExtraLight).
+   Estrictamente aditivo: el sistema solo usa Regular/Medium/SemiBold/Bold.
+   Estos quedan disponibles para usos puntuales (énfasis itálico, ultra-light
+   en displays especiales) sin tocar ninguno de los pesos ya definidos. */
+@font-face { font-family: 'Poppins'; src: url("../fonts/0ff52df3-6717-471a-bd56-ae54f0c79c29.ttf") format('truetype');             font-weight: 100; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url("../fonts/b9f0560a-a9fb-4604-8763-55d76251e1db.ttf") format('truetype');       font-weight: 100; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url("../fonts/0b12ed45-15df-4ca0-bf26-a5d1dc2e1e6a.ttf") format('truetype');       font-weight: 200; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url("../fonts/87fabf7e-5aa0-496b-bf1b-5cc60b9d9f28.ttf") format('truetype'); font-weight: 200; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url("../fonts/3dd9735d-03cc-422f-82c9-1e2b157b7661.ttf") format('truetype');      font-weight: 300; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url("../fonts/e9dea0d9-0821-4b74-9473-7572ae8e63e2.ttf") format('truetype');     font-weight: 500; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url("../fonts/33cb1cfd-1bf5-4354-8e1f-754107b32f1f.ttf") format('truetype');   font-weight: 600; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url("../fonts/f82cb7d4-b20f-4353-80cb-7fda21015627.ttf") format('truetype');  font-weight: 800; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url("../fonts/e9279eb6-f4ae-4ce5-965f-6abf2d5f1724.ttf") format('truetype');      font-weight: 900; font-style: italic; font-display: swap; }
+
+:root {
+  /* ---------- Brand colors ---------- */
+  /* Primary palette — observed in every cover variant */
+  --prsm-red:        #F7444C;   /* primary brand red — cover bg, accents */
+  --prsm-red-deep:   #E9121C;   /* deeper red — solid CTA on red bg */
+  --prsm-red-light:  #FD787D;   /* pinkish red — tertiary block fills */
+  --prsm-green:      #46C678;   /* primary brand green */
+  --prsm-green-deep: #0EA75D;   /* deep green — solid CTA on green bg, logo petal */
+  --prsm-green-mid:  #10A65D;   /* alt deep green */
+  --prsm-yellow:     #FCB942;   /* primary brand yellow */
+  --prsm-yellow-deep:#FAAA00;   /* deep yellow/orange — bg variant, logo petal */
+
+  /* ---------- Neutrals ---------- */
+  --prsm-ink:        #3C3C3C;   /* primary text — used for ~all text on white */
+  --prsm-black:      #000000;
+  --prsm-white:      #FFFFFF;
+  --prsm-off-white:  #F9FBFF;   /* slight cool tint white-on-color */
+  --prsm-gray-50:    #F5F5F5;
+  --prsm-gray-100:   #F4F4F4;   /* card fill / soft blocks */
+  --prsm-gray-200:   #E4E4E4;   /* divider lines, hairlines */
+  --prsm-gray-300:   #D5D5D5;   /* hairline alt / muted divider */
+  --prsm-gray-400:   #A6AAA9;   /* secondary/muted text */
+  --prsm-gray-500:   #808080;   /* eyebrow / Fecha chrome text */
+  --prsm-ink-light:  #5C5C5C;   /* body alt, slightly lighter than ink */
+
+  /* ---------- Semantic tokens ---------- */
+  --bg:              var(--prsm-white);
+  --bg-alt:          var(--prsm-gray-100);
+  --fg:              var(--prsm-ink);
+  --fg-muted:        var(--prsm-gray-400);
+  --fg-on-color:     var(--prsm-white);
+  --border:          var(--prsm-gray-200);
+  --divider:         var(--prsm-gray-200);
+
+  /* Accent (primary action / highlight). Each cover/section can override. */
+  --accent:          var(--prsm-red);
+  --accent-deep:     var(--prsm-red-deep);
+  --accent-soft:     var(--prsm-red-light);
+  --accent-contrast: var(--prsm-white);
+
+  /* ---------- Typography ---------- */
+  --font-sans: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* Type scale — calibrated against the original .pptx (3840×2160 canvas → 1920 norm).
+     Treat as px at 1920×1080 design width. */
+  --fs-display-xl: 100px;  /* cover title / "Título informe" — Poppins SemiBold */
+  --fs-display-lg: 100px;  /* chapter title — Poppins SemiBold (same as display-xl) */
+  --fs-display-md: 75px;   /* "Título destacado" / secondary section title — SemiBold */
+  --fs-h1:         88px;   /* slide title alt (compact contexts) — SemiBold */
+  --fs-h2:         72px;   /* subhead w/ green-dot — SemiBold */
+  --fs-h3:         66px;   /* category label — SemiBold */
+  --fs-subhead:    60px;   /* "Subtítulo X:" colon subheads — SemiBold */
+  --fs-stat-xl:    140px;  /* hero stat / cifra destacada — SemiBold */
+  --fs-stat-lg:    96px;   /* secondary stat */
+  --fs-stat-md:    72px;   /* tertiary stat */
+  --fs-lead:       50px;   /* lead paragraph (same as body in PPT) */
+  --fs-body:       50px;   /* body — Regular or Light */
+  --fs-body-sm:    44px;   /* secondary body / supporting copy — Regular */
+  --fs-small:      30px;   /* footnote / fine print — Regular */
+  --fs-eyebrow:    16px;   /* chrome eyebrow + Fecha — Poppins Medium */
+  --fs-label:      30px;   /* button + chip label */
+
+  /* Weights observed: only 400 (regular) and 700 (bold) are used in slides */
+  --fw-regular: 400; /* @kind font */
+  --fw-medium:  500; /* @kind font */
+  --fw-semibold:600; /* @kind font */
+  --fw-bold:    700; /* @kind font */
+  --fw-black:   900; /* @kind font */
+
+  /* Line heights — slides use 100%; body copy uses ~1.4 */
+  --lh-tight:   1;    /* @kind font */
+  --lh-snug:    1.15; /* @kind font */
+  --lh-body:    1.4;  /* @kind font */
+  --lh-loose:   1.6;  /* @kind font */
+
+  /* Letter spacing — eyebrow tracked at 0.10em (PPT spc=159 at 16pt) */
+  --ls-eyebrow: 0.10em;
+  --ls-button:  0.01em;
+
+  /* ---------- Spacing scale ---------- */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+  --space-9:  96px;
+  --space-10: 128px;
+
+  /* ---------- Radii ---------- */
+  --radius-sm:    8px;
+  --radius-md:    16px;
+  --radius-lg:    24px;
+  --radius-xl:    40px;
+  --radius-pill:  9999px;   /* default for buttons, chips, stat cards */
+  --radius-card:  28px;     /* stat card / icon-row pill */
+
+  /* ---------- Pills & stickers (canonical sizes) ---------- */
+  /* Standalone pills (button-style chips like "Palabra destacada",
+     "Fin de la presentación") and decorative round stickers share the
+     same height so they sit on the same baseline when clustered. */
+  --pill-height:    72px;   /* canonical pill button height */
+  --pill-font:      28px;   /* matching SemiBold label size */
+  --pill-padding-x: 42px;   /* horizontal padding to keep proportions */
+  --sticker-size:   72px;   /* canonical round sticker / badge diameter */
+
+  /* ---------- Borders ---------- */
+  --border-thin:    1px solid var(--border);
+  --border-thick:   2px solid var(--border);
+  /* outlined chip / icon ring */
+  --border-outline: 3px solid currentColor; /* @kind other */
+
+  /* ---------- Shadows ---------- */
+  /* The system is largely shadow-free; cards rely on color blocks + radii.
+     These exist only for elevation in interactive UI. */
+  --shadow-sm: 0 1px 2px rgba(60,60,60,0.06);
+  --shadow-md: 0 4px 16px rgba(60,60,60,0.08);
+  --shadow-lg: 0 12px 40px rgba(60,60,60,0.10);
+
+  /* ---------- Layout ---------- */
+  --deck-w: 1920px;
+  --deck-h: 1080px;
+  --deck-margin-x: 100px;   /* L/R safe area on a 1920w slide */
+  --deck-margin-y: 80px;    /* T/B safe area */
+}
+
+/* ============================================================= */
+/* Semantic element styles — drop-in defaults for prose surfaces  */
+/* ============================================================= */
+
+html, body { font-family: var(--font-sans); color: var(--fg); background: var(--bg); }
+
+h1, .h1 {
+  font: var(--fw-bold) var(--fs-h1)/var(--lh-tight) var(--font-sans);
+  color: var(--fg); margin: 0; letter-spacing: -0.01em;
+}
+h2, .h2 {
+  font: var(--fw-bold) var(--fs-h2)/var(--lh-tight) var(--font-sans);
+  color: var(--fg); margin: 0;
+}
+h3, .h3 {
+  font: var(--fw-bold) var(--fs-h3)/var(--lh-snug) var(--font-sans);
+  color: var(--fg); margin: 0;
+}
+.display-xl { font: var(--fw-semibold) var(--fs-display-xl)/var(--lh-tight) var(--font-sans); letter-spacing: -0.02em; }
+.display-lg { font: var(--fw-semibold) var(--fs-display-lg)/var(--lh-tight) var(--font-sans); letter-spacing: -0.02em; }
+.display-md { font: var(--fw-bold) var(--fs-display-md)/var(--lh-tight) var(--font-sans); }
+
+.lead { font: var(--fw-regular) var(--fs-lead)/var(--lh-body) var(--font-sans); color: var(--fg); }
+p, .body { font: var(--fw-regular) var(--fs-body)/var(--lh-body) var(--font-sans); color: var(--fg); margin: 0; }
+.small { font-size: var(--fs-small); line-height: var(--lh-body); }
+
+.eyebrow {
+  font: var(--fw-regular) var(--fs-eyebrow)/var(--lh-tight) var(--font-sans);
+  text-transform: uppercase; letter-spacing: var(--ls-eyebrow); color: var(--fg);
+}
+
+.stat-xl { font: var(--fw-bold) var(--fs-stat-xl)/var(--lh-tight) var(--font-sans); letter-spacing: -0.02em; }
+.stat-lg { font: var(--fw-bold) var(--fs-stat-lg)/var(--lh-tight) var(--font-sans); letter-spacing: -0.01em; }
+.stat-md { font: var(--fw-bold) var(--fs-stat-md)/var(--lh-tight) var(--font-sans); }
+.stat-caption { font: var(--fw-regular) var(--fs-body)/var(--lh-snug) var(--font-sans); color: var(--fg); }
+
+.muted { color: var(--fg-muted); }
+
+/* ============================================================= */
+/* SLIDE CHROME — unified header + footer spec                    */
+/* Calibrated against the original .pptx layouts (slideLayout2):  */
+/*   Eyebrow Poppins Medium 16px / 110% / 0.10em / ink #3C3C3C    */
+/*   Logo 40px tall / Hairline 2px #E4E4E4 / Fecha Medium #A6AAA9 */
+/* Applied to every slide that uses .header / .footer-line /      */
+/* .footer-date. Override only by adding .on-color to the slide.  */
+/* This is the SINGLE SOURCE OF TRUTH for chrome — do not redefine */
+/* in individual slide files.                                     */
+/* ============================================================= */
+
+.header {
+  position: absolute; left: 100px; right: 100px; top: 84px;
+  display: flex; justify-content: space-between; align-items: center;
+  font: var(--fw-medium) 16px/1.1 var(--font-sans);
+  text-transform: uppercase; letter-spacing: 0.10em; color: var(--prsm-ink);
+}
+.header .sep { margin: 0 14px; color: var(--prsm-gray-300); }
+.header img { height: 40px; }
+
+.footer-line {
+  position: absolute; left: 100px; right: 100px; bottom: 50px;
+  height: 2px; background: var(--prsm-gray-200);
+}
+.footer-date {
+  position: absolute; right: 100px; bottom: 65px;
+  font: var(--fw-medium) 16px/1.1 var(--font-sans); color: var(--prsm-gray-400);
+}
+
+/* Chrome inversion for color-background slides */
+.on-color .header,
+.on-color .footer-date { color: #ffffff; }
+.on-color .header .sep { color: rgba(255,255,255,0.55); }
+.on-color .footer-line { background: rgba(255,255,255,0.5); }

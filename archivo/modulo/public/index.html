@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seguimiento y Optimización</title>
+<link rel="icon" href="assets/LogoColor.svg">
+<script>window.__resources = {
+  'https://unpkg.com/react@18.3.1/umd/react.production.min.js': 'vendor/react.production.min.js',
+  'https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js': 'vendor/react-dom.production.min.js',
+};</script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/colors_and_type.css">
+<script src="_ds/_ds_bundle.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:#3C3C3C;font-family:'Poppins',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#3C3C3C}
+a:hover{color:#E9121C}
+button,select,textarea,input{font-family:inherit}
+</style>
+</helmet>
+<template id="__bundler_thumbnail" data-bg-color="#FCB942"><svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg"><rect width="1200" height="800" fill="#FCB942"></rect><rect x="380" y="420" width="80" height="140" rx="16" fill="#fff"></rect><rect x="500" y="340" width="80" height="220" rx="16" fill="#fff"></rect><rect x="620" y="280" width="80" height="280" rx="16" fill="#fff"></rect><rect x="740" y="380" width="80" height="180" rx="16" fill="#fff"></rect><line x1="360" y1="400" x2="840" y2="400" stroke="#fff" stroke-width="8" stroke-dasharray="20 14"></line></svg></template>
+<div style="min-height:100vh;display:flex;flex-direction:column;font-family:'Poppins',system-ui,sans-serif;color:#3C3C3C;background:#fff">
+
+  <header style="border-bottom:1px solid #E4E4E4">
+    <div style="max-width:1280px;margin:0 auto;padding:20px 32px 0;display:flex;flex-direction:column;gap:18px">
+      <div style="display:flex;align-items:center;gap:16px 20px;flex-wrap:wrap">
+        <img src="assets/LogoColor.svg" alt="Prosumia" style="height:28px;display:block">
+        <span style="width:1px;height:24px;background:#E4E4E4"></span>
+        <span style="font-size:16px;font-weight:600;white-space:nowrap">Seguimiento y optimización</span>
+        <span style="display:inline-flex;align-items:center;min-height:24px;padding:3px 10px;border-radius:9999px;border:1px solid #D5D5D5;font-size:11px;font-weight:500;color:#5C5C5C">Borrador · todo lo que toca Meta está simulado</span>
+        <span style="margin-left:auto;font-size:13px;font-weight:500;color:#5C5C5C;white-space:nowrap">Juan · Implementador</span>
+      </div>
+      <nav style="display:flex;gap:28px">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+          <button onClick="{{ t.onClick }}" style="border:0;background:none;padding:0 0 14px;margin-bottom:-1px;font-size:15px;font-weight:{{ t.fw }};color:#3C3C3C;border-bottom:3px solid {{ t.bc }};cursor:pointer;display:flex;gap:8px;align-items:center">
+            <span style="white-space:nowrap">{{ t.label }}</span>
+            <sc-if value="{{ t.hasCount }}" hint-placeholder-val="{{ false }}"><span style="min-width:22px;height:22px;padding:0 7px;border-radius:9999px;background:#F4F4F4;font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center">{{ t.count }}</span></sc-if>
+          </button>
+        </sc-for>
+      </nav>
+    </div>
+  </header>
+
+  <div style="border-bottom:1px solid #E4E4E4">
+    <div style="max-width:1280px;margin:0 auto;padding:14px 32px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center">
+      <label style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Proyecto
+        <select value="{{ proyecto }}" onChange="{{ onProyecto }}" style="height:36px;border:1px solid #D5D5D5;border-radius:9999px;padding:0 12px;font-size:13px;font-weight:500;letter-spacing:0;text-transform:none;background:#fff;color:#3C3C3C">
+          <sc-for list="{{ proyectos }}" as="p" hint-placeholder-count="2"><option value="{{ p.id }}">{{ p.nombre }}</option></sc-for>
+        </select>
+      </label>
+      <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Canal
+        <div style="display:flex;padding:3px;border-radius:9999px;background:#F4F4F4;gap:2px">
+          <sc-for list="{{ canalOpts }}" as="o" hint-placeholder-count="3">
+            <button onClick="{{ o.onClick }}" style="height:30px;padding:0 14px;border-radius:9999px;border:0;background:{{ o.bg }};color:{{ o.fg }};font-size:13px;font-weight:500;letter-spacing:0;text-transform:none;cursor:pointer;white-space:nowrap">{{ o.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Eje
+        <select value="{{ eje }}" onChange="{{ onEje }}" style="height:36px;border:1px solid #D5D5D5;border-radius:9999px;padding:0 12px;font-size:13px;font-weight:500;letter-spacing:0;text-transform:none;background:#fff;color:#3C3C3C">
+          <sc-for list="{{ ejes }}" as="e" hint-placeholder-count="5"><option value="{{ e }}">{{ e }}</option></sc-for>
+        </select>
+      </label>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:14px;min-width:0;flex:0 1 auto">
+        <span style="font-size:12px;color:#5C5C5C;line-height:1.4">{{ frescura }}</span>
+        <button onClick="{{ onRefresh }}" style="height:36px;padding:0 18px;border-radius:9999px;border:1.5px solid #3C3C3C;background:#fff;color:#3C3C3C;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex:none" style-hover="background:#F4F4F4">{{ refreshLabel }}</button>
+      </div>
+    </div>
+  </div>
+
+  <main style="max-width:1280px;width:100%;margin:0 auto;padding:32px 32px 96px;display:flex;flex-direction:column;gap:28px">
+    <sc-if value="{{ cargando }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:14px 18px;border-radius:16px;background:#F4F4F4;font-size:13px;font-weight:500;color:#5C5C5C">Consultando BigQuery… (la primera carga de un proyecto tarda unos segundos; después queda en caché 30 minutos)</div>
+    </sc-if>
+    <sc-if value="{{ hasError }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:14px 18px;border-radius:16px;background:#FFF1F1;border:1px solid #F7444C;font-size:13px;font-weight:500;color:#E9121C">{{ error }}</div>
+    </sc-if>
+
+    <sc-if value="{{ showPanel }}" hint-placeholder-val="{{ true }}">
+      <section style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">{{ P.nombre }} · {{ P.mesTxt }}</div>
+          <h1 style="margin:0;font-size:32px;line-height:1.1;font-weight:600;letter-spacing:-0.02em">¿Qué está corriendo y a cuál entro?</h1>
+        </div>
+        <sc-if value="{{ SA.visible }}" hint-placeholder-val="{{ false }}">
+        <div style="border:1px solid #E4E4E4;border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <h2 style="margin:0;font-size:20px;font-weight:600">Salud de los activos</h2>
+              <span style="font-size:12px;color:#5C5C5C">{{ SA.sub }}</span>
+            </div>
+            <div style="display:flex;padding:3px;border-radius:9999px;background:#F4F4F4;gap:2px">
+              <sc-for list="{{ SA.meses }}" as="sm" hint-placeholder-count="2">
+                <button sc-camel-on-click="{{ sm.onClick }}" style="height:30px;padding:0 14px;border-radius:9999px;border:0;background:{{ sm.bg }};color:{{ sm.fg }};font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap">{{ sm.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="font-size:12px;color:#5C5C5C">{{ SA.totales }}</div>
+          <div style="display:none">
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <sc-for list="{{ SA.chips }}" as="ch" hint-placeholder-count="5">
+              <button sc-camel-on-click="{{ ch.onClick }}" style="display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:9999px;border:1px solid {{ ch.bc }};background:{{ ch.bg }};color:#3C3C3C;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap"><span style="width:8px;height:8px;border-radius:50%;background:{{ ch.c }}"></span>{{ ch.label }}</button>
+            </sc-for>
+          </div>
+          <div style="overflow-x:auto">
+            <div style="min-width:980px">
+              <div style="display:grid;grid-template-columns:150px minmax(0,2.2fr) repeat(3,minmax(0,0.9fr)) minmax(120px,1fr) minmax(0,1.3fr);gap:12px;padding:10px 0;border-bottom:1px solid #E4E4E4;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C"><span>Estado</span><span>Activo</span><span>Pedido</span><span>Gastado</span><span>Restante</span><span>Ejecución</span><span>Nota</span></div>
+              <sc-for list="{{ SA.filas }}" as="sa" hint-placeholder-count="8">
+                <div style="display:grid;grid-template-columns:150px minmax(0,2.2fr) repeat(3,minmax(0,0.9fr)) minmax(120px,1fr) minmax(0,1.3fr);gap:12px;padding:12px 0;border-bottom:1px solid #E4E4E4;align-items:center;font-size:13px">
+                  <span style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:12px"><span style="flex:none;width:8px;height:8px;border-radius:50%;background:{{ sa.c }}"></span>{{ sa.estado }}</span>
+                  <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ sa.nombre }}">{{ sa.nombre }}</span><span style="font-size:11px;color:#5C5C5C">{{ sa.sub }}</span></span>
+                  <span>{{ sa.pedido }}</span><span>{{ sa.gastado }}</span><span style="font-weight:600;color:{{ sa.rc }}">{{ sa.restante }}</span>
+                  <span style="display:flex;flex-direction:column;gap:4px"><span style="position:relative;height:8px;border-radius:9999px;background:#F4F4F4"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ sa.bar }}%;border-radius:9999px;background:{{ sa.c }}"></span><span style="position:absolute;left:{{ sa.mes }}%;top:-3px;bottom:-3px;width:2px;background:#3C3C3C"></span></span><span style="font-size:11px;color:#5C5C5C">{{ sa.ejec }}</span></span>
+                  <span style="font-size:12px;line-height:1.4;color:#3C3C3C">{{ sa.nota }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <sc-if value="{{ SA.hayMas }}" hint-placeholder-val="{{ false }}">
+            <button sc-camel-on-click="{{ SA.toggle }}" style="align-self:flex-start;border:0;background:none;padding:0;font-size:13px;font-weight:600;color:#3C3C3C;cursor:pointer;text-decoration:underline;text-underline-offset:3px">{{ SA.toggleLabel }}</button>
+          </sc-if>
+          <div style="font-size:11px;color:#5C5C5C;line-height:1.5">{{ SA.pie }}</div>
+        </div>
+        </sc-if>
+        <sc-for list="{{ budgetRows }}" as="br" hint-placeholder-count="2">
+        <div style="border:1px solid #E4E4E4;border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <span style="display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:9999px;background:#F4F4F4;font-size:12px;font-weight:600;white-space:nowrap">{{ br.canal }}</span>
+            <span style="font-size:12px;color:#5C5C5C">{{ br.sub }}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px 24px">
+            <sc-for list="{{ br.figs }}" as="b" hint-placeholder-count="4">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <div style="font-size:12px;font-weight:500;color:#5C5C5C">{{ b.label }}</div>
+                <div style="font-size:26px;font-weight:600;letter-spacing:-0.02em;line-height:1.1">{{ b.value }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ br.tienePresu }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="position:relative;height:10px;border-radius:9999px;background:#F4F4F4;overflow:hidden">
+                <div style="position:absolute;left:0;top:0;bottom:0;width:{{ br.projBar }}%;background:#D5D5D5;border-radius:9999px"></div>
+                <div style="position:absolute;left:0;top:0;bottom:0;width:{{ br.gastBar }}%;background:#3C3C3C;border-radius:9999px"></div>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px 20px;font-size:12px;color:#5C5C5C">
+                <span style="display:flex;align-items:center;gap:6px"><span style="flex:none;width:10px;height:10px;border-radius:50%;background:#3C3C3C"></span><span>Gastado {{ br.gastPct }} %</span></span>
+                <span style="display:flex;align-items:center;gap:6px"><span style="flex:none;width:10px;height:10px;border-radius:50%;background:#D5D5D5"></span><span>Proyección al cierre {{ br.projPct }} % (ritmo de los últimos 7 días)</span></span>
+                <span>{{ br.diaTxt }}</span>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ br.hasAviso }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 16px;border-radius:16px;background:#F4F4F4;font-size:13px;line-height:1.5;font-weight:500"><span style="flex:none;margin-top:6px;width:8px;height:8px;border-radius:50%;background:#FCB942"></span>{{ br.aviso }}</div>
+          </sc-if>
+        </div>
+        </sc-for>
+        <sc-if value="{{ P.hasAviso }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 16px;border-radius:16px;background:#F4F4F4;font-size:13px;line-height:1.5;font-weight:500"><span style="flex:none;margin-top:6px;width:8px;height:8px;border-radius:50%;background:#FCB942"></span>{{ P.aviso }}</div>
+        </sc-if>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+          <sc-for list="{{ totals }}" as="t" hint-placeholder-count="4">
+            <div style="background:#F4F4F4;border-radius:20px;padding:16px 20px;display:flex;flex-direction:column;gap:2px">
+              <div style="font-size:24px;font-weight:600;letter-spacing:-0.02em">{{ t.value }}</div>
+              <div style="font-size:12px;font-weight:500;color:#5C5C5C">{{ t.label }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ P.hasCalidad }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;font-weight:500">
+            <span style="width:8px;height:8px;border-radius:50%;background:#F7444C"></span>
+            <span>{{ P.calidadAviso }}</span>
+            <button onClick="{{ openCalidad }}" style="border:0;background:none;padding:0;font:inherit;font-weight:600;color:#3C3C3C;cursor:pointer;text-decoration:underline;text-underline-offset:3px">Ver lista</button>
+          </div>
+        </sc-if>
+      </section>
+
+      <section style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <h2 style="margin:0;font-size:20px;font-weight:600">Panel general</h2>
+          <span style="font-size:12px;color:#5C5C5C">Primero las que tienen problemas, después por gasto de los últimos 7 días</span>
+        </div>
+        <div style="border:1px solid #E4E4E4;border-radius:24px;overflow:hidden">
+          <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(112px,1fr) minmax(104px,1fr) minmax(170px,1.2fr) 20px;gap:16px;padding:12px 24px;background:#F4F4F4;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">
+            <span>Campaña</span><span>Estado</span><span>Piso</span><span>Recomendaciones</span><span></span>
+          </div>
+          <sc-for list="{{ rows }}" as="c" hint-placeholder-count="6">
+            <button onClick="{{ c.open }}" style="width:100%;text-align:left;border:0;border-top:1px solid #E4E4E4;background:#fff;color:#3C3C3C;cursor:pointer;display:grid;grid-template-columns:minmax(0,2fr) minmax(112px,1fr) minmax(104px,1fr) minmax(170px,1.2fr) 20px;gap:16px;align-items:center;padding:16px 24px" style-hover="background:#FAFAFA">
+              <span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                <span style="font-size:15px;font-weight:600">{{ c.nombre }}</span>
+                <span style="font-size:12px;color:#5C5C5C">{{ c.eje }} · {{ c.canalTxt }}</span>
+              </span>
+              <span style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500"><span style="flex:none;width:8px;height:8px;border-radius:50%;background:{{ c.estC }}"></span><span style="white-space:nowrap">{{ c.estado }}</span></span>
+              <span style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500"><span style="flex:none;width:8px;height:8px;border-radius:50%;background:{{ c.pisoC }}"></span><span style="white-space:nowrap">{{ c.piso }}</span></span>
+              <span style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500">
+                <span style="min-width:26px;height:26px;padding:0 8px;border-radius:9999px;background:{{ c.recBg }};color:{{ c.recFg }};font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center">{{ c.pend }}</span>
+                <span style="font-size:12px;color:#5C5C5C;white-space:nowrap">{{ c.altaTxt }}</span>
+              </span>
+              <span style="font-size:16px;color:#5C5C5C">›</span>
+            </button>
+          </sc-for>
+          <sc-if value="{{ noRows }}" hint-placeholder-val="{{ false }}">
+            <div style="border-top:1px solid #E4E4E4;padding:32px 24px;font-size:14px;line-height:1.5;color:#5C5C5C">{{ emptyPanel }}</div>
+          </sc-if>
+        </div>
+      </section>
+
+      <section style="border:1px solid #E4E4E4;border-radius:24px">
+        <button onClick="{{ toggleCalidad }}" style="width:100%;border:0;background:none;padding:18px 24px;display:flex;align-items:center;gap:12px;cursor:pointer;color:#3C3C3C;text-align:left">
+          <span style="font-size:15px;font-weight:600">Calidad de datos del proyecto</span>
+          <span style="font-size:12px;color:#5C5C5C">{{ calidadCount }} observaciones · lo que no se pudo analizar por cómo está cargado</span>
+          <span style="margin-left:auto;font-size:13px;font-weight:600">{{ calidadToggle }}</span>
+        </button>
+        <sc-if value="{{ calidadOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:0 24px 20px;display:flex;flex-direction:column">
+            <sc-for list="{{ P.calidad }}" as="q" hint-placeholder-count="3">
+              <div style="display:flex;gap:10px;padding:12px 0;border-top:1px solid #E4E4E4;font-size:14px;line-height:1.5"><span style="flex:none;margin-top:7px;width:6px;height:6px;border-radius:50%;background:#A6AAA9"></span>{{ q }}</div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ showDetail }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <button onClick="{{ backToPanel }}" style="align-self:flex-start;border:0;background:none;padding:0;font-size:13px;font-weight:600;color:#3C3C3C;cursor:pointer;white-space:nowrap">← Panel general</button>
+        <div style="display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">{{ P.nombre }} · {{ D.eje }}</div>
+            <h1 style="margin:0;font-size:36px;line-height:1.05;font-weight:600;letter-spacing:-0.02em">{{ D.nombre }}</h1>
+          </div>
+          <div style="font-size:12px;color:#5C5C5C">Campaña de Meta: {{ D.metaCamp }}</div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:9999px;background:#F4F4F4;font-size:12px;font-weight:500;white-space:nowrap"><span style="width:8px;height:8px;border-radius:50%;background:{{ D.estC }}"></span>{{ D.estado }}</span>
+          <span style="display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:9999px;background:#F4F4F4;font-size:12px;font-weight:500;white-space:nowrap">{{ D.canalTxt }}</span>
+          <span style="display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:9999px;background:#F4F4F4;font-size:12px;font-weight:500;white-space:nowrap"><span>Objetivo: {{ D.objetivo }}</span></span>
+        </div>
+      </div>
+
+      <section style="background:#F4F4F4;border-radius:24px;padding:24px 28px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Resumen del agente</div>
+        <p style="margin:0;font-size:22px;line-height:1.4;font-weight:500;letter-spacing:-0.01em;text-wrap:pretty">{{ D.resumen }}</p>
+      </section>
+
+      <sc-if value="{{ D.hasKpi }}" hint-placeholder-val="{{ true }}">
+        <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
+          <div style="border:1px solid #E4E4E4;border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Resultado · últimos 7 días</div>
+            <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span style="font-size:36px;font-weight:600;letter-spacing:-0.025em;line-height:1">{{ K.resultado }}</span><span style="font-size:14px;color:#5C5C5C">{{ K.resUnit }}</span></div>
+            <div style="font-size:14px;font-weight:500">{{ K.costo }}</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500"><span style="width:8px;height:8px;border-radius:50%;background:{{ K.vecesC }}"></span>{{ K.vecesTxt }} veces la mediana</div>
+          </div>
+          <div style="border:1px solid #E4E4E4;border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Avance contra el piso</span><span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600"><span style="width:8px;height:8px;border-radius:50%;background:{{ D.pisoC }}"></span>{{ D.piso }}</span></div>
+            <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span style="font-size:36px;font-weight:600;letter-spacing:-0.025em;line-height:1">{{ K.pisoPct }} %</span><span style="font-size:14px;color:#5C5C5C">del esperado a la fecha</span></div>
+            <div style="position:relative;height:8px;border-radius:9999px;background:#F4F4F4">
+              <div style="position:absolute;left:0;top:0;bottom:0;width:{{ K.pisoBar }}%;border-radius:9999px;background:{{ D.pisoC }}"></div>
+              <div style="position:absolute;left:70%;top:-3px;bottom:-3px;width:2px;background:#A6AAA9"></div>
+            </div>
+            <div style="font-size:12px;line-height:1.5;color:#5C5C5C">{{ K.acum }} acumuladas contra {{ K.esp }} esperadas a la fecha. La marca indica el 70 %.</div>
+          </div>
+          <div style="border:1px solid #E4E4E4;border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Ritmo de gasto</span><span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600"><span style="width:8px;height:8px;border-radius:50%;background:{{ K.ritmoC }}"></span>{{ K.ritmo }}</span></div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:grid;grid-template-columns:64px 1fr 40px;gap:8px;align-items:center;font-size:12px"><span style="color:#5C5C5C">Gastado</span><span style="height:8px;border-radius:9999px;background:#F4F4F4;position:relative;overflow:hidden"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ K.gastPct }}%;background:#3C3C3C;border-radius:9999px"></span></span><span style="font-weight:600;text-align:right">{{ K.gastPct }} %</span></div>
+              <div style="display:grid;grid-template-columns:64px 1fr 40px;gap:8px;align-items:center;font-size:12px"><span style="color:#5C5C5C">Plazo</span><span style="height:8px;border-radius:9999px;background:#F4F4F4;position:relative;overflow:hidden"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ K.plazoPct }}%;background:#A6AAA9;border-radius:9999px"></span></span><span style="font-weight:600;text-align:right">{{ K.plazoPct }} %</span></div>
+            </div>
+            <div style="font-size:13px;line-height:1.5;font-weight:500">{{ K.proyeccion }}</div>
+          </div>
+          <div style="border:1px solid #E4E4E4;border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Presupuesto</div>
+            <sc-for list="{{ K.presu }}" as="p" hint-placeholder-count="4">
+              <div style="display:flex;justify-content:space-between;gap:12px;font-size:14px;padding-bottom:8px;border-bottom:1px solid #E4E4E4"><span style="color:#5C5C5C;white-space:nowrap">{{ p.label }}</span><span style="font-weight:600">{{ p.value }}</span></div>
+            </sc-for>
+          </div>
+        </section>
+
+        <section style="display:flex;flex-wrap:wrap;gap:16px">
+          <div style="flex:2 1 520px;min-width:0;border:1px solid #E4E4E4;border-radius:24px;padding:22px 24px;display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+              <div style="display:flex;flex-direction:column;gap:2px">
+                <h2 style="margin:0;font-size:18px;font-weight:600">Evolución en el tiempo</h2>
+                <span style="font-size:12px;color:#5C5C5C">{{ chart.sub }}</span>
+              </div>
+              <div style="display:flex;padding:3px;border-radius:9999px;background:#F4F4F4;gap:2px">
+                <sc-for list="{{ chart.opts }}" as="o" hint-placeholder-count="2">
+                  <button onClick="{{ o.onClick }}" style="height:30px;padding:0 14px;border-radius:9999px;border:0;background:{{ o.bg }};color:{{ o.fg }};font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap">{{ o.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+            <div style="position:relative;height:220px;margin-top:18px">
+              <div style="position:absolute;inset:0;display:flex;align-items:flex-end;gap:3px">
+                <sc-for list="{{ chart.bars }}" as="b" hint-placeholder-count="17">
+                  <div title="{{ b.tip }}" style="flex:1 1 0;min-width:0;height:100%;position:relative;display:flex;align-items:flex-end">
+                    <div style="width:100%;height:{{ b.h }}%;background:#5C5C5C;border-radius:4px 4px 0 0"></div>
+                    <sc-if value="{{ b.mk }}" hint-placeholder-val="{{ false }}">
+                      <div style="position:absolute;left:50%;top:-18px;bottom:0;width:0;border-left:2px dashed #3C3C3C"></div>
+                      <div style="position:absolute;left:50%;top:-26px;transform:translateX(-50%);height:20px;padding:0 8px;border-radius:9999px;background:#3C3C3C;color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;white-space:nowrap">{{ b.d }} · cambio</div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="position:absolute;left:0;right:0;bottom:{{ chart.medPct }}%;border-top:2px dashed #F7444C"></div>
+              <div style="position:absolute;left:0;bottom:{{ chart.medPct }}%;margin-bottom:4px;white-space:nowrap;padding:2px 8px;border-radius:9999px;background:#fff;border:1px solid #F7444C;font-size:11px;font-weight:600;color:#3C3C3C">Mediana benchmark · {{ chart.medTxt }}</div>
+            </div>
+            <div style="display:flex;gap:3px">
+              <sc-for list="{{ chart.bars }}" as="b" hint-placeholder-count="17">
+                <div style="flex:1 1 0;min-width:0;font-size:10px;color:#5C5C5C;text-align:center;white-space:nowrap;overflow:visible">{{ b.lab }}</div>
+              </sc-for>
+            </div>
+            <sc-if value="{{ chart.hasMk }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 16px;border-radius:16px;background:#F4F4F4;font-size:13px;line-height:1.5"><span style="flex:none;margin-top:4px;width:10px;height:10px;border:2px dashed #3C3C3C;border-radius:50%"></span>{{ chart.mkText }}</div>
+            </sc-if>
+          </div>
+
+          <div style="flex:1 1 300px;min-width:0;border:1px solid #E4E4E4;border-radius:24px;padding:22px 24px;display:flex;flex-direction:column;gap:14px">
+            <h2 style="margin:0;font-size:18px;font-weight:600">Relación con el benchmark</h2>
+            <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span style="font-size:44px;font-weight:600;letter-spacing:-0.025em;line-height:1">{{ B.vecesTxt }}</span><span style="font-size:14px;color:#5C5C5C">veces la mediana</span></div>
+            <div style="position:relative;height:36px;margin-top:4px">
+              <div style="position:absolute;left:0;right:0;top:14px;height:8px;border-radius:9999px;background:#F4F4F4"></div>
+              <div style="position:absolute;left:33.33%;top:6px;height:24px;width:2px;background:#3C3C3C"></div>
+              <div style="position:absolute;left:{{ B.pos }}%;top:9px;width:18px;height:18px;margin-left:-9px;border-radius:50%;background:{{ B.c }};border:3px solid #fff"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#5C5C5C;margin-top:-6px"><span>0</span><span style="margin-left:22%">1 · mediana</span><span>3 o más</span></div>
+            <div style="font-size:13px;line-height:1.5">{{ B.metrica }}</div>
+            <div style="font-size:12px;line-height:1.5;color:#5C5C5C;padding-top:12px;border-top:1px solid #E4E4E4">Comparable: {{ B.comparable }}. Es el mismo dato que sostiene el piso simulado y el “por qué” de las recomendaciones.</div>
+          </div>
+        </section>
+
+        <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px">
+          <sc-for list="{{ rankings }}" as="rk" hint-placeholder-count="2">
+            <div style="border:1px solid #E4E4E4;border-radius:24px;padding:22px 24px;display:flex;flex-direction:column;gap:12px;min-width:0">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap">
+                <h2 style="margin:0;font-size:18px;line-height:1.3;font-weight:600">{{ rk.title }}</h2>
+                <button onClick="{{ rk.toggle }}" style="border:0;background:none;padding:0;font-size:13px;font-weight:600;color:#3C3C3C;cursor:pointer;text-decoration:underline;text-underline-offset:3px;white-space:nowrap;flex:none">{{ rk.toggleLabel }}</button>
+              </div>
+              <div style="font-size:12px;color:#5C5C5C">{{ rk.sub }}</div>
+              <sc-for list="{{ rk.cols }}" as="col" hint-placeholder-count="2">
+                <div style="display:flex;flex-direction:column">
+                  <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C;padding:8px 0">{{ col.title }}</div>
+                  <sc-for list="{{ col.items }}" as="x" hint-placeholder-count="3">
+                    <div style="display:grid;grid-template-columns:minmax(0,1fr) 96px;gap:6px 16px;padding:12px 0;border-top:1px solid #E4E4E4">
+                      <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                        <span style="font-size:14px;font-weight:600;line-height:1.35">{{ x.nombre }}</span>
+                        <span style="font-size:12px;color:#5C5C5C;line-height:1.4">{{ x.sub }}</span>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+                        <span style="font-size:15px;font-weight:600">{{ x.vecesTxt }}×</span>
+                        <span style="position:relative;width:96px;height:6px;border-radius:9999px;background:#F4F4F4"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ x.bar }}%;border-radius:9999px;background:{{ x.c }}"></span><span style="position:absolute;left:33.33%;top:-3px;bottom:-3px;width:2px;background:#3C3C3C"></span></span>
+                      </div>
+                      <div style="grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:#5C5C5C">
+                        <sc-for list="{{ x.meta }}" as="m" hint-placeholder-count="3"><span style="white-space:nowrap">{{ m }}</span></sc-for>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </section>
+
+        <sc-if value="{{ D.hasInsights }}" hint-placeholder-val="{{ true }}">
+          <section style="display:flex;flex-direction:column;gap:12px">
+            <h2 style="margin:0;font-size:18px;font-weight:600">Insights</h2>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
+              <sc-for list="{{ D.insights }}" as="i" hint-placeholder-count="4">
+                <div style="background:#F4F4F4;border-radius:24px;padding:20px 22px;display:flex;flex-direction:column;gap:10px">
+                  <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">{{ i.tag }}</div>
+                  <p style="margin:0;font-size:14px;line-height:1.5;font-weight:500;text-wrap:pretty">{{ i.texto }}</p>
+                  <sc-if value="{{ i.hasRows }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-direction:column;background:#fff;border-radius:14px;padding:6px 14px">
+                      <div style="display:grid;grid-template-columns:1.2fr 1fr 0.8fr 0.8fr;gap:8px;padding:6px 0;font-size:11px;color:#5C5C5C"><span>Canal</span><span>Gasto</span><span>CPM</span><span>Reac./mil</span></div>
+                      <sc-for list="{{ i.rows }}" as="row" hint-placeholder-count="2">
+                        <div style="display:grid;grid-template-columns:1.2fr 1fr 0.8fr 0.8fr;gap:8px;padding:6px 0;border-top:1px solid #E4E4E4;font-size:12px;font-weight:500"><span>{{ row.a }}</span><span>{{ row.b }}</span><span>{{ row.c }}</span><span>{{ row.d }}</span></div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ i.hasNota }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#5C5C5C">{{ i.nota }}</div></sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </sc-if>
+      </sc-if>
+
+      <section style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <h2 style="margin:0;font-size:18px;font-weight:600">Recomendaciones de esta campaña</h2>
+          <span style="font-size:12px;color:#5C5C5C">Las mismas que en la pestaña Recomendaciones: decidir acá o allá actualiza lo mismo</span>
+        </div>
+        <sc-for list="{{ campRecs }}" as="r" hint-placeholder-count="2">
+          <dc-import name="RecoCard" rec="{{ r }}" decision="{{ r.decision }}" show-campaign="{{ false }}" on-decide="{{ decide }}" on-undo="{{ undo }}" on-done="{{ markDone }}" on-open-camp="{{ openCamp }}" hint-size="100%,420px"></dc-import>
+        </sc-for>
+        <sc-if value="{{ noCampRecs }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:24px;border-radius:24px;background:#F4F4F4;font-size:14px;color:#5C5C5C">Sin recomendaciones para esta campaña.</div>
+        </sc-if>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ showRecs }}" hint-placeholder-val="{{ false }}">
+      <section style="display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">{{ P.nombre }} · todas las campañas</div>
+          <h1 style="margin:0;font-size:32px;line-height:1.1;font-weight:600;letter-spacing:-0.02em">¿Qué hay que cambiar hoy?</h1>
+          <div style="font-size:14px;font-weight:500">{{ counter }}</div>
+        </div>
+        <sc-if value="{{ showSilenced }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;padding:14px 18px;border-radius:16px;background:#F4F4F4">
+            <span style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Aprendizaje</span>
+            <span style="flex:1 1 320px;font-size:13px;line-height:1.5;font-weight:500">{{ silencedText }}</span>
+            <button onClick="{{ unsilence }}" style="height:34px;padding:0 16px;border-radius:9999px;border:1.5px solid #3C3C3C;background:#fff;color:#3C3C3C;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex:none">Volver a mostrar</button>
+          </div>
+        </sc-if>
+        <div style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;padding-bottom:16px;border-bottom:1px solid #E4E4E4">
+          <button onClick="{{ toggleSolo }}" style="height:36px;padding:0 14px 0 6px;border-radius:9999px;border:1px solid #D5D5D5;background:#fff;color:#3C3C3C;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none">
+            <span style="width:36px;height:24px;border-radius:9999px;background:{{ soloBg }};position:relative;display:inline-block"><span style="position:absolute;top:3px;left:{{ soloKnob }}px;width:18px;height:18px;border-radius:50%;background:#fff"></span></span>
+            Solo pendientes
+          </button>
+          <sc-for list="{{ recSelects }}" as="f" hint-placeholder-count="3">
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5C5C5C">{{ f.label }}
+              <select value="{{ f.value }}" onChange="{{ f.onChange }}" style="height:36px;border:1px solid #D5D5D5;border-radius:9999px;padding:0 12px;font-size:13px;font-weight:500;background:#fff;color:#3C3C3C">
+                <sc-for list="{{ f.opts }}" as="o" hint-placeholder-count="4"><option value="{{ o }}">{{ o }}</option></sc-for>
+              </select>
+            </label>
+          </sc-for>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:#5C5C5C">Agrupar
+            <div style="display:flex;padding:3px;border-radius:9999px;background:#F4F4F4;gap:2px">
+              <sc-for list="{{ groupOpts }}" as="o" hint-placeholder-count="3">
+                <button onClick="{{ o.onClick }}" style="height:30px;padding:0 14px;border-radius:9999px;border:0;background:{{ o.bg }};color:{{ o.fg }};font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap">{{ o.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <sc-for list="{{ recGroups }}" as="g" hint-placeholder-count="1">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <sc-if value="{{ g.hasTitle }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:baseline;gap:10px;padding-top:8px"><h2 style="margin:0;font-size:18px;font-weight:600">{{ g.title }}</h2><span style="font-size:12px;color:#5C5C5C">{{ g.countTxt }}</span></div>
+            </sc-if>
+            <sc-for list="{{ g.recs }}" as="r" hint-placeholder-count="3">
+              <dc-import name="RecoCard" rec="{{ r }}" decision="{{ r.decision }}" show-campaign="{{ true }}" on-decide="{{ decide }}" on-undo="{{ undo }}" on-done="{{ markDone }}" on-open-camp="{{ openCamp }}" hint-size="100%,420px"></dc-import>
+            </sc-for>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noRecs }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:32px;border-radius:24px;background:#F4F4F4;font-size:14px;color:#5C5C5C">No hay recomendaciones con estos filtros.</div>
+        </sc-if>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ showHist }}" hint-placeholder-val="{{ false }}">
+      <section style="display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Todas las decisiones · de la más nueva a la más vieja</div>
+            <h1 style="margin:0;font-size:32px;line-height:1.1;font-weight:600;letter-spacing:-0.02em">Historial</h1>
+          </div>
+          <button onClick="{{ exportCsv }}" style="height:38px;padding:0 20px;border-radius:9999px;border:0;background:#3C3C3C;color:#fff;font-size:13px;font-weight:600;cursor:pointer" style-hover="opacity:0.9">Exportar CSV</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;padding-bottom:16px;border-bottom:1px solid #E4E4E4">
+          <sc-for list="{{ histSelects }}" as="f" hint-placeholder-count="3">
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5C5C5C">{{ f.label }}
+              <select value="{{ f.value }}" onChange="{{ f.onChange }}" style="height:36px;border:1px solid #D5D5D5;border-radius:9999px;padding:0 12px;font-size:13px;font-weight:500;background:#fff;color:#3C3C3C">
+                <sc-for list="{{ f.opts }}" as="o" hint-placeholder-count="4"><option value="{{ o }}">{{ o }}</option></sc-for>
+              </select>
+            </label>
+          </sc-for>
+          <span style="margin-left:auto;font-size:12px;color:#5C5C5C">{{ histCount }}</span>
+        </div>
+        <div style="border:1px solid #E4E4E4;border-radius:24px;overflow-x:auto">
+          <div style="min-width:1100px;font-size:13px">
+            <div style="display:grid;grid-template-columns:80px 90px minmax(220px,1.4fr) 130px minmax(220px,1.3fr) 160px minmax(200px,1fr);background:#F4F4F4"><div style="padding:12px 16px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Fecha</div><div style="padding:12px 16px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Quién</div><div style="padding:12px 16px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Campaña · contenido</div><div style="padding:12px 16px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Cambio</div><div style="padding:12px 16px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Decisión</div><div style="padding:12px 16px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Aplicación</div><div style="padding:12px 16px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Resultado a 7 días</div></div>
+            <sc-for list="{{ histRows }}" as="hr" hint-placeholder-count="7">
+              <div style="display:grid;grid-template-columns:80px 90px minmax(220px,1.4fr) 130px minmax(220px,1.3fr) 160px minmax(200px,1fr);border-top:1px solid #E4E4E4;align-items:start">
+                <div style="padding:14px 16px;white-space:nowrap;font-weight:500">{{ hr.fecha }}</div>
+                <div style="padding:14px 16px;white-space:nowrap">{{ hr.quien }}</div>
+                <div style="padding:14px 16px"><div style="font-weight:600">{{ hr.camp }}</div><div style="color:#5C5C5C;font-size:12px">{{ hr.contenido }} · {{ hr.canal }} · {{ hr.proyecto }}</div></div>
+                <div style="padding:14px 16px">{{ hr.tipo }}</div>
+                <div style="padding:14px 16px"><div style="display:flex;align-items:center;gap:6px;font-weight:600"><span style="flex:none;width:8px;height:8px;border-radius:50%;background:{{ hr.decC }}"></span>{{ hr.dec }}</div><sc-if value="{{ hr.hasJust }}" hint-placeholder-val="{{ false }}"><div style="color:#5C5C5C;font-size:12px;line-height:1.5;margin-top:2px">{{ hr.just }}</div></sc-if></div>
+                <div style="padding:14px 16px">{{ hr.aplic }}</div>
+                <div style="padding:14px 16px"><div style="font-weight:500">{{ hr.res }}</div><sc-if value="{{ hr.hasLect }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#5C5C5C;margin-top:2px"><span style="width:8px;height:8px;border-radius:50%;background:{{ hr.lectC }}"></span>{{ hr.lect }}</div></sc-if></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+  </main>
+
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);display:flex;align-items:center;gap:16px;padding:12px 14px 12px 20px;border-radius:9999px;background:#3C3C3C;color:#fff;font-size:13px;font-weight:500;z-index:10">
+      <span>{{ toastText }}</span>
+      <button onClick="{{ toastUndo }}" style="height:30px;padding:0 14px;border-radius:9999px;border:1.5px solid #fff;background:none;color:#fff;font-size:12px;font-weight:600;cursor:pointer">Deshacer</button>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+// Lógica de la pantalla raíz (se inyecta en public/index.html con build-index.js).
+// Misma derivación que el prototipo de Claude Design, pero los datos vienen del API del módulo.
+const EST_C = { 'Activa': '#46C678', 'Por vencer': '#FCB942', 'Sin entrega': '#F7444C', 'Agotada': '#A6AAA9', 'Programada': '#D5D5D5' };
+const PISO_C = { 'En camino': '#46C678', 'En riesgo': '#FCB942', 'No llega': '#F7444C', '—': '#D5D5D5' };
+const RITMO_C = { 'En ritmo': '#46C678', 'Subejecutada': '#FCB942', 'Sobreejecutada': '#F7444C' };
+const vc = v => v >= 1 ? '#46C678' : v >= 0.5 ? '#FCB942' : '#F7444C';
+const fx = v => (v == null ? '—' : (v < 0.1 ? v.toFixed(2) : v.toFixed(1)).replace('.', ','));
+const money = n => '$' + Math.round(n || 0).toLocaleString('es-AR');
+const DEC = { aceptada: 'Aceptada e incorporada', noinc: 'Aceptada, no incorporada', resp: 'Respondida', decl: 'Declinada' };
+const DEC_C = { 'Aceptada e incorporada': '#46C678', 'Aceptada, no incorporada': '#FCB942', 'Respondida': '#A6AAA9', 'Declinada': '#F7444C' };
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const api = (url, opts) => fetch(url, opts).then(r => r.json());
+const fechaCorta = iso => iso ? `${iso.slice(8, 10)}/${iso.slice(5, 7)}` : '—';
+const horaDe = ts => ts ? String(ts).slice(11, 16) : '—';
+
+function buildChart(c, metric, marcas) {
+  const s = c.serie;
+  if (!s || !s.dias || !s.dias.length) return { bars: [], medPct: 0, medTxt: '—', unitLabel: '', mkText: '' };
+  const isRes = metric === 'res';
+  const vals = s.dias.map(x => (isRes ? x.res : x.cost) || 0);
+  const med = isRes ? s.medRes : s.medCost;
+  const max = Math.max(med || 0, ...vals) * 1.12 || 1;
+  const fmt = v => isRes ? Math.round(v).toLocaleString('es-AR') : money(v);
+  const marcasMap = new Map((marcas || []).map(m => [m.fecha, m.texto]));
+  const n = s.dias.length;
+  const conLabel = i => i === n - 1 || (i % 4 === 0 && i < n - 2);
+  const bars = s.dias.map((x, i) => ({ h: (vals[i] / max * 100).toFixed(1), d: x.d, lab: conLabel(i) ? x.d : '', mk: marcasMap.has(x.fecha), tip: x.d + ' · ' + (vals[i] ? fmt(vals[i]) : 'sin entrega') }));
+  const resLabel = s.unit.res.charAt(0).toUpperCase() + s.unit.res.slice(1) + ' por día';
+  const costLabel = s.unit.costo === 'CPM' ? 'CPM' : 'Costo ' + s.unit.costo;
+  return { bars, medPct: med ? (med / max * 100).toFixed(1) : 0, medTxt: med ? fmt(med) + (isRes ? ' por día' : '') : 'sin comparable', unitLabel: isRes ? resLabel : costLabel, resLabel, costLabel, mkText: [...marcasMap.values()].join(' · ') };
+}
+
+class Component extends DCLogic {
+  state = { tab: 'seg', proyecto: null, proyectos: [], data: null, cargando: true, error: '', canal: 'Ambos', eje: 'Todos', campId: null, metric: 'res', allCont: false, allAud: false, calidadOpen: false,
+    decisions: {}, soloPend: true, fTipo: 'Todos', fVia: 'Todas', fConf: 'Todas', agrupar: 'Ninguno', unsilenced: false, refreshing: false, hImpl: 'Todos', hDec: 'Todas', hTipo: 'Todos', toast: null };
+
+  componentDidMount() { this.cargarProyectos(); }
+  componentWillUnmount() { clearTimeout(this._tt); }
+
+  async cargarProyectos() {
+    try {
+      const ps = await api('/api/proyectos');
+      this.setState({ proyectos: ps });
+      if (ps.length) this.cargar(ps[0].id);
+    } catch (e) { this.setState({ error: 'No se pudo conectar con el servidor del módulo.', cargando: false }); }
+  }
+
+  async cargar(id, forzar) {
+    this.setState({ cargando: true, refreshing: !!forzar, error: '', pedidos: null });
+    this.cargarPedidos(id, forzar);
+    try {
+      const d = await api(`/api/datos?proyecto=${encodeURIComponent(id)}${forzar ? '&forzar=1' : ''}`);
+      if (d.error) throw new Error(d.error);
+      this.setState({ proyecto: id, data: d, decisions: d.decisiones || {}, cargando: false, refreshing: false, campId: null, eje: 'Todos' });
+    } catch (e) { this.setState({ error: e.message, cargando: false, refreshing: false }); }
+  }
+
+  async cargarPedidos(id, forzar, periodo) {
+    try {
+      const per = periodo || this.state.periodoAct || '';
+      const p = await api(`/api/activos?proyecto=${encodeURIComponent(id)}${forzar ? '&forzar=1' : ''}${per ? '&periodo=' + per : ''}`);
+      if (!p.error) this.setState({ pedidos: p });
+    } catch (e) { /* la sección de pedidos no se muestra */ }
+  }
+
+  async refrescarHist() {
+    try {
+      const d = await api(`/api/datos?proyecto=${encodeURIComponent(this.state.proyecto)}`);
+      if (!d.error) this.setState({ data: d });
+    } catch (e) { /* la próxima carga lo trae */ }
+  }
+
+  toast(id, text) { this.setState({ toast: { id, text } }); clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: null }), 5000); }
+
+  decide = async (id, d) => {
+    const rec = (this.state.data.recs || []).find(r => r.id === id);
+    const r = await api('/api/decisiones', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, ...d, proyecto: this.state.proyecto, quien: 'Juan', foto: rec }) });
+    if (r.error) return this.toast(null, r.error);
+    this.setState(s => ({ decisions: { ...s.decisions, [id]: r.decision } }));
+    this.toast(id, 'Decisión registrada: ' + DEC[d.tipo]);
+    this.refrescarHist();
+  };
+  undo = async id => {
+    await fetch('/api/decisiones/' + id, { method: 'DELETE' });
+    this.setState(s => { const n = { ...s.decisions }; delete n[id]; return { decisions: n, toast: null }; });
+    this.refrescarHist();
+  };
+  markDone = async id => {
+    await fetch(`/api/decisiones/${id}/hecho`, { method: 'POST' });
+    this.setState(s => ({ decisions: { ...s.decisions, [id]: { ...s.decisions[id], hecho: true } } }));
+    this.refrescarHist();
+  };
+  openCamp = id => { this.setState({ tab: 'seg', campId: id, allCont: false, allAud: false }); window.scrollTo(0, 0); };
+
+  seg(opts, cur, key) {
+    return opts.map(o => ({ label: o, bg: cur === o ? '#3C3C3C' : 'transparent', fg: cur === o ? '#fff' : '#3C3C3C', onClick: () => this.setState({ [key]: o }) }));
+  }
+
+  exportCsv(rows) {
+    const cols = ['fecha', 'quien', 'proyecto', 'canal', 'camp', 'contenido', 'tipo', 'dec', 'just', 'aplic', 'res', 'lect'];
+    const csv = [cols.join(';')].concat(rows.map(r => cols.map(k => '"' + String(r[k] || '').replace(/"/g, '""') + '"').join(';'))).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv' }));
+    a.download = 'historial-seguimiento.csv'; a.click();
+  }
+
+  renderVals() {
+    const s = this.state;
+    const data = s.data || { P: { nombre: '', presu: 0, gast: 0, proj: 0, aviso: '', conjuntos: 0, calidadAviso: '', calidad: [], diaMes: 0, diasMes: 0 }, campanas: [], recs: [], hist: [], ejes: [], avisosSilencio: [], frescura: {} };
+    const P0 = data.P;
+    const decs = s.decisions;
+    const CAMPS = data.campanas, RECS = data.recs;
+    const campById = Object.fromEntries(CAMPS.map(c => [c.id, c]));
+    const inFilter = c => c && (s.canal === 'Ambos' || c.canales.includes(s.canal)) && (s.eje === 'Todos' || c.eje === s.eje);
+    const recsAll = RECS.filter(r => !r.silenced || s.unsilenced).filter(r => inFilter(campById[r.camp]));
+    const isPend = r => !decs[r.id];
+    const enrich = r => { const c = campById[r.camp] || {}; return { ...r, campNombre: c.nombre, eje: c.eje, decision: decs[r.id] || null }; };
+    const pendAll = recsAll.filter(isPend);
+
+    const camps = CAMPS.filter(inFilter);
+    const problem = c => c.piso === 'No llega' || c.piso === 'En riesgo' || c.estado === 'Sin entrega';
+    const rows = camps.slice().sort((a, b) => (problem(b) - problem(a)) || (b.gasto7 - a.gasto7)).map(c => {
+      const pr = pendAll.filter(r => r.camp === c.id);
+      const alta = pr.filter(r => r.prioridad === 'Alta').length;
+      return { ...c, canalTxt: c.canales.join(' e '), estC: EST_C[c.estado] || '#D5D5D5', pisoC: PISO_C[c.piso] || '#D5D5D5', pend: pr.length,
+        recBg: alta ? '#F7444C' : '#F4F4F4', recFg: alta ? '#fff' : '#3C3C3C', altaTxt: alta ? `${alta} de prioridad alta` : pr.length ? 'pendientes' : 'sin pendientes',
+        open: () => this.openCamp(c.id) };
+    });
+
+    const hoy = new Date();
+    const P = { ...P0, hasAviso: !!P0.aviso, hasCalidad: (P0.calidad || []).length > 0, mesTxt: `${MESES[hoy.getMonth()]} ${hoy.getFullYear()}` };
+    // presupuesto: una tarjeta por canal; con el filtro de canal se muestra solo ese
+    const canalesVis = (P0.presupuestos || []).filter(b => s.canal === 'Ambos' || b.canal === s.canal);
+    const budgetRows = canalesVis.map(b => {
+      const base = b.tienePresu ? b.gastConPresu : b.gast;
+      const gastPct = b.presu > 0 ? Math.round(b.gastConPresu / b.presu * 100) : 0;
+      const projPct = b.presu > 0 ? Math.round(b.projConPresu / b.presu * 100) : 0;
+      const proyectos = (b.proyectos || []).filter(x => x.presu > 0 || x.gast > 0);
+      const sub = proyectos.length > 1
+        ? proyectos.map(x => `${x.nombre}: ${x.presu > 0 ? money(x.presu) : 'sin presupuesto'}`).join(' · ')
+        : `Datos hasta ${fechaCorta(b.datosHasta)}`;
+      return {
+        canal: b.canal, sub, tienePresu: b.tienePresu,
+        figs: [
+          { label: 'Presupuesto mensual', value: b.tienePresu ? money(b.presu) : 'sin dato' },
+          { label: 'Gastado en el mes', value: money(b.gast) },
+          { label: 'Restante del mes', value: b.tienePresu ? money(Math.max(0, b.presu - base)) : '—' },
+          { label: 'Proyección al cierre', value: money(b.proj) },
+        ],
+        gastPct, projPct, gastBar: Math.min(100, gastPct), projBar: Math.min(100, projPct),
+        diaTxt: `Datos hasta el día ${b.diaDatos} de ${b.diasMes}`,
+        hasAviso: !!b.aviso, aviso: b.aviso,
+      };
+    });
+
+    // salud y presupuesto de cada activo (planilla de pedidos vs DataJunta)
+    const MM = n => (n < 0 ? '-' : '') + '$' + (Math.abs(n || 0) / 1e6).toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' M';
+    const pctTxt = x => x == null ? '—' : Math.round(x * 100) + ' %';
+    const EST_ACT = { 'Gasto sin pedido': '#F7444C', 'Por encima de lo pedido': '#F7444C', 'Se agota antes de fin de mes': '#FCB942', 'Sin gasto reciente': '#FCB942', 'No gastó': '#FCB942', 'Va a sobrar': '#A6AAA9', 'Sobró': '#A6AAA9', 'En ritmo': '#46C678', 'Ejecutado': '#46C678' };
+    const ORDEN_EST = Object.keys(EST_ACT);
+    const pa = s.pedidos;
+    const SA = { visible: !!pa && (pa.activos || []).length > 0, chips: [], filas: [] };
+    if (pa) {
+      const xs = pa.activos.filter(u => s.canal === 'Ambos' || u.canal === s.canal);
+      const cuenta = {}; for (const u of xs) cuenta[u.mes.estado] = (cuenta[u.mes.estado] || 0) + 1;
+      SA.chips = [{ label: `Todos (${xs.length})`, estado: null }].concat(ORDEN_EST.filter(e => cuenta[e]).map(e => ({ label: `${e} (${cuenta[e]})`, estado: e })))
+        .map(ch => { const on = (s.fEstAct || null) === ch.estado; return { ...ch, c: ch.estado ? EST_ACT[ch.estado] : '#3C3C3C', bg: on ? '#F4F4F4' : '#fff', bc: on ? '#3C3C3C' : '#D5D5D5', onClick: () => this.setState({ fEstAct: ch.estado, verTodosAct: true }) }; });
+      const filtrados = s.fEstAct ? xs.filter(u => u.mes.estado === s.fEstAct) : xs;
+      const fecha = iso => iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) : '';
+      const nota = m => {
+        if (m.estado === 'Gasto sin pedido') return `Gastó ${MM(m.gastado)} sin nada pedido en la planilla este mes.`;
+        if (m.estado === 'Por encima de lo pedido') return `Va ${MM(m.gastado - m.pedido)} por encima de lo pedido.`;
+        if (m.estado === 'Se agota antes de fin de mes') return `Al ritmo de ${MM(m.diario * 7)} por semana se agota el ${fecha(m.agota)}.`;
+        if (m.estado === 'Sin gasto reciente') return m.gastado ? `No gasta desde el ${fecha(m.ultimoGasto)}: quedan ${MM(m.restante)} parados.` : `Tiene ${MM(m.pedido)} pedidos y no gastó nada este mes.`;
+        if (m.estado === 'No gastó') return `Tenía ${MM(m.pedido)} pedidos y no gastó nada en el mes.`;
+        if (m.estado === 'Sobró') return `Sobraron ${MM(m.restante)} (${pctTxt(1 - m.pctEjec)} de lo pedido)${m.diasSinGasto >= 3 ? `; dejó de gastar el ${fecha(m.ultimoGasto)}` : ''}.`;
+        if (m.estado === 'Ejecutado') return `Usó el ${pctTxt(m.pctEjec)} de lo pedido.`;
+        if (m.estado === 'Va a sobrar') return `Al ritmo actual cierra en ${MM(m.proy)}: sobrarían ${MM(m.pedido - m.proy)}.`;
+        return `Cierra en ${MM(m.proy)} al ritmo actual.`;
+      };
+      const otroMes = x => { const o = (x.resumenMeses || []).find(r => r.periodo !== pa.periodo); return o && (o.pedido || o.gastado) ? `(${MESES[Number(o.periodo.slice(5, 7)) - 1]}: ${o.estado.toLowerCase()}, ${MM(o.gastado)} de ${MM(o.pedido)})` : ''; };
+      const vis = (s.verTodosAct || s.fEstAct) ? filtrados : filtrados.filter(u => u.mes.nivel > 0).slice(0, 12);
+      SA.filas = vis.map(u => {
+        const m = u.mes;
+        return { estado: m.estado, c: EST_ACT[m.estado] || '#D5D5D5', nombre: u.nombre,
+          sub: `${u.plataforma} · ${u.canal}${u.cuentas.length ? ' · cuenta ' + u.cuentas.join(', ') : ''}${u.agrupada ? ' · agrupada' : ''}${m.pendiente ? ' · ' + MM(m.pendiente) + ' pendientes de aplicar' : ''}`,
+          pedido: m.pedido ? MM(m.pedido) : 'sin pedido', gastado: MM(m.gastado), restante: m.pedido ? MM(m.restante) : '—', rc: m.restante < 0 ? '#E9121C' : '#3C3C3C',
+          bar: Math.min(100, Math.round((m.pctEjec || (m.gastado ? 1 : 0)) * 100)), mes: Math.round((m.pctMes || 0) * 100),
+          ejec: m.pedido ? (m.cerrado ? `${pctTxt(m.pctEjec)} del pedido` : `${pctTxt(m.pctEjec)} con ${pctTxt(m.pctMes)} del mes`) : '—', nota: nota(m) + (otroMes(u) ? ' ' + otroMes(u) : '') };
+      });
+      SA.hayMas = filtrados.length > vis.length || !!s.verTodosAct;
+      SA.toggleLabel = s.verTodosAct ? 'Mostrar solo los que necesitan atención' : `Ver todos los activos (${filtrados.length})`;
+      SA.toggle = () => this.setState({ verTodosAct: !s.verTodosAct, fEstAct: null });
+      const mesTxt = MESES[Number(pa.periodo.slice(5, 7)) - 1];
+      const cerrado = pa.diaDatos && pa.diaDatos >= pa.diasMes;
+      SA.sub = `Presupuesto pedido en la planilla contra el gasto de DataJunta, por cuenta publicitaria · ${mesTxt}${cerrado ? ' (mes cerrado)' : ` · datos hasta el día ${pa.diaDatos || '—'} de ${pa.diasMes || '—'}`}`;
+      SA.meses = (pa.periodos || []).map(p => ({ label: MESES[Number(p.slice(5, 7)) - 1].replace(/^./, c => c.toUpperCase()), bg: p === pa.periodo ? '#3C3C3C' : 'transparent', fg: p === pa.periodo ? '#fff' : '#3C3C3C', onClick: () => { this.setState({ periodoAct: p, fEstAct: null }); this.cargarPedidos(s.proyecto, false, p); } }));
+      SA.totales = pa.porCanal.filter(k => (s.canal === 'Ambos' || k.canal === s.canal) && (k.pedido || k.gastado)).map(k => `${k.canal}: ${MM(k.pedido)} pedidos · ${MM(k.gastado)} gastados · quedan ${MM(k.restante)}`).join('   ·   ');
+      SA.pie = 'Unión cuenta ↔ activo: Meta y DV360 por número de cuenta; Google, TikTok y el resto por código de proyecto y grupo. Las cuentas que no se pueden identificar aparecen como "Cuenta N" y se pueden asignar a mano en presupuestos/cuentas_manual.json.';
+    }
+
+    // detalle
+    const c = s.campId ? campById[s.campId] : null;
+    let D = {}, K = {}, B = {}, chart = { bars: [], opts: [] }, rankings = [], campRecs = [];
+    if (c) {
+      D = { ...c, canalTxt: c.canales.join(' e '), estC: EST_C[c.estado] || '#D5D5D5', pisoC: PISO_C[c.piso] || '#D5D5D5', hasKpi: !!c.kpi,
+        hasInsights: (c.insights || []).length > 0,
+        insights: (c.insights || []).map(i => ({ ...i, hasRows: !!i.rows, rows: (i.rows || []).map(r => ({ a: r[0], b: r[1], c: r[2], d: r[3] })), hasNota: !!i.nota })) };
+      if (c.kpi) {
+        const k = c.kpi;
+        K = { ...k, resUnit: c.serie.unit.res, vecesTxt: fx(k.veces), vecesC: vc(k.veces), pisoBar: Math.min(k.pisoPct, 100), ritmoC: RITMO_C[k.ritmo] || '#D5D5D5',
+          presu: [{ label: 'Presupuesto', value: k.presu }, { label: 'Gastado', value: k.gastado }, { label: 'Restante', value: k.restante }, { label: 'Días restantes', value: k.dias }] };
+        B = { ...c.bench, vecesTxt: fx(c.bench.veces), pos: (Math.min(c.bench.veces, 3) / 3 * 100).toFixed(1), c: vc(c.bench.veces) };
+        const sr = buildChart(c, s.metric, c.serie.marcas);
+        chart = { ...sr, sub: sr.unitLabel + ' · ' + (c.serie.dias.length >= 30 ? 'últimos 30 días' : 'desde el inicio de la campaña'), hasMk: !!sr.mkText, mkText: sr.mkText,
+          opts: [['res', sr.resLabel.replace(' por día', '')], ['cost', sr.costLabel]].map(([id, label]) => ({ label, bg: s.metric === id ? '#3C3C3C' : 'transparent', fg: s.metric === id ? '#fff' : '#3C3C3C', onClick: () => this.setState({ metric: id }) })) };
+      }
+      const rank = (list, all, key, title, sub, map) => {
+        const sorted = list.map(map).sort((a, b) => b.v - a.v);
+        const nb = Math.min(3, Math.ceil(sorted.length / 2));
+        const cols = all ? [{ title: 'Todos, de mejor a peor', items: sorted }] : [{ title: 'Mejores', items: sorted.slice(0, nb) }, { title: 'Peores', items: sorted.slice(nb).slice(-3).reverse() }].filter(x => x.items.length);
+        return { title, sub, cols, toggleLabel: all ? 'Ver mejores y peores' : `Ver todos (${sorted.length})`, toggle: () => this.setState({ [key]: !all }) };
+      };
+      const item = (x, v) => ({ ...x, v, vecesTxt: fx(v), bar: (Math.min(v, 3) / 3 * 100).toFixed(1), c: vc(v) });
+      if ((c.cont || []).length) {
+        rankings.push(rank(c.cont, s.allCont, 'allCont', 'Mejores y peores contenidos', 'Eficiencia contra la mediana. Solo entran los que superan el piso de volumen mínimo.',
+          x => item({ nombre: x[1], sub: x[0] + ' · ' + x[2], meta: [x[3], x[4], 'Gasto ' + x[6]] }, x[5])));
+      }
+      if ((c.aud || []).length) {
+        rankings.push(rank(c.aud, s.allAud, 'allAud', 'Mejores y peores audiencias', 'Ranking de conjuntos (ubicación + segmentación), con el mismo piso de volumen.',
+          x => item({ nombre: x[1] + ' · ' + x[2], sub: x[0] + ' · ' + x[3], meta: [x[4], x[5], x[7] === 'api' ? 'Vía API (simulado)' : 'Manual'] }, x[6])));
+      }
+      campRecs = RECS.filter(r => r.camp === c.id && (!r.silenced || s.unsilenced)).sort((a, b) => b.score - a.score).map(enrich);
+    }
+
+    // pestaña recomendaciones
+    const tipos = ['Todos', ...Array.from(new Set(RECS.map(r => r.tipo)))];
+    const viaMap = { 'API (simulado)': 'api', 'Manual': 'manual', 'PAUTADOR': 'pautador' };
+    const list = recsAll.filter(r => {
+      const d = decs[r.id];
+      if (s.soloPend && d && !(d.tipo === 'aceptada' && r.via === 'manual' && !d.hecho)) return false;
+      if (s.fTipo !== 'Todos' && r.tipo !== s.fTipo) return false;
+      if (s.fVia !== 'Todas' && r.via !== viaMap[s.fVia]) return false;
+      if (s.fConf !== 'Todas' && r.confianza !== s.fConf) return false;
+      return true;
+    }).sort((a, b) => b.score - a.score).map(enrich);
+    let recGroups;
+    if (s.agrupar === 'Ninguno') recGroups = [{ hasTitle: false, recs: list }];
+    else {
+      const key = s.agrupar === 'Eje' ? 'eje' : 'campNombre'; const m = new Map();
+      list.forEach(r => { if (!m.has(r[key])) m.set(r[key], []); m.get(r[key]).push(r); });
+      recGroups = Array.from(m, ([title, recs]) => ({ hasTitle: true, title, recs, countTxt: recs.length + (recs.length === 1 ? ' recomendación' : ' recomendaciones') }));
+    }
+    const nApi = pendAll.filter(r => r.via === 'api').length;
+    const counter = `${pendAll.length} pendientes · ${nApi} se pueden aplicar vía API (simulado) · ${pendAll.length - nApi} manuales`;
+    const silenciados = (data.avisosSilencio || []);
+    const silencedText = silenciados.map(a => `Dejé de proponer “${a.tipo}” en ${a.campNombre}: se declinó ${a.n} veces con “es intencional” o “pedido del cliente”.`).join(' ');
+
+    // historial
+    const allHist = data.hist || [];
+    const histRows = allHist.filter(h => (s.hImpl === 'Todos' || h.quien === s.hImpl) && (s.hDec === 'Todas' || h.dec === s.hDec) && (s.hTipo === 'Todos' || h.tipo === s.hTipo))
+      .map(h => ({ ...h, decC: DEC_C[h.dec], hasJust: !!h.just, hasLect: !!h.lect, lectC: h.lectC || '#A6AAA9' }));
+    const sel = (label, key, opts) => ({ label, value: s[key], opts, onChange: e => this.setState({ [key]: e.target.value }) });
+
+    const f = data.frescura || {};
+    const tab = s.tab;
+    return {
+      tabs: [['seg', 'Seguimiento'], ['rec', 'Recomendaciones'], ['his', 'Historial']].map(([id, label]) => ({
+        label, fw: tab === id ? 600 : 500, bc: tab === id ? '#3C3C3C' : 'transparent', hasCount: id === 'rec' && pendAll.length > 0, count: pendAll.length,
+        onClick: () => this.setState({ tab: id, campId: id === 'seg' ? null : s.campId }) })),
+      proyecto: s.proyecto || '', proyectos: s.proyectos,
+      onProyecto: e => this.cargar(e.target.value),
+      canalOpts: this.seg(['Ambos', 'Oficial', 'Informativo'], s.canal, 'canal'),
+      eje: s.eje, ejes: ['Todos', ...(data.ejes || [])], onEje: e => this.setState({ eje: e.target.value }),
+      frescura: s.data ? `Datos hasta ${fechaCorta(f.datosHasta)} · chequeo de las ${horaDe(f.calculadoEn)} · consultado ${f.consultado || '—'}` : 'Consultando BigQuery…',
+      refreshLabel: s.refreshing ? 'Actualizando…' : 'Actualizar',
+      onRefresh: () => { if (!s.refreshing && s.proyecto) this.cargar(s.proyecto, true); },
+      cargando: s.cargando, hasError: !!s.error, error: s.error,
+      showPanel: tab === 'seg' && !c, showDetail: tab === 'seg' && !!c, showRecs: tab === 'rec', showHist: tab === 'his',
+      P, budgetRows, SA,
+      totals: [{ value: camps.filter(x => ['Activa', 'Por vencer', 'Sin entrega'].includes(x.estado)).length, label: 'Campañas activas' }, { value: canalesVis.reduce((a, b) => a + b.conjuntos, 0), label: 'Conjuntos vivos' }, { value: money(canalesVis.reduce((a, b) => a + b.gasto7, 0)), label: 'Gasto de los últimos 7 días' }, { value: pendAll.length, label: 'Recomendaciones pendientes' }],
+      openCalidad: () => this.setState({ calidadOpen: true }), toggleCalidad: () => this.setState({ calidadOpen: !s.calidadOpen }),
+      calidadOpen: s.calidadOpen, calidadToggle: s.calidadOpen ? 'Plegar' : 'Desplegar', calidadCount: (P0.calidad || []).length,
+      rows, noRows: rows.length === 0 && !s.cargando,
+      emptyPanel: 'No hay campañas con estos filtros.',
+      backToPanel: () => this.setState({ campId: null }),
+      D, K, B, chart, rankings, campRecs, noCampRecs: c ? campRecs.length === 0 : false,
+      decide: this.decide, undo: this.undo, markDone: this.markDone, openCamp: this.openCamp,
+      counter, showSilenced: silenciados.length > 0 && !s.unsilenced, silencedText, unsilence: () => this.setState({ unsilenced: true }),
+      toggleSolo: () => this.setState({ soloPend: !s.soloPend }), soloBg: s.soloPend ? '#3C3C3C' : '#D5D5D5', soloKnob: s.soloPend ? 15 : 3,
+      recSelects: [sel('Tipo', 'fTipo', tipos), sel('Vía', 'fVia', ['Todas', 'API (simulado)', 'Manual', 'PAUTADOR']), sel('Confianza', 'fConf', ['Todas', 'Alta', 'Media', 'Baja'])],
+      groupOpts: this.seg(['Ninguno', 'Eje', 'Campaña'], s.agrupar, 'agrupar'),
+      recGroups, noRecs: list.length === 0,
+      histSelects: [sel('Implementador', 'hImpl', ['Todos', ...new Set(allHist.map(h => h.quien))]), sel('Decisión', 'hDec', ['Todas', ...Object.values(DEC)]), sel('Tipo de cambio', 'hTipo', ['Todos', ...new Set(allHist.map(h => h.tipo))])],
+      histRows, histCount: `${histRows.length} decisiones`, exportCsv: () => this.exportCsv(histRows),
+      hasToast: !!s.toast, toastText: s.toast ? s.toast.text : '', toastUndo: () => s.toast && s.toast.id && this.undo(s.toast.id),
+    };
+  }
+}
+
+</script>
+
+</body></html>

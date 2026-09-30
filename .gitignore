@@ -1,0 +1,16 @@
+# Datos y extracciones (se rearman desde BigQuery)
+_*.json
+borrador/borrador-interfaz.html
+app/Seguimiento y Optimizacion.html
+# Lo que escribe el equipo y lo que genera el armado diario (va a la base en Railway)
+app/repositorio/
+presupuestos/resumen-activos/
+# Claves y entorno
+.env
+.env.*
+*credentials*.json
+*service-account*.json
+*-key*.json
+GCP/
+node_modules/
+*.log

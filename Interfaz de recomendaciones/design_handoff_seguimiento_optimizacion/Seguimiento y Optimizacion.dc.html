@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/prosumia-design-system-a332dc38-6675-4343-8617-61085d81bf79/colors_and_type.css">
+<script src="_ds/prosumia-design-system-a332dc38-6675-4343-8617-61085d81bf79/_ds_bundle.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:#3C3C3C;font-family:'Poppins',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#3C3C3C}
+a:hover{color:#E9121C}
+button,select,textarea,input{font-family:inherit}
+</style>
+</helmet>
+<template id="__bundler_thumbnail" data-bg-color="#FCB942"><svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg"><rect width="1200" height="800" fill="#FCB942"></rect><rect x="380" y="420" width="80" height="140" rx="16" fill="#fff"></rect><rect x="500" y="340" width="80" height="220" rx="16" fill="#fff"></rect><rect x="620" y="280" width="80" height="280" rx="16" fill="#fff"></rect><rect x="740" y="380" width="80" height="180" rx="16" fill="#fff"></rect><line x1="360" y1="400" x2="840" y2="400" stroke="#fff" stroke-width="8" stroke-dasharray="20 14"></line></svg></template>
+<div style="min-height:100vh;display:flex;flex-direction:column;font-family:'Poppins',system-ui,sans-serif;color:#3C3C3C;background:#fff">
+
+  <header style="border-bottom:1px solid #E4E4E4">
+    <div style="max-width:1280px;margin:0 auto;padding:20px 32px 0;display:flex;flex-direction:column;gap:18px">
+      <div style="display:flex;align-items:center;gap:16px 20px;flex-wrap:wrap">
+        <img src="assets/LogoColor.svg" alt="Prosumia" style="height:28px;display:block">
+        <span style="width:1px;height:24px;background:#E4E4E4"></span>
+        <span style="font-size:16px;font-weight:600;white-space:nowrap">Seguimiento y optimización</span>
+        <span style="display:inline-flex;align-items:center;min-height:24px;padding:3px 10px;border-radius:9999px;border:1px solid #D5D5D5;font-size:11px;font-weight:500;color:#5C5C5C">Borrador · todo lo que toca Meta está simulado</span>
+        <span style="margin-left:auto;font-size:13px;font-weight:500;color:#5C5C5C;white-space:nowrap">Juan · Implementador</span>
+      </div>
+      <nav style="display:flex;gap:28px">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+          <button onClick="{{ t.onClick }}" style="border:0;background:none;padding:0 0 14px;margin-bottom:-1px;font-size:15px;font-weight:{{ t.fw }};color:#3C3C3C;border-bottom:3px solid {{ t.bc }};cursor:pointer;display:flex;gap:8px;align-items:center">
+            <span style="white-space:nowrap">{{ t.label }}</span>
+            <sc-if value="{{ t.hasCount }}" hint-placeholder-val="{{ false }}"><span style="min-width:22px;height:22px;padding:0 7px;border-radius:9999px;background:#F4F4F4;font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center">{{ t.count }}</span></sc-if>
+          </button>
+        </sc-for>
+      </nav>
+    </div>
+  </header>
+
+  <div style="border-bottom:1px solid #E4E4E4">
+    <div style="max-width:1280px;margin:0 auto;padding:14px 32px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center">
+      <label style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Proyecto
+        <select value="{{ proyecto }}" onChange="{{ onProyecto }}" style="height:36px;border:1px solid #D5D5D5;border-radius:9999px;padding:0 12px;font-size:13px;font-weight:500;letter-spacing:0;text-transform:none;background:#fff;color:#3C3C3C">
+          <sc-for list="{{ proyectos }}" as="p" hint-placeholder-count="2"><option value="{{ p.id }}">{{ p.nombre }}</option></sc-for>
+        </select>
+      </label>
+      <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Canal
+        <div style="display:flex;padding:3px;border-radius:9999px;background:#F4F4F4;gap:2px">
+          <sc-for list="{{ canalOpts }}" as="o" hint-placeholder-count="3">
+            <button onClick="{{ o.onClick }}" style="height:30px;padding:0 14px;border-radius:9999px;border:0;background:{{ o.bg }};color:{{ o.fg }};font-size:13px;font-weight:500;letter-spacing:0;text-transform:none;cursor:pointer;white-space:nowrap">{{ o.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Eje
+        <select value="{{ eje }}" onChange="{{ onEje }}" style="height:36px;border:1px solid #D5D5D5;border-radius:9999px;padding:0 12px;font-size:13px;font-weight:500;letter-spacing:0;text-transform:none;background:#fff;color:#3C3C3C">
+          <sc-for list="{{ ejes }}" as="e" hint-placeholder-count="5"><option value="{{ e }}">{{ e }}</option></sc-for>
+        </select>
+      </label>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:14px;min-width:0;flex:0 1 auto">
+        <span style="font-size:12px;color:#5C5C5C;line-height:1.4">{{ frescura }}</span>
+        <button onClick="{{ onRefresh }}" style="height:36px;padding:0 18px;border-radius:9999px;border:1.5px solid #3C3C3C;background:#fff;color:#3C3C3C;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex:none" style-hover="background:#F4F4F4">{{ refreshLabel }}</button>
+      </div>
+    </div>
+  </div>
+
+  <main style="max-width:1280px;width:100%;margin:0 auto;padding:32px 32px 96px;display:flex;flex-direction:column;gap:28px">
+
+    <sc-if value="{{ showPanel }}" hint-placeholder-val="{{ true }}">
+      <section style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">{{ P.nombre }} · septiembre 2026</div>
+          <h1 style="margin:0;font-size:32px;line-height:1.1;font-weight:600;letter-spacing:-0.02em">¿Qué está corriendo y a cuál entro?</h1>
+        </div>
+        <div style="border:1px solid #E4E4E4;border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px 24px">
+            <sc-for list="{{ budget }}" as="b" hint-placeholder-count="4">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <div style="font-size:12px;font-weight:500;color:#5C5C5C">{{ b.label }}</div>
+                <div style="font-size:26px;font-weight:600;letter-spacing:-0.02em;line-height:1.1">{{ b.value }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="position:relative;height:10px;border-radius:9999px;background:#F4F4F4;overflow:hidden">
+              <div style="position:absolute;left:0;top:0;bottom:0;width:{{ P.projPct }}%;background:#D5D5D5;border-radius:9999px"></div>
+              <div style="position:absolute;left:0;top:0;bottom:0;width:{{ P.gastPct }}%;background:#3C3C3C;border-radius:9999px"></div>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px 20px;font-size:12px;color:#5C5C5C">
+              <span style="display:flex;align-items:center;gap:6px"><span style="flex:none;width:10px;height:10px;border-radius:50%;background:#3C3C3C"></span><span>Gastado {{ P.gastPct }} %</span></span>
+              <span style="display:flex;align-items:center;gap:6px"><span style="flex:none;width:10px;height:10px;border-radius:50%;background:#D5D5D5"></span><span>Proyección al cierre {{ P.projPct }} % (ritmo de los últimos 7 días)</span></span>
+              <span>Día 22 de 30</span>
+            </div>
+          </div>
+          <sc-if value="{{ P.hasAviso }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 16px;border-radius:16px;background:#F4F4F4;font-size:13px;line-height:1.5;font-weight:500"><span style="flex:none;margin-top:6px;width:8px;height:8px;border-radius:50%;background:#FCB942"></span>{{ P.aviso }}</div>
+          </sc-if>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+          <sc-for list="{{ totals }}" as="t" hint-placeholder-count="4">
+            <div style="background:#F4F4F4;border-radius:20px;padding:16px 20px;display:flex;flex-direction:column;gap:2px">
+              <div style="font-size:24px;font-weight:600;letter-spacing:-0.02em">{{ t.value }}</div>
+              <div style="font-size:12px;font-weight:500;color:#5C5C5C">{{ t.label }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ P.hasCalidad }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;font-weight:500">
+            <span style="width:8px;height:8px;border-radius:50%;background:#F7444C"></span>
+            <span>{{ P.calidadAviso }}</span>
+            <button onClick="{{ openCalidad }}" style="border:0;background:none;padding:0;font:inherit;font-weight:600;color:#3C3C3C;cursor:pointer;text-decoration:underline;text-underline-offset:3px">Ver lista</button>
+          </div>
+        </sc-if>
+      </section>
+
+      <section style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <h2 style="margin:0;font-size:20px;font-weight:600">Panel general</h2>
+          <span style="font-size:12px;color:#5C5C5C">Primero las que tienen problemas, después por gasto de los últimos 7 días</span>
+        </div>
+        <div style="border:1px solid #E4E4E4;border-radius:24px;overflow:hidden">
+          <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(112px,1fr) minmax(104px,1fr) minmax(170px,1.2fr) 20px;gap:16px;padding:12px 24px;background:#F4F4F4;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">
+            <span>Campaña</span><span>Estado</span><span>Piso</span><span>Recomendaciones</span><span></span>
+          </div>
+          <sc-for list="{{ rows }}" as="c" hint-placeholder-count="6">
+            <button onClick="{{ c.open }}" style="width:100%;text-align:left;border:0;border-top:1px solid #E4E4E4;background:#fff;color:#3C3C3C;cursor:pointer;display:grid;grid-template-columns:minmax(0,2fr) minmax(112px,1fr) minmax(104px,1fr) minmax(170px,1.2fr) 20px;gap:16px;align-items:center;padding:16px 24px" style-hover="background:#FAFAFA">
+              <span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                <span style="font-size:15px;font-weight:600">{{ c.nombre }}</span>
+                <span style="font-size:12px;color:#5C5C5C">{{ c.eje }} · {{ c.canalTxt }}</span>
+              </span>
+              <span style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500"><span style="flex:none;width:8px;height:8px;border-radius:50%;background:{{ c.estC }}"></span><span style="white-space:nowrap">{{ c.estado }}</span></span>
+              <span style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500"><span style="flex:none;width:8px;height:8px;border-radius:50%;background:{{ c.pisoC }}"></span><span style="white-space:nowrap">{{ c.piso }}</span></span>
+              <span style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500">
+                <span style="min-width:26px;height:26px;padding:0 8px;border-radius:9999px;background:{{ c.recBg }};color:{{ c.recFg }};font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center">{{ c.pend }}</span>
+                <span style="font-size:12px;color:#5C5C5C;white-space:nowrap">{{ c.altaTxt }}</span>
+              </span>
+              <span style="font-size:16px;color:#5C5C5C">›</span>
+            </button>
+          </sc-for>
+          <sc-if value="{{ noRows }}" hint-placeholder-val="{{ false }}">
+            <div style="border-top:1px solid #E4E4E4;padding:32px 24px;font-size:14px;line-height:1.5;color:#5C5C5C">{{ emptyPanel }}</div>
+          </sc-if>
+        </div>
+      </section>
+
+      <section style="border:1px solid #E4E4E4;border-radius:24px">
+        <button onClick="{{ toggleCalidad }}" style="width:100%;border:0;background:none;padding:18px 24px;display:flex;align-items:center;gap:12px;cursor:pointer;color:#3C3C3C;text-align:left">
+          <span style="font-size:15px;font-weight:600">Calidad de datos del proyecto</span>
+          <span style="font-size:12px;color:#5C5C5C">{{ calidadCount }} observaciones · lo que no se pudo analizar por cómo está cargado</span>
+          <span style="margin-left:auto;font-size:13px;font-weight:600">{{ calidadToggle }}</span>
+        </button>
+        <sc-if value="{{ calidadOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:0 24px 20px;display:flex;flex-direction:column">
+            <sc-for list="{{ P.calidad }}" as="q" hint-placeholder-count="3">
+              <div style="display:flex;gap:10px;padding:12px 0;border-top:1px solid #E4E4E4;font-size:14px;line-height:1.5"><span style="flex:none;margin-top:7px;width:6px;height:6px;border-radius:50%;background:#A6AAA9"></span>{{ q }}</div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ showDetail }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <button onClick="{{ backToPanel }}" style="align-self:flex-start;border:0;background:none;padding:0;font-size:13px;font-weight:600;color:#3C3C3C;cursor:pointer;white-space:nowrap">← Panel general</button>
+        <div style="display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">{{ P.nombre }} · {{ D.eje }}</div>
+            <h1 style="margin:0;font-size:36px;line-height:1.05;font-weight:600;letter-spacing:-0.02em">{{ D.nombre }}</h1>
+          </div>
+          <div style="font-size:12px;color:#5C5C5C">Campaña de Meta: {{ D.metaCamp }}</div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:9999px;background:#F4F4F4;font-size:12px;font-weight:500;white-space:nowrap"><span style="width:8px;height:8px;border-radius:50%;background:{{ D.estC }}"></span>{{ D.estado }}</span>
+          <span style="display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:9999px;background:#F4F4F4;font-size:12px;font-weight:500;white-space:nowrap">{{ D.canalTxt }}</span>
+          <span style="display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:9999px;background:#F4F4F4;font-size:12px;font-weight:500;white-space:nowrap"><span>Objetivo: {{ D.objetivo }}</span></span>
+        </div>
+      </div>
+
+      <section style="background:#F4F4F4;border-radius:24px;padding:24px 28px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Resumen del agente</div>
+        <p style="margin:0;font-size:22px;line-height:1.4;font-weight:500;letter-spacing:-0.01em;text-wrap:pretty">{{ D.resumen }}</p>
+      </section>
+
+      <sc-if value="{{ D.hasKpi }}" hint-placeholder-val="{{ true }}">
+        <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
+          <div style="border:1px solid #E4E4E4;border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Resultado · últimos 7 días</div>
+            <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span style="font-size:36px;font-weight:600;letter-spacing:-0.025em;line-height:1">{{ K.resultado }}</span><span style="font-size:14px;color:#5C5C5C">{{ K.resUnit }}</span></div>
+            <div style="font-size:14px;font-weight:500">{{ K.costo }}</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500"><span style="width:8px;height:8px;border-radius:50%;background:{{ K.vecesC }}"></span>{{ K.vecesTxt }} veces la mediana</div>
+          </div>
+          <div style="border:1px solid #E4E4E4;border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Avance contra el piso</span><span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600"><span style="width:8px;height:8px;border-radius:50%;background:{{ D.pisoC }}"></span>{{ D.piso }}</span></div>
+            <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span style="font-size:36px;font-weight:600;letter-spacing:-0.025em;line-height:1">{{ K.pisoPct }} %</span><span style="font-size:14px;color:#5C5C5C">del esperado a la fecha</span></div>
+            <div style="position:relative;height:8px;border-radius:9999px;background:#F4F4F4">
+              <div style="position:absolute;left:0;top:0;bottom:0;width:{{ K.pisoBar }}%;border-radius:9999px;background:{{ D.pisoC }}"></div>
+              <div style="position:absolute;left:70%;top:-3px;bottom:-3px;width:2px;background:#A6AAA9"></div>
+            </div>
+            <div style="font-size:12px;line-height:1.5;color:#5C5C5C">{{ K.acum }} acumuladas contra {{ K.esp }} esperadas a la fecha. La marca indica el 70 %.</div>
+          </div>
+          <div style="border:1px solid #E4E4E4;border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Ritmo de gasto</span><span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600"><span style="width:8px;height:8px;border-radius:50%;background:{{ K.ritmoC }}"></span>{{ K.ritmo }}</span></div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:grid;grid-template-columns:64px 1fr 40px;gap:8px;align-items:center;font-size:12px"><span style="color:#5C5C5C">Gastado</span><span style="height:8px;border-radius:9999px;background:#F4F4F4;position:relative;overflow:hidden"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ K.gastPct }}%;background:#3C3C3C;border-radius:9999px"></span></span><span style="font-weight:600;text-align:right">{{ K.gastPct }} %</span></div>
+              <div style="display:grid;grid-template-columns:64px 1fr 40px;gap:8px;align-items:center;font-size:12px"><span style="color:#5C5C5C">Plazo</span><span style="height:8px;border-radius:9999px;background:#F4F4F4;position:relative;overflow:hidden"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ K.plazoPct }}%;background:#A6AAA9;border-radius:9999px"></span></span><span style="font-weight:600;text-align:right">{{ K.plazoPct }} %</span></div>
+            </div>
+            <div style="font-size:13px;line-height:1.5;font-weight:500">{{ K.proyeccion }}</div>
+          </div>
+          <div style="border:1px solid #E4E4E4;border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Presupuesto</div>
+            <sc-for list="{{ K.presu }}" as="p" hint-placeholder-count="4">
+              <div style="display:flex;justify-content:space-between;gap:12px;font-size:14px;padding-bottom:8px;border-bottom:1px solid #E4E4E4"><span style="color:#5C5C5C;white-space:nowrap">{{ p.label }}</span><span style="font-weight:600">{{ p.value }}</span></div>
+            </sc-for>
+          </div>
+        </section>
+
+        <section style="display:flex;flex-wrap:wrap;gap:16px">
+          <div style="flex:2 1 520px;min-width:0;border:1px solid #E4E4E4;border-radius:24px;padding:22px 24px;display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+              <div style="display:flex;flex-direction:column;gap:2px">
+                <h2 style="margin:0;font-size:18px;font-weight:600">Evolución en el tiempo</h2>
+                <span style="font-size:12px;color:#5C5C5C">{{ chart.sub }}</span>
+              </div>
+              <div style="display:flex;padding:3px;border-radius:9999px;background:#F4F4F4;gap:2px">
+                <sc-for list="{{ chart.opts }}" as="o" hint-placeholder-count="2">
+                  <button onClick="{{ o.onClick }}" style="height:30px;padding:0 14px;border-radius:9999px;border:0;background:{{ o.bg }};color:{{ o.fg }};font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap">{{ o.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+            <div style="position:relative;height:220px;margin-top:18px">
+              <div style="position:absolute;inset:0;display:flex;align-items:flex-end;gap:3px">
+                <sc-for list="{{ chart.bars }}" as="b" hint-placeholder-count="17">
+                  <div title="{{ b.tip }}" style="flex:1 1 0;min-width:0;height:100%;position:relative;display:flex;align-items:flex-end">
+                    <div style="width:100%;height:{{ b.h }}%;background:#5C5C5C;border-radius:4px 4px 0 0"></div>
+                    <sc-if value="{{ b.mk }}" hint-placeholder-val="{{ false }}">
+                      <div style="position:absolute;left:50%;top:-18px;bottom:0;width:0;border-left:2px dashed #3C3C3C"></div>
+                      <div style="position:absolute;left:50%;top:-26px;transform:translateX(-50%);height:20px;padding:0 8px;border-radius:9999px;background:#3C3C3C;color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;white-space:nowrap">{{ b.d }} · cambio</div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="position:absolute;left:0;right:0;bottom:{{ chart.medPct }}%;border-top:2px dashed #F7444C"></div>
+              <div style="position:absolute;left:0;bottom:{{ chart.medPct }}%;margin-bottom:4px;white-space:nowrap;padding:2px 8px;border-radius:9999px;background:#fff;border:1px solid #F7444C;font-size:11px;font-weight:600;color:#3C3C3C">Mediana benchmark · {{ chart.medTxt }}</div>
+            </div>
+            <div style="display:flex;gap:3px">
+              <sc-for list="{{ chart.bars }}" as="b" hint-placeholder-count="17">
+                <div style="flex:1 1 0;min-width:0;font-size:10px;color:#5C5C5C;text-align:center;white-space:nowrap;overflow:visible">{{ b.lab }}</div>
+              </sc-for>
+            </div>
+            <sc-if value="{{ chart.hasMk }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 16px;border-radius:16px;background:#F4F4F4;font-size:13px;line-height:1.5"><span style="flex:none;margin-top:4px;width:10px;height:10px;border:2px dashed #3C3C3C;border-radius:50%"></span>{{ chart.mkText }}</div>
+            </sc-if>
+          </div>
+
+          <div style="flex:1 1 300px;min-width:0;border:1px solid #E4E4E4;border-radius:24px;padding:22px 24px;display:flex;flex-direction:column;gap:14px">
+            <h2 style="margin:0;font-size:18px;font-weight:600">Relación con el benchmark</h2>
+            <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span style="font-size:44px;font-weight:600;letter-spacing:-0.025em;line-height:1">{{ B.vecesTxt }}</span><span style="font-size:14px;color:#5C5C5C">veces la mediana</span></div>
+            <div style="position:relative;height:36px;margin-top:4px">
+              <div style="position:absolute;left:0;right:0;top:14px;height:8px;border-radius:9999px;background:#F4F4F4"></div>
+              <div style="position:absolute;left:33.33%;top:6px;height:24px;width:2px;background:#3C3C3C"></div>
+              <div style="position:absolute;left:{{ B.pos }}%;top:9px;width:18px;height:18px;margin-left:-9px;border-radius:50%;background:{{ B.c }};border:3px solid #fff"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#5C5C5C;margin-top:-6px"><span>0</span><span style="margin-left:22%">1 · mediana</span><span>3 o más</span></div>
+            <div style="font-size:13px;line-height:1.5">{{ B.metrica }}</div>
+            <div style="font-size:12px;line-height:1.5;color:#5C5C5C;padding-top:12px;border-top:1px solid #E4E4E4">Comparable: {{ B.comparable }}. Es el mismo dato que sostiene el piso simulado y el “por qué” de las recomendaciones.</div>
+          </div>
+        </section>
+
+        <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px">
+          <sc-for list="{{ rankings }}" as="rk" hint-placeholder-count="2">
+            <div style="border:1px solid #E4E4E4;border-radius:24px;padding:22px 24px;display:flex;flex-direction:column;gap:12px;min-width:0">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap">
+                <h2 style="margin:0;font-size:18px;line-height:1.3;font-weight:600">{{ rk.title }}</h2>
+                <button onClick="{{ rk.toggle }}" style="border:0;background:none;padding:0;font-size:13px;font-weight:600;color:#3C3C3C;cursor:pointer;text-decoration:underline;text-underline-offset:3px;white-space:nowrap;flex:none">{{ rk.toggleLabel }}</button>
+              </div>
+              <div style="font-size:12px;color:#5C5C5C">{{ rk.sub }}</div>
+              <sc-for list="{{ rk.cols }}" as="col" hint-placeholder-count="2">
+                <div style="display:flex;flex-direction:column">
+                  <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C;padding:8px 0">{{ col.title }}</div>
+                  <sc-for list="{{ col.items }}" as="x" hint-placeholder-count="3">
+                    <div style="display:grid;grid-template-columns:minmax(0,1fr) 96px;gap:6px 16px;padding:12px 0;border-top:1px solid #E4E4E4">
+                      <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                        <span style="font-size:14px;font-weight:600;line-height:1.35">{{ x.nombre }}</span>
+                        <span style="font-size:12px;color:#5C5C5C;line-height:1.4">{{ x.sub }}</span>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+                        <span style="font-size:15px;font-weight:600">{{ x.vecesTxt }}×</span>
+                        <span style="position:relative;width:96px;height:6px;border-radius:9999px;background:#F4F4F4"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ x.bar }}%;border-radius:9999px;background:{{ x.c }}"></span><span style="position:absolute;left:33.33%;top:-3px;bottom:-3px;width:2px;background:#3C3C3C"></span></span>
+                      </div>
+                      <div style="grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:#5C5C5C">
+                        <sc-for list="{{ x.meta }}" as="m" hint-placeholder-count="3"><span style="white-space:nowrap">{{ m }}</span></sc-for>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </section>
+
+        <sc-if value="{{ D.hasInsights }}" hint-placeholder-val="{{ true }}">
+          <section style="display:flex;flex-direction:column;gap:12px">
+            <h2 style="margin:0;font-size:18px;font-weight:600">Insights</h2>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
+              <sc-for list="{{ D.insights }}" as="i" hint-placeholder-count="4">
+                <div style="background:#F4F4F4;border-radius:24px;padding:20px 22px;display:flex;flex-direction:column;gap:10px">
+                  <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">{{ i.tag }}</div>
+                  <p style="margin:0;font-size:14px;line-height:1.5;font-weight:500;text-wrap:pretty">{{ i.texto }}</p>
+                  <sc-if value="{{ i.hasRows }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-direction:column;background:#fff;border-radius:14px;padding:6px 14px">
+                      <div style="display:grid;grid-template-columns:1.2fr 1fr 0.8fr 0.8fr;gap:8px;padding:6px 0;font-size:11px;color:#5C5C5C"><span>Canal</span><span>Gasto</span><span>CPM</span><span>Reac./mil</span></div>
+                      <sc-for list="{{ i.rows }}" as="row" hint-placeholder-count="2">
+                        <div style="display:grid;grid-template-columns:1.2fr 1fr 0.8fr 0.8fr;gap:8px;padding:6px 0;border-top:1px solid #E4E4E4;font-size:12px;font-weight:500"><span>{{ row.a }}</span><span>{{ row.b }}</span><span>{{ row.c }}</span><span>{{ row.d }}</span></div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ i.hasNota }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#5C5C5C">{{ i.nota }}</div></sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </sc-if>
+      </sc-if>
+
+      <section style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <h2 style="margin:0;font-size:18px;font-weight:600">Recomendaciones de esta campaña</h2>
+          <span style="font-size:12px;color:#5C5C5C">Las mismas que en la pestaña Recomendaciones: decidir acá o allá actualiza lo mismo</span>
+        </div>
+        <sc-for list="{{ campRecs }}" as="r" hint-placeholder-count="2">
+          <dc-import name="RecoCard" rec="{{ r }}" decision="{{ r.decision }}" show-campaign="{{ false }}" on-decide="{{ decide }}" on-undo="{{ undo }}" on-done="{{ markDone }}" on-open-camp="{{ openCamp }}" hint-size="100%,420px"></dc-import>
+        </sc-for>
+        <sc-if value="{{ noCampRecs }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:24px;border-radius:24px;background:#F4F4F4;font-size:14px;color:#5C5C5C">Sin recomendaciones para esta campaña.</div>
+        </sc-if>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ showRecs }}" hint-placeholder-val="{{ false }}">
+      <section style="display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">{{ P.nombre }} · todas las campañas</div>
+          <h1 style="margin:0;font-size:32px;line-height:1.1;font-weight:600;letter-spacing:-0.02em">¿Qué hay que cambiar hoy?</h1>
+          <div style="font-size:14px;font-weight:500">{{ counter }}</div>
+        </div>
+        <sc-if value="{{ showSilenced }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;padding:14px 18px;border-radius:16px;background:#F4F4F4">
+            <span style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Aprendizaje</span>
+            <span style="flex:1 1 320px;font-size:13px;line-height:1.5;font-weight:500">Dejé de proponer “Reforzar” en Juegos Suramericanos: se declinó 4 veces con “pedido del cliente”.</span>
+            <button onClick="{{ unsilence }}" style="height:34px;padding:0 16px;border-radius:9999px;border:1.5px solid #3C3C3C;background:#fff;color:#3C3C3C;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex:none">Volver a mostrar</button>
+          </div>
+        </sc-if>
+        <div style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;padding-bottom:16px;border-bottom:1px solid #E4E4E4">
+          <button onClick="{{ toggleSolo }}" style="height:36px;padding:0 14px 0 6px;border-radius:9999px;border:1px solid #D5D5D5;background:#fff;color:#3C3C3C;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none">
+            <span style="width:36px;height:24px;border-radius:9999px;background:{{ soloBg }};position:relative;display:inline-block"><span style="position:absolute;top:3px;left:{{ soloKnob }}px;width:18px;height:18px;border-radius:50%;background:#fff"></span></span>
+            Solo pendientes
+          </button>
+          <sc-for list="{{ recSelects }}" as="f" hint-placeholder-count="3">
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5C5C5C">{{ f.label }}
+              <select value="{{ f.value }}" onChange="{{ f.onChange }}" style="height:36px;border:1px solid #D5D5D5;border-radius:9999px;padding:0 12px;font-size:13px;font-weight:500;background:#fff;color:#3C3C3C">
+                <sc-for list="{{ f.opts }}" as="o" hint-placeholder-count="4"><option value="{{ o }}">{{ o }}</option></sc-for>
+              </select>
+            </label>
+          </sc-for>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:#5C5C5C">Agrupar
+            <div style="display:flex;padding:3px;border-radius:9999px;background:#F4F4F4;gap:2px">
+              <sc-for list="{{ groupOpts }}" as="o" hint-placeholder-count="3">
+                <button onClick="{{ o.onClick }}" style="height:30px;padding:0 14px;border-radius:9999px;border:0;background:{{ o.bg }};color:{{ o.fg }};font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap">{{ o.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <sc-for list="{{ recGroups }}" as="g" hint-placeholder-count="1">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <sc-if value="{{ g.hasTitle }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:baseline;gap:10px;padding-top:8px"><h2 style="margin:0;font-size:18px;font-weight:600">{{ g.title }}</h2><span style="font-size:12px;color:#5C5C5C">{{ g.countTxt }}</span></div>
+            </sc-if>
+            <sc-for list="{{ g.recs }}" as="r" hint-placeholder-count="3">
+              <dc-import name="RecoCard" rec="{{ r }}" decision="{{ r.decision }}" show-campaign="{{ true }}" on-decide="{{ decide }}" on-undo="{{ undo }}" on-done="{{ markDone }}" on-open-camp="{{ openCamp }}" hint-size="100%,420px"></dc-import>
+            </sc-for>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noRecs }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:32px;border-radius:24px;background:#F4F4F4;font-size:14px;color:#5C5C5C">No hay recomendaciones con estos filtros.</div>
+        </sc-if>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ showHist }}" hint-placeholder-val="{{ false }}">
+      <section style="display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Todas las decisiones · de la más nueva a la más vieja</div>
+            <h1 style="margin:0;font-size:32px;line-height:1.1;font-weight:600;letter-spacing:-0.02em">Historial</h1>
+          </div>
+          <button onClick="{{ exportCsv }}" style="height:38px;padding:0 20px;border-radius:9999px;border:0;background:#3C3C3C;color:#fff;font-size:13px;font-weight:600;cursor:pointer" style-hover="opacity:0.9">Exportar CSV</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;padding-bottom:16px;border-bottom:1px solid #E4E4E4">
+          <sc-for list="{{ histSelects }}" as="f" hint-placeholder-count="3">
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5C5C5C">{{ f.label }}
+              <select value="{{ f.value }}" onChange="{{ f.onChange }}" style="height:36px;border:1px solid #D5D5D5;border-radius:9999px;padding:0 12px;font-size:13px;font-weight:500;background:#fff;color:#3C3C3C">
+                <sc-for list="{{ f.opts }}" as="o" hint-placeholder-count="4"><option value="{{ o }}">{{ o }}</option></sc-for>
+              </select>
+            </label>
+          </sc-for>
+          <span style="margin-left:auto;font-size:12px;color:#5C5C5C">{{ histCount }}</span>
+        </div>
+        <div style="border:1px solid #E4E4E4;border-radius:24px;overflow-x:auto">
+          <table style="width:100%;min-width:1100px;border-collapse:collapse;font-size:13px">
+            <thead>
+              <tr style="background:#F4F4F4;text-align:left">
+                <th style="padding:12px 16px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Fecha</th>
+                <th style="padding:12px 16px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Quién</th>
+                <th style="padding:12px 16px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Campaña · contenido</th>
+                <th style="padding:12px 16px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Cambio</th>
+                <th style="padding:12px 16px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Decisión</th>
+                <th style="padding:12px 16px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Aplicación</th>
+                <th style="padding:12px 16px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#5C5C5C">Resultado a 7 días</th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ histRows }}" as="h" hint-placeholder-count="7">
+                <tr style="border-top:1px solid #E4E4E4;vertical-align:top">
+                  <td style="padding:14px 16px;white-space:nowrap;font-weight:500">{{ h.fecha }}</td>
+                  <td style="padding:14px 16px;white-space:nowrap">{{ h.quien }}</td>
+                  <td style="padding:14px 16px;min-width:220px"><div style="font-weight:600">{{ h.camp }}</div><div style="color:#5C5C5C;font-size:12px">{{ h.contenido }} · {{ h.canal }} · {{ h.proyecto }}</div></td>
+                  <td style="padding:14px 16px">{{ h.tipo }}</td>
+                  <td style="padding:14px 16px;min-width:220px"><div style="display:flex;align-items:center;gap:6px;font-weight:600"><span style="flex:none;width:8px;height:8px;border-radius:50%;background:{{ h.decC }}"></span>{{ h.dec }}</div><sc-if value="{{ h.hasJust }}" hint-placeholder-val="{{ false }}"><div style="color:#5C5C5C;font-size:12px;line-height:1.5;margin-top:2px">{{ h.just }}</div></sc-if></td>
+                  <td style="padding:14px 16px">{{ h.aplic }}</td>
+                  <td style="padding:14px 16px;min-width:200px"><div style="font-weight:500">{{ h.res }}</div><sc-if value="{{ h.hasLect }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#5C5C5C;margin-top:2px"><span style="width:8px;height:8px;border-radius:50%;background:{{ h.lectC }}"></span>{{ h.lect }}</div></sc-if></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </sc-if>
+  </main>
+
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);display:flex;align-items:center;gap:16px;padding:12px 14px 12px 20px;border-radius:9999px;background:#3C3C3C;color:#fff;font-size:13px;font-weight:500;z-index:10">
+      <span>{{ toastText }}</span>
+      <button onClick="{{ toastUndo }}" style="height:30px;padding:0 14px;border-radius:9999px;border:1.5px solid #fff;background:none;color:#fff;font-size:12px;font-weight:600;cursor:pointer">Deshacer</button>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const EST_C = { 'Activa': '#46C678', 'Por vencer': '#FCB942', 'Sin entrega': '#F7444C', 'Agotada': '#A6AAA9', 'Programada': '#D5D5D5' };
+const PISO_C = { 'En camino': '#46C678', 'En riesgo': '#FCB942', 'No llega': '#F7444C', '—': '#D5D5D5' };
+const RITMO_C = { 'En ritmo': '#46C678', 'Subejecutada': '#FCB942', 'Sobreejecutada': '#F7444C' };
+const vc = v => v >= 1 ? '#46C678' : v >= 0.5 ? '#FCB942' : '#F7444C';
+const fx = v => (v < 0.1 ? v.toFixed(2) : v.toFixed(1)).replace('.', ',');
+const money = n => '$' + Math.round(n).toLocaleString('es-AR');
+const DEC = { aceptada: 'Aceptada e incorporada', noinc: 'Aceptada, no incorporada', resp: 'Respondida', decl: 'Declinada' };
+const DEC_C = { 'Aceptada e incorporada': '#46C678', 'Aceptada, no incorporada': '#FCB942', 'Respondida': '#A6AAA9', 'Declinada': '#F7444C' };
+const UNIT = {
+  'Interacción': ['reacciones', 'Reacciones por día', 'Costo por reacción', 'reacción'],
+  'Impresiones': ['impresiones', 'Impresiones por día', 'CPM', 'mil impresiones'],
+  'Alcance': ['impresiones', 'Impresiones por día', 'CPM', 'mil impresiones'],
+  'Tráfico': ['clics', 'Clics por día', 'CPC', 'clic'],
+};
+
+const PROJ = {
+  chaco: {
+    nombre: 'Gobierno del Chaco', presu: 38000000, gast: 21400000, proj: 31900000,
+    aviso: 'Al ritmo de los últimos 7 días, el mes cierra con $6.100.000 sin usar (16 % del presupuesto mensual).',
+    conjuntos: 34, calidadAviso: '15 conjuntos con problemas de carga.',
+    calidad: ['12 conjuntos sin eje.', '3 conjuntos sin presupuesto asignado: no se puede calcular el ritmo.', 'GDCHACAED10688 · IG Stories (Más Futuro): sin presupuesto diario cargado; queda fuera del ranking de audiencias.'],
+  },
+  lsf: {
+    nombre: 'Lotería de Santa Fe', presu: 12000000, gast: 7900000, proj: 11300000, aviso: '', conjuntos: 9,
+    calidadAviso: '3 campañas no se pueden comparar por cómo están cargadas.',
+    calidad: ['Lotería de Santa Fe: la comunicación está cargada como "Stories" e "IG/FB Feed".', '3 campañas cargadas como "Stories", "IG/FB Feed" o sin comunicación. No se pueden comparar por campaña.'],
+  },
+};
+
+const CAMPS = [
+  { id: 'mf', proj: 'chaco', nombre: 'Más Futuro', eje: 'Deportes', canales: ['Oficial', 'Informativo'], estado: 'Activa', piso: 'No llega', objetivo: 'Interacción', gasto7: 1229090, metaCamp: 'CHACO_INTERACCION_SEP26',
+    resumen: 'Gasta en ritmo pero genera la quinta parte de las reacciones esperadas; el problema está en dos de sus cinco contenidos.',
+    kpi: { resultado: '1.381', costo: '$890 por reacción', veces: 0.2, pisoPct: 35, acum: '1.605', esp: '4.586', ritmo: 'Subejecutada', gastPct: 32, plazoPct: 47, proyeccion: '32 % gastado con 47 % del plazo; termina con $3,2 M sin gastar.', presu: '$7.000.000', gastado: '$2.240.000', restante: '$4.760.000', dias: '9' },
+    bench: { veces: 0.2, metrica: 'Reacciones por mil impresiones: 0,9 contra 4,5 de la mediana. Costo por reacción: $890 contra $90.', comparable: '30 conjuntos de Interacción, placa fija, audiencia provincial abierta, últimas 13 semanas' },
+    serie: { start: [8, 6], n: 17, res: [190, 1.3], cost: [1050, 0.72], med: [980, 90], mk: 12, mkText: '18/09 · Se bajó 20 % el presupuesto de "Inscripción Madres y Padres" — desde ahí el costo por reacción bajó de $1.050 a $760.' },
+    cont: [['GDCHACAED10702', 'Becas deportivas 2026', 'Video', '512 reacciones', '$640 por reacción', 1.4, '$327.680'], ['GDCHACAED10669', 'Inscripción Madres y Padres', 'Placa fija', '380 reacciones', '$760 por reacción', 1.0, '$288.800'], ['GDCHACAED10688', 'Torneo intercolegial', 'Carrusel', '210 reacciones', '$1.020 por reacción', 0.6, '$214.200'], ['GDCHACAED10715', 'Escuelitas municipales', 'Placa fija', '140 reacciones', '$1.580 por reacción', 0.12, '$221.200'], ['GDCHACAED10771', 'Inscripción Chaco sin Resistencia', 'Placa fija', '139 reacciones', '$1.900 por reacción', 0.1, '$264.100']],
+    aud: [['GDCHACAED10669', 'FB/IG Feed', 'Capital y Gran Resistencia', 'Inscripción Madres y Padres', '302 reacciones', '$310 por reacción', 2.9, 'manual'], ['GDCHACAED10702', 'IG Reels', 'Jóvenes 16–24, toda la provincia', 'Becas deportivas 2026', '341 reacciones', '$520 por reacción', 1.7, 'api'], ['GDCHACAED10702', 'FB Feed', 'Toda la provincia', 'Becas deportivas 2026', '171 reacciones', '$700 por reacción', 1.2, 'api'], ['GDCHACAED10715', 'FB/IG Feed', 'Interior provincial', 'Escuelitas municipales', '140 reacciones', '$1.580 por reacción', 0.12, 'manual'], ['GDCHACAED10688', 'IG Stories', 'Toda la provincia, 13–18', 'Torneo intercolegial', '92 reacciones', '$1.900 por reacción', 0.09, 'manual'], ['GDCHACAED10771', 'FB/IG Feed', 'Toda la provincia excluyendo Resistencia', 'Inscripción Chaco sin Resistencia', '110 reacciones', '$2.400 por reacción', 0.04, 'manual']],
+    insights: [
+      { tag: 'Cruce de canales', texto: 'Informativo genera 13 veces más reacciones por mil; Oficial tiene el CPM 40 % más barato.', rows: [['Oficial', '$1.340.000', '$1.150', '0,4'], ['Informativo', '$900.000', '$1.920', '5,2']] },
+      { tag: 'Fatiga de creativo', texto: '"Escuelitas municipales" (GDCHACAED10715) lleva 24 días activo. Pasados los 21 días se dispara "Rotar creativo".' },
+      { tag: 'Posible solapamiento', texto: '"Toda la provincia excluyendo Resistencia" (GDCHACAED10771) y "Capital y Gran Resistencia" (GDCHACAED10669) compiten por buena parte del mismo público. Revisar antes de reforzar ambos a la vez.', nota: 'Heurística por geografía: no mide superposición real de personas.' },
+      { tag: 'Calidad de datos', texto: 'GDCHACAED10688 · IG Stories no tiene presupuesto diario cargado: no se calcula su ritmo.' },
+    ] },
+  { id: 'cs', proj: 'chaco', nombre: 'Chaco Seguro', eje: 'Seguridad', canales: ['Oficial'], estado: 'Sin entrega', piso: 'No llega', objetivo: 'Impresiones', gasto7: 186000, metaCamp: 'CHACO_IMPRESIONES_SEP26',
+    resumen: 'Dejó de entregar hace 2 días con $540.000 vigentes; hasta entonces rendía cerca de la mediana.',
+    kpi: { resultado: '412.300', costo: '$451 CPM', veces: 0.9, pisoPct: 64, acum: '1,1 M', esp: '1,7 M', ritmo: 'Subejecutada', gastPct: 38, plazoPct: 60, proyeccion: 'Sin entrega no hay proyección: $540.000 detenidos.', presu: '$1.500.000', gastado: '$570.000', restante: '$930.000', dias: '12' },
+    bench: { veces: 0.9, metrica: 'CPM: $451 contra $405 de la mediana.', comparable: '22 conjuntos de Impresiones, video, provincia, audiencia abierta, últimas 13 semanas' },
+    serie: { start: [7, 24], n: 30, res: [60000, 1], cost: [440, 1], med: [64000, 405], mk: -1, stop: 28 },
+    cont: [['GDCHACASEG20114', 'Línea 147 de denuncias', 'Video 15s', '412.300 impresiones', '$451 CPM', 0.9, '$186.000'], ['GDCHACASEG20120', 'Alarmas comunitarias', 'Placa fija', '288.000 impresiones', '$520 CPM', 0.8, '$149.760']],
+    aud: [['GDCHACASEG20114', 'FB/IG Feed', 'Toda la provincia', 'Línea 147 de denuncias', '412.300 impresiones', '$451 CPM', 0.9, 'manual'], ['GDCHACASEG20120', 'FB Feed', 'Capital y Gran Resistencia', 'Alarmas comunitarias', '288.000 impresiones', '$520 CPM', 0.8, 'manual']],
+    insights: [{ tag: 'Calidad de datos', texto: '"Sin entrega" no distingue todavía entre rechazado, en revisión o entrega limitada: requiere la API de Meta.', nota: 'Pendiente de la API de Meta.' }] },
+  { id: 'ea', proj: 'chaco', nombre: 'Escuelas abiertas', eje: 'Educación', canales: ['Oficial', 'Informativo'], estado: 'Por vencer', piso: 'En riesgo', objetivo: 'Interacción', gasto7: 860000, metaCamp: 'CHACO_INTERACCION_AGO26',
+    resumen: 'Gasta más rápido que el plazo y va a agotarse 2 días antes del cierre; las reacciones están en el 82 % de lo esperado.',
+    kpi: { resultado: '1.290', costo: '$667 por reacción', veces: 0.8, pisoPct: 82, acum: '4.120', esp: '5.020', ritmo: 'Sobreejecutada', gastPct: 86, plazoPct: 71, proyeccion: 'Agota el presupuesto el 24/09, antes del cierre del 25/09.', presu: '$3.200.000', gastado: '$2.752.000', restante: '$448.000', dias: '3' },
+    bench: { veces: 0.8, metrica: 'Reacciones por mil impresiones: 3,6 contra 4,5 de la mediana.', comparable: '30 conjuntos de Interacción, carrusel, provincia, audiencia abierta, últimas 13 semanas' },
+    serie: { start: [7, 24], n: 30, res: [180, 1.05], cost: [700, 0.94], med: [220, 560], mk: 19, mkText: '12/09 · Se bajó el presupuesto de "Inscripción 2027" (a mano) — el CPM pasó de $1.480 a $1.410.' },
+    cont: [['GDCHACAED10640', 'Inscripción 2027', 'Carrusel', '702 reacciones', '$510 por reacción', 1.3, '$358.020'], ['GDCHACAED10655', 'Calendario escolar', 'Video', '410 reacciones', '$690 por reacción', 0.9, '$282.900'], ['GDCHACAED10661', 'Comedores escolares', 'Placa fija', '178 reacciones', '$1.240 por reacción', 0.4, '$220.720']],
+    aud: [['GDCHACAED10640', 'FB/IG Feed', 'Capital y Gran Resistencia', 'Inscripción 2027', '420 reacciones', '$460 por reacción', 1.5, 'api'], ['GDCHACAED10640', 'FB/IG Feed', 'Interior provincial', 'Inscripción 2027', '282 reacciones', '$590 por reacción', 1.1, 'api'], ['GDCHACAED10655', 'IG Reels', 'Toda la provincia', 'Calendario escolar', '410 reacciones', '$690 por reacción', 0.9, 'api'], ['GDCHACAED10661', 'FB/IG Feed', 'Toda la provincia', 'Comedores escolares', '178 reacciones', '$1.240 por reacción', 0.4, 'api']],
+    insights: [{ tag: 'Cruce de canales', texto: 'Oficial e Informativo rinden parecido: 4,1 y 4,6 reacciones por mil. Oficial concentra el 70 % del gasto.', rows: [['Oficial', '$602.000', '$1.380', '4,1'], ['Informativo', '$258.000', '$1.520', '4,6']] }] },
+  { id: 'vi', proj: 'chaco', nombre: 'Vacunación invierno', eje: 'Salud', canales: ['Oficial'], estado: 'Activa', piso: 'En riesgo', objetivo: 'Alcance', gasto7: 410000, metaCamp: 'CHACO_ALCANCE_SEP26',
+    resumen: 'Llega al 78 % de las impresiones esperadas porque la audiencia es chica y el CPM duplica la mediana.',
+    kpi: { resultado: '132.000', costo: '$3.100 CPM', veces: 0.4, pisoPct: 78, acum: '298.000', esp: '382.000', ritmo: 'En ritmo', gastPct: 52, plazoPct: 50, proyeccion: 'Termina con el presupuesto usado.', presu: '$1.800.000', gastado: '$936.000', restante: '$864.000', dias: '23' },
+    bench: { veces: 0.4, metrica: 'CPM: $3.100 contra $1.300 de la mediana.', comparable: '22 conjuntos de Alcance, placa fija, localidad, audiencia por edad, últimas 13 semanas' },
+    serie: { start: [7, 24], n: 30, res: [19000, 1], cost: [3100, 1], med: [24000, 1300], mk: -1 },
+    cont: [['GDCHACASAL30021', 'Vacunate contra la gripe', 'Placa fija', '82.000 impresiones', '$3.100 CPM', 0.4, '$254.200'], ['GDCHACASAL30027', 'Dónde vacunarte', 'Video', '50.000 impresiones', '$1.900 CPM', 0.7, '$95.000']],
+    aud: [['GDCHACASAL30021', 'FB Feed', 'Mayores de 65, Sáenz Peña', 'Vacunate contra la gripe', '82.000 impresiones', '$3.100 CPM', 0.4, 'manual'], ['GDCHACASAL30027', 'FB Feed', 'Toda la provincia, 60+', 'Dónde vacunarte', '50.000 impresiones', '$1.900 CPM', 0.7, 'manual']],
+    insights: [{ tag: 'Calidad de datos', texto: 'Alcance y frecuencia todavía no llegan desde Meta: esta campaña se compara por impresiones.', nota: 'Pendiente de la API de Meta.' }] },
+  { id: 'js', proj: 'chaco', nombre: 'Juegos Suramericanos', eje: 'Deportes', canales: ['Informativo'], estado: 'Activa', piso: 'En camino', objetivo: 'Interacción', gasto7: 1050000, metaCamp: 'CHACO_INTERACCION_SEP26',
+    resumen: 'Va por encima del piso con dos conjuntos en 2 veces la mediana; solo Natación queda por debajo.',
+    kpi: { resultado: '9.870', costo: '$106 por reacción', veces: 1.3, pisoPct: 124, acum: '31.400', esp: '25.300', ritmo: 'En ritmo', gastPct: 48, plazoPct: 45, proyeccion: 'Termina con el presupuesto usado.', presu: '$6.500.000', gastado: '$3.120.000', restante: '$3.380.000', dias: '19' },
+    bench: { veces: 1.3, metrica: 'Reacciones por mil impresiones: 5,9 contra 4,5 de la mediana.', comparable: '18 conjuntos de Interacción, video, provincia, audiencia abierta, últimas 13 semanas' },
+    serie: { start: [7, 24], n: 30, res: [1400, 1], cost: [106, 1], med: [1100, 140], mk: -1 },
+    cont: [['GDCHACADEP10801', 'Atletismo: clasificación', 'Video', '3.940 reacciones', '$62 por reacción', 2.3, '$244.280'], ['GDCHACADEP10806', 'Básquet 3x3', 'Video', '3.100 reacciones', '$75 por reacción', 1.9, '$232.500'], ['GDCHACADEP10812', 'Agenda de competencias', 'Placa fija', '2.180 reacciones', '$140 por reacción', 1.0, '$305.200'], ['GDCHACADEP10818', 'Natación en el Centro Acuático', 'Video', '650 reacciones', '$360 por reacción', 0.4, '$234.000']],
+    aud: [['GDCHACADEP10801', 'FB/IG Feed', 'Capital y Gran Resistencia', 'Atletismo: clasificación', '3.940 reacciones', '$62 por reacción', 2.3, 'api'], ['GDCHACADEP10806', 'IG Reels', 'Jóvenes 16–24, toda la provincia', 'Básquet 3x3', '3.100 reacciones', '$75 por reacción', 1.9, 'api'], ['GDCHACADEP10812', 'FB Feed', 'Toda la provincia', 'Agenda de competencias', '2.180 reacciones', '$140 por reacción', 1.0, 'manual'], ['GDCHACADEP10818', 'IG Stories', 'Toda la provincia', 'Natación en el Centro Acuático', '650 reacciones', '$360 por reacción', 0.4, 'api']],
+    insights: [{ tag: 'Fatiga de creativo', texto: '"Agenda de competencias" (GDCHACADEP10812) cumple 21 días activo el 25/09.' }] },
+  { id: 'cb', proj: 'chaco', nombre: 'Cultura en los barrios', eje: 'Cultura', canales: ['Oficial', 'Informativo'], estado: 'Agotada', piso: 'En camino', objetivo: 'Impresiones', gasto7: 240000, metaCamp: 'CHACO_IMPRESIONES_AGO26',
+    resumen: 'Usó el 99 % del presupuesto y paró el 20/09; cerró con 1,3 veces el piso de impresiones.',
+    kpi: { resultado: '610.000', costo: '$393 CPM', veces: 1.2, pisoPct: 130, acum: '2,9 M', esp: '2,2 M', ritmo: 'En ritmo', gastPct: 99, plazoPct: 100, proyeccion: 'Cerró con $12.000 sin gastar.', presu: '$1.200.000', gastado: '$1.188.000', restante: '$12.000', dias: '0' },
+    bench: { veces: 1.2, metrica: 'CPM: $393 contra $470 de la mediana.', comparable: '26 conjuntos de Impresiones, video, provincia, audiencia abierta, últimas 13 semanas' },
+    serie: { start: [7, 24], n: 30, res: [87000, 1], cost: [393, 1], med: [72000, 470], mk: -1, stop: 28 },
+    cont: [['GDCHACACUL40011', 'Festival de murgas', 'Video', '380.000 impresiones', '$360 CPM', 1.3, '$136.800'], ['GDCHACACUL40016', 'Talleres barriales', 'Placa fija', '230.000 impresiones', '$430 CPM', 1.1, '$98.900']],
+    aud: [['GDCHACACUL40011', 'FB/IG Feed', 'Capital y Gran Resistencia', 'Festival de murgas', '380.000 impresiones', '$360 CPM', 1.3, 'manual'], ['GDCHACACUL40016', 'FB Feed', 'Toda la provincia', 'Talleres barriales', '230.000 impresiones', '$430 CPM', 1.1, 'manual']],
+    insights: [] },
+  { id: 'be', proj: 'chaco', nombre: 'Boleto estudiantil', eje: 'Educación', canales: ['Oficial'], estado: 'Programada', piso: '—', objetivo: 'Tráfico', gasto7: 0, metaCamp: 'CHACO_TRAFICO_OCT26',
+    resumen: 'Empieza el 01/10. Todavía no hay datos para seguir.', kpi: null, cont: [], aud: [], insights: [] },
+];
+
+const RECS = [
+  { id: 'r1', camp: 'mf', score: 98, tipo: 'Pausar y mover el restante', prioridad: 'Alta', que: 'Pausar el conjunto y mover el restante', contenido: '"Inscripción Chaco sin Resistencia" (Placa Fija)', conjuntos: ['FB/IG Feed · Toda la provincia excluyendo Resistencia'],
+    porque: 'Genera 0,1 veces las reacciones por impresión de conjuntos comparables (30 conjuntos de Interacción, placa fija, audiencia provincial abierta).',
+    gana: 'Mover $325.230 a "Inscripción Madres y Padres", que rinde en la mediana, suma ~2.900 reacciones en los 9 días que quedan.', via: 'manual',
+    pasos: ['En el administrador de anuncios, pausar el conjunto GDCHACAED10771.', 'Subir el presupuesto diario de GDCHACAED10669 en 20 % (el resto del restante queda para el próximo ajuste, dentro de 3 días).'],
+    seguridad: ['Limitado a +20 % en el conjunto que recibe, para no reiniciar el aprendizaje de Meta', 'El restante se mueve dentro de la misma campaña'], confianza: 'Alta', vence: '01/10' },
+  { id: 'r2', camp: 'cs', score: 92, tipo: 'Revisar entrega', prioridad: 'Alta', que: 'Revisar la entrega del conjunto', contenido: '"Línea 147 de denuncias" (Video 15s)', conjuntos: ['FB/IG Feed · Toda la provincia'],
+    porque: 'No gastó en las últimas 48 h con $540.000 de presupuesto vigente y 12 días por delante.', gana: 'Recupera la entrega de $540.000 que hoy no se están gastando.', via: 'manual',
+    pasos: ['En el administrador de anuncios → conjunto GDCHACASEG20114 → revisar si el anuncio fue rechazado, está en revisión o tiene entrega limitada.', 'Si fue rechazado, pedir el ajuste de la pieza en PAUTADOR.'],
+    seguridad: ['Sin cambios de presupuesto hasta confirmar la causa', 'El estado de entrega todavía no llega desde la API de Meta'], confianza: 'Alta', vence: '04/10' },
+  { id: 'r4', camp: 'ea', score: 84, tipo: 'Frenar', prioridad: 'Alta', que: 'Bajar 15 % el presupuesto diario', contenido: '"Inscripción 2027" (Carrusel)', conjuntos: ['FB/IG Feed · Capital y Gran Resistencia', 'FB/IG Feed · Interior provincial'],
+    porque: 'Gastó 1,22 veces lo que corresponde al plazo: 86 % del presupuesto con 71 % del plazo.', gana: 'Evita agotar el presupuesto antes del cierre y mantiene la entrega hasta el 25/09.', via: 'api',
+    pasos: ['Presupuesto diario, Capital y Gran Resistencia: $30.000 → $25.500 (-15 %)', 'Presupuesto diario, Interior provincial: $22.000 → $18.700 (-15 %)'],
+    seguridad: ['Dentro del tope de ±20 % por cambio', 'Quedan 3 días: fuera de la ventana de los últimos 2 días'], confianza: 'Alta', vence: '24/09' },
+  { id: 'r3', camp: 'mf', score: 71, tipo: 'Acelerar', prioridad: 'Media', que: 'Subir 20 % el presupuesto diario', contenido: '"Becas deportivas 2026" (Video)', conjuntos: ['IG Reels · Jóvenes 16–24, toda la provincia'],
+    porque: 'La campaña gastó 32 % con 47 % del plazo. Este conjunto rinde 1,7 veces la mediana (30 conjuntos de Interacción, video, provincia, audiencia abierta).', gana: 'Reduce en $158.000 lo que termina sin gastar y suma ~250 reacciones en los 9 días que quedan.', via: 'api',
+    pasos: ['Presupuesto diario del conjunto: $18.000 → $21.600 (+20 %)'], seguridad: ['Limitado a +20 % para no reiniciar el aprendizaje de Meta', 'Último cambio en este conjunto hace 5 días'], confianza: 'Media', vence: '01/10' },
+  { id: 'r9', camp: 'ea', score: 66, tipo: 'Bajar presupuesto', prioridad: 'Media', que: 'Bajar 20 % el presupuesto diario', contenido: '"Comedores escolares" (Placa Fija)', conjuntos: ['FB/IG Feed · Toda la provincia'],
+    porque: 'Rinde 0,4 veces la mediana en reacciones por mil impresiones (30 conjuntos de Interacción, placa fija, provincia, audiencia abierta).', gana: 'Evita que sobren $85.000 en un conjunto que rinde por debajo.', via: 'api',
+    pasos: ['Presupuesto diario del conjunto: $15.000 → $12.000 (-20 %)'], seguridad: ['Limitado a -20 % para no reiniciar el aprendizaje de Meta', 'Por encima del mínimo diario de Meta'], confianza: 'Alta', vence: '24/09' },
+  { id: 'r5', camp: 'mf', score: 60, tipo: 'Rotar creativo', prioridad: 'Media', que: 'Rotar el creativo', contenido: '"Escuelitas municipales" (Placa Fija)', conjuntos: ['FB/IG Feed · Interior provincial'],
+    porque: 'Lleva 24 días activo en Interacción. Pasado el mes, la tasa de reacción cae entre 35 % y 55 %; hoy rinde 0,12 veces la mediana.', gana: 'Recupera la tasa de reacción de una pieza nueva en los 9 días que quedan.', via: 'pautador',
+    pasos: ['Pedir una pieza nueva en PAUTADOR para la misma campaña y audiencia.'], seguridad: ['Rotar creativo no se aplica solo: genera un pedido de pieza en PAUTADOR'], confianza: 'Media', vence: '01/10' },
+  { id: 'r6', camp: 'js', score: 48, tipo: 'Bajar presupuesto', prioridad: 'Media', que: 'Bajar 20 % el presupuesto diario', contenido: '"Natación en el Centro Acuático" (Video)', conjuntos: ['IG Stories · Toda la provincia'],
+    porque: 'Rinde 0,4 veces la mediana (18 conjuntos de Interacción, video, provincia, audiencia abierta).', gana: 'Libera $96.000 para el próximo ajuste dentro de la campaña.', via: 'api',
+    pasos: ['Presupuesto diario del conjunto: $12.000 → $9.600 (-20 %)'], seguridad: ['Limitado a -20 % para no reiniciar el aprendizaje de Meta', 'Por encima del mínimo diario de Meta'], confianza: 'Media', vence: '12/10' },
+  { id: 'r10', camp: 'js', score: 45, silenced: true, tipo: 'Reforzar', prioridad: 'Media', que: 'Subir 20 % el presupuesto diario', contenido: '"Atletismo: clasificación" (Video)', conjuntos: ['FB/IG Feed · Capital y Gran Resistencia'],
+    porque: 'Rinde 2,3 veces la mediana y le quedan 19 días (18 conjuntos comparables).', gana: '+640 reacciones con +$58.000 dentro del presupuesto de la campaña.', via: 'api',
+    pasos: ['Presupuesto diario del conjunto: $14.000 → $16.800 (+20 %)'], seguridad: ['Limitado a +20 % para no reiniciar el aprendizaje de Meta'], confianza: 'Media', vence: '12/10' },
+  { id: 'r7', camp: 'vi', score: 34, tipo: 'Revisar audiencia', prioridad: 'Baja', que: 'Revisar la audiencia', contenido: '"Vacunate contra la gripe" (Placa Fija)', conjuntos: ['FB Feed · Mayores de 65, Sáenz Peña'],
+    porque: 'CPM $3.100, 2,4 veces la mediana (22 conjuntos de Alcance, placa fija, localidad, audiencia por edad). Típico de audiencias chicas.', gana: 'Con una audiencia del tamaño de la mediana, las mismas impresiones cuestan ~$120.000 menos.', via: 'manual',
+    pasos: ['En el administrador de anuncios → conjunto GDCHACASAL30021 → audiencia → ampliar a Sáenz Peña + 20 km o sumar el rango 60–64.'], seguridad: ['Cambiar la audiencia reinicia el aprendizaje: hacerlo una sola vez'], confianza: 'Baja', vence: '15/10' },
+  { id: 'r8', camp: 'mf', score: 30, tipo: 'Revisar audiencia', prioridad: 'Baja', que: 'Revisar la audiencia', contenido: '"Torneo intercolegial" (Carrusel)', conjuntos: ['IG Stories · Toda la provincia, 13–18'],
+    porque: 'CPM 2,1 veces la mediana (12 conjuntos comparables: pocos para una lectura firme).', gana: 'Llevar el CPM a la mediana suma ~90 reacciones con el mismo gasto.', via: 'manual',
+    pasos: ['En el administrador de anuncios → conjunto GDCHACAED10688 → audiencia → sumar FB Feed como ubicación o ampliar a 13–24.'], seguridad: ['Un cambio por conjunto cada 3 días: último cambio hace 6 días'], confianza: 'Baja', vence: '01/10' },
+];
+
+const HIST = [
+  { fecha: '18/09', quien: 'Juan', proyecto: 'Gobierno del Chaco', canal: 'Oficial', camp: 'Más Futuro', contenido: 'Inscripción Madres y Padres', tipo: 'Bajar presupuesto', dec: 'Aceptada e incorporada', just: '', aplic: 'Aplicada vía API (simulado)', res: '$1.050 → $760 por reacción', lect: 'Mejoró · medición parcial (4 de 7 días)', lectC: '#46C678' },
+  { fecha: '15/09', quien: 'Carla', proyecto: 'Gobierno del Chaco', canal: 'Informativo', camp: 'Juegos Suramericanos', contenido: 'Atletismo: clasificación', tipo: 'Reforzar', dec: 'Declinada', just: 'Pedido del cliente — "Mantener la distribución por disciplina hasta el cierre."', aplic: '—', res: '—', lect: '' },
+  { fecha: '12/09', quien: 'Juan', proyecto: 'Gobierno del Chaco', canal: 'Oficial', camp: 'Escuelas abiertas', contenido: 'Inscripción 2027', tipo: 'Frenar', dec: 'Aceptada e incorporada', just: '', aplic: 'Hecha a mano', res: 'CPM $1.480 → $1.410 · 1,1 → 1,2 veces la mediana', lect: 'Sin cambio', lectC: '#A6AAA9' },
+  { fecha: '10/09', quien: 'Carla', proyecto: 'Gobierno del Chaco', canal: 'Oficial', camp: 'Vacunación invierno', contenido: 'Vacunate contra la gripe', tipo: 'Revisar audiencia', dec: 'Respondida', just: '"La audiencia es chica a propósito: es un operativo puntual en Sáenz Peña."', aplic: '—', res: '—', lect: '' },
+  { fecha: '08/09', quien: 'Juan', proyecto: 'Gobierno del Chaco', canal: 'Oficial e Informativo', camp: 'Más Futuro', contenido: 'Becas deportivas 2026', tipo: 'Reforzar', dec: 'Aceptada e incorporada', just: '', aplic: 'Aplicada vía API (simulado)', res: '$820 → $640 por reacción · 1,1 → 1,4 veces la mediana', lect: 'Mejoró', lectC: '#46C678' },
+  { fecha: '05/09', quien: 'Martín', proyecto: 'Gobierno del Chaco', canal: 'Informativo', camp: 'Juegos Suramericanos', contenido: 'Natación en el Centro Acuático', tipo: 'Pausar y mover el restante', dec: 'Aceptada, no incorporada', just: '"Lo hacemos en el próximo pedido."', aplic: '—', res: '—', lect: '' },
+  { fecha: '02/09', quien: 'Martín', proyecto: 'Gobierno del Chaco', canal: 'Oficial', camp: 'Chaco Seguro', contenido: 'Alarmas comunitarias', tipo: 'Bajar presupuesto', dec: 'Aceptada e incorporada', just: '', aplic: 'Hecha a mano', res: 'CPM $490 → $520 · 0,9 → 0,8 veces la mediana', lect: 'Empeoró', lectC: '#F7444C' },
+];
+
+function buildSerie(c, metric) {
+  const s = c.serie; if (!s) return null;
+  const isRes = metric === 'res';
+  const [base, mult] = isRes ? s.res : s.cost;
+  const med = isRes ? s.med[0] : s.med[1];
+  const vals = [];
+  for (let i = 0; i < s.n; i++) {
+    let v = base * (1 + 0.16 * Math.sin(i * 1.9 + base % 7) + 0.07 * Math.cos(i * 3.1));
+    if (s.mk >= 0 && i >= s.mk) v *= mult;
+    if (s.stop != null && i >= s.stop) v = 0;
+    vals.push(v);
+  }
+  const max = Math.max(med, ...vals) * 1.12;
+  const u = UNIT[c.objetivo];
+  const fmt = v => isRes ? Math.round(v).toLocaleString('es-AR') : money(v);
+  const bars = vals.map((v, i) => {
+    const dt = new Date(2026, s.start[0], s.start[1] + i);
+    const d = String(dt.getDate()).padStart(2, '0') + '/' + String(dt.getMonth() + 1).padStart(2, '0');
+    return { h: (v / max * 100).toFixed(1), d, lab: (i % 4 === 0 || i === s.n - 1) ? d : '', mk: i === s.mk, tip: d + ' · ' + (v ? fmt(v) : 'sin entrega') };
+  });
+  return { bars, medPct: (med / max * 100).toFixed(1), medTxt: fmt(med) + (isRes ? ' por día' : ''), unitLabel: isRes ? u[1] : u[2] };
+}
+
+class Component extends DCLogic {
+  state = { tab: 'seg', proyecto: 'chaco', canal: 'Ambos', eje: 'Todos', campId: null, metric: 'res', allCont: false, allAud: false, calidadOpen: false,
+    decisions: {}, soloPend: true, fTipo: 'Todos', fVia: 'Todas', fConf: 'Todas', agrupar: 'Ninguno', unsilenced: false,
+    consultado: '14:32', refreshing: false, hImpl: 'Todos', hDec: 'Todas', hTipo: 'Todos', toast: null };
+
+  componentWillUnmount() { clearTimeout(this._tt); clearTimeout(this._rt); }
+
+  decide = (id, d) => {
+    this.setState(s => ({ decisions: { ...s.decisions, [id]: { ...d, fecha: '23/09', quien: 'Juan', ts: Date.now() } }, toast: { id, text: 'Decisión registrada: ' + DEC[d.tipo] } }));
+    clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: null }), 5000);
+  };
+  undo = id => this.setState(s => { const n = { ...s.decisions }; delete n[id]; return { decisions: n, toast: null }; });
+  markDone = id => this.setState(s => ({ decisions: { ...s.decisions, [id]: { ...s.decisions[id], hecho: true } } }));
+  openCamp = id => { this.setState({ tab: 'seg', campId: id, allCont: false, allAud: false }); window.scrollTo(0, 0); };
+
+  seg(opts, cur, key) {
+    return opts.map(o => ({ label: o, bg: cur === o ? '#3C3C3C' : 'transparent', fg: cur === o ? '#fff' : '#3C3C3C', onClick: () => this.setState({ [key]: o }) }));
+  }
+
+  exportCsv(rows) {
+    const cols = ['fecha', 'quien', 'proyecto', 'canal', 'camp', 'contenido', 'tipo', 'dec', 'just', 'aplic', 'res', 'lect'];
+    const csv = [cols.join(';')].concat(rows.map(r => cols.map(k => '"' + String(r[k] || '').replace(/"/g, '""') + '"').join(';'))).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv' }));
+    a.download = 'historial-seguimiento.csv'; a.click();
+  }
+
+  renderVals() {
+    const s = this.state;
+    const P0 = PROJ[s.proyecto];
+    const decs = s.decisions;
+    const campById = Object.fromEntries(CAMPS.map(c => [c.id, c]));
+    const inFilter = c => c.proj === s.proyecto && (s.canal === 'Ambos' || c.canales.includes(s.canal)) && (s.eje === 'Todos' || c.eje === s.eje);
+    const recsAll = RECS.filter(r => !r.silenced || s.unsilenced).filter(r => inFilter(campById[r.camp]));
+    const isPend = r => !decs[r.id];
+    const enrich = r => { const c = campById[r.camp]; return { ...r, campNombre: c.nombre, eje: c.eje, decision: decs[r.id] || null }; };
+    const pendAll = recsAll.filter(isPend);
+
+    const camps = CAMPS.filter(inFilter);
+    const problem = c => c.piso === 'No llega' || c.piso === 'En riesgo' || c.estado === 'Sin entrega';
+    const rows = camps.slice().sort((a, b) => (problem(b) - problem(a)) || (b.gasto7 - a.gasto7)).map(c => {
+      const pr = pendAll.filter(r => r.camp === c.id);
+      const alta = pr.filter(r => r.prioridad === 'Alta').length;
+      return { ...c, canalTxt: c.canales.join(' e '), estC: EST_C[c.estado], pisoC: PISO_C[c.piso], pend: pr.length,
+        recBg: alta ? '#F7444C' : '#F4F4F4', recFg: alta ? '#fff' : '#3C3C3C', altaTxt: alta ? `${alta} de prioridad alta` : pr.length ? 'pendientes' : 'sin pendientes',
+        open: () => this.openCamp(c.id) };
+    });
+
+    const gastPct = Math.round(P0.gast / P0.presu * 100), projPct = Math.round(P0.proj / P0.presu * 100);
+    const P = { ...P0, gastPct, projPct, hasAviso: !!P0.aviso, hasCalidad: P0.calidad.length > 0 };
+
+    // detail
+    const c = s.campId ? campById[s.campId] : null;
+    let D = {}, K = {}, B = {}, chart = { bars: [], opts: [] }, rankings = [], campRecs = [];
+    if (c) {
+      const u = UNIT[c.objetivo];
+      D = { ...c, canalTxt: c.canales.join(' e '), estC: EST_C[c.estado], pisoC: PISO_C[c.piso], hasKpi: !!c.kpi,
+        hasInsights: c.insights.length > 0,
+        insights: c.insights.map(i => ({ ...i, hasRows: !!i.rows, rows: (i.rows || []).map(r => ({ a: r[0], b: r[1], c: r[2], d: r[3] })), hasNota: !!i.nota })) };
+      if (c.kpi) {
+        const k = c.kpi;
+        K = { ...k, resUnit: u[0], vecesTxt: fx(k.veces), vecesC: vc(k.veces), pisoBar: Math.min(k.pisoPct, 100), ritmoC: RITMO_C[k.ritmo],
+          presu: [{ label: 'Presupuesto', value: k.presu }, { label: 'Gastado', value: k.gastado }, { label: 'Restante', value: k.restante }, { label: 'Días restantes', value: k.dias }] };
+        B = { ...c.bench, vecesTxt: fx(c.bench.veces), pos: (Math.min(c.bench.veces, 3) / 3 * 100).toFixed(1), c: vc(c.bench.veces) };
+        const sr = buildSerie(c, s.metric);
+        chart = { ...sr, sub: sr.unitLabel + ' · ' + (c.serie.n >= 30 ? 'últimos 30 días' : 'desde el inicio de la campaña'), hasMk: c.serie.mk >= 0, mkText: c.serie.mkText || '',
+          opts: [['res', u[1].replace(' por día', '')], ['cost', u[2]]].map(([id, label]) => ({ label, bg: s.metric === id ? '#3C3C3C' : 'transparent', fg: s.metric === id ? '#fff' : '#3C3C3C', onClick: () => this.setState({ metric: id }) })) };
+      }
+      const rank = (list, all, key, title, sub, map) => {
+        const sorted = list.map(map).sort((a, b) => b.v - a.v);
+        const nb = Math.min(3, Math.ceil(sorted.length / 2));
+        const cols = all ? [{ title: 'Todos, de mejor a peor', items: sorted }] : [{ title: 'Mejores', items: sorted.slice(0, nb) }, { title: 'Peores', items: sorted.slice(nb).slice(-3).reverse() }].filter(x => x.items.length);
+        return { title, sub, cols, toggleLabel: all ? 'Ver mejores y peores' : `Ver todos (${sorted.length})`, toggle: () => this.setState({ [key]: !all }) };
+      };
+      const item = (x, v) => ({ ...x, v, vecesTxt: fx(v), bar: (Math.min(v, 3) / 3 * 100).toFixed(1), c: vc(v) });
+      if (c.cont.length) {
+        rankings.push(rank(c.cont, s.allCont, 'allCont', 'Mejores y peores contenidos', 'Eficiencia contra la mediana. Solo entran los que superan el piso de volumen mínimo.',
+          x => item({ nombre: x[1], sub: x[0] + ' · ' + x[2], meta: [x[3], x[4], 'Gasto ' + x[6]] }, x[5])));
+        rankings.push(rank(c.aud, s.allAud, 'allAud', 'Mejores y peores audiencias', 'Ranking de conjuntos (ubicación + segmentación), con el mismo piso de volumen.',
+          x => item({ nombre: x[1] + ' · ' + x[2], sub: x[0] + ' · ' + x[3], meta: [x[4], x[5], x[7] === 'api' ? 'Vía API (simulado)' : 'Manual'] }, x[6])));
+      }
+      campRecs = RECS.filter(r => r.camp === c.id && (!r.silenced || s.unsilenced)).sort((a, b) => b.score - a.score).map(enrich);
+    }
+
+    // recs tab
+    const tipos = ['Todos', ...Array.from(new Set(RECS.map(r => r.tipo)))];
+    const viaMap = { 'API (simulado)': 'api', 'Manual': 'manual', 'PAUTADOR': 'pautador' };
+    const list = recsAll.filter(r => {
+      const d = decs[r.id];
+      if (s.soloPend && d && !(d.tipo === 'aceptada' && r.via === 'manual' && !d.hecho)) return false;
+      if (s.fTipo !== 'Todos' && r.tipo !== s.fTipo) return false;
+      if (s.fVia !== 'Todas' && r.via !== viaMap[s.fVia]) return false;
+      if (s.fConf !== 'Todas' && r.confianza !== s.fConf) return false;
+      return true;
+    }).sort((a, b) => b.score - a.score).map(enrich);
+    let recGroups;
+    if (s.agrupar === 'Ninguno') recGroups = [{ hasTitle: false, recs: list }];
+    else {
+      const key = s.agrupar === 'Eje' ? 'eje' : 'campNombre'; const m = new Map();
+      list.forEach(r => { if (!m.has(r[key])) m.set(r[key], []); m.get(r[key]).push(r); });
+      recGroups = Array.from(m, ([title, recs]) => ({ hasTitle: true, title, recs, countTxt: recs.length + (recs.length === 1 ? ' recomendación' : ' recomendaciones') }));
+    }
+    const nApi = pendAll.filter(r => r.via === 'api').length;
+    const counter = `${pendAll.length} pendientes · ${nApi} se pueden aplicar vía API (simulado) · ${pendAll.length - nApi} manuales`;
+
+    // historial
+    const sessionRows = Object.entries(decs).sort((a, b) => b[1].ts - a[1].ts).map(([id, d]) => {
+      const r = RECS.find(x => x.id === id); const cc = campById[r.camp];
+      let aplic = '—', res = '—';
+      if (d.tipo === 'aceptada') {
+        aplic = r.via === 'api' ? 'Aplicada vía API (simulado)' : r.via === 'pautador' ? 'Pedido enviado a PAUTADOR (simulado)' : d.hecho ? 'Hecha a mano' : 'Pendiente de hacer a mano';
+        res = 'Se mide el 30/09';
+      }
+      const just = d.tipo === 'decl' ? `${d.motivo} — "${d.texto}"` : d.texto ? `"${d.texto}"` : '';
+      return { fecha: d.fecha, quien: d.quien, proyecto: PROJ[cc.proj].nombre, canal: cc.canales.join(' e '), camp: cc.nombre, contenido: r.contenido.replace(/"/g, ''), tipo: r.tipo, dec: DEC[d.tipo], just, aplic, res, lect: '' };
+    });
+    const allHist = sessionRows.concat(HIST).filter(h => h.proyecto === P0.nombre);
+    const histRows = allHist.filter(h => (s.hImpl === 'Todos' || h.quien === s.hImpl) && (s.hDec === 'Todas' || h.dec === s.hDec) && (s.hTipo === 'Todos' || h.tipo === s.hTipo))
+      .map(h => ({ ...h, decC: DEC_C[h.dec], hasJust: !!h.just, hasLect: !!h.lect, lectC: h.lectC || '#A6AAA9' }));
+    const sel = (label, key, opts) => ({ label, value: s[key], opts, onChange: e => this.setState({ [key]: e.target.value }) });
+
+    const tab = s.tab;
+    return {
+      tabs: [['seg', 'Seguimiento'], ['rec', 'Recomendaciones'], ['his', 'Historial']].map(([id, label]) => ({
+        label, fw: tab === id ? 600 : 500, bc: tab === id ? '#3C3C3C' : 'transparent', hasCount: id === 'rec' && pendAll.length > 0, count: pendAll.length,
+        onClick: () => this.setState({ tab: id, campId: id === 'seg' ? null : s.campId }) })),
+      proyecto: s.proyecto, proyectos: Object.entries(PROJ).map(([id, p]) => ({ id, nombre: p.nombre })),
+      onProyecto: e => this.setState({ proyecto: e.target.value, campId: null }),
+      canalOpts: this.seg(['Ambos', 'Oficial', 'Informativo'], s.canal, 'canal'),
+      eje: s.eje, ejes: ['Todos', 'Deportes', 'Educación', 'Salud', 'Seguridad', 'Cultura'], onEje: e => this.setState({ eje: e.target.value }),
+      frescura: `Datos hasta 22/09 · chequeo de las 11:00 · consultado ${s.consultado}`,
+      refreshLabel: s.refreshing ? 'Actualizando…' : 'Actualizar',
+      onRefresh: () => {
+        if (s.refreshing) return;
+        this.setState({ refreshing: true });
+        this._rt = setTimeout(() => { const d = new Date(); this.setState({ refreshing: false, consultado: String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') }); }, 800);
+      },
+      showPanel: tab === 'seg' && !c, showDetail: tab === 'seg' && !!c, showRecs: tab === 'rec', showHist: tab === 'his',
+      P, budget: [{ label: 'Presupuesto mensual', value: money(P0.presu) }, { label: 'Gastado en el mes', value: money(P0.gast) }, { label: 'Restante del mes', value: money(P0.presu - P0.gast) }, { label: 'Proyección al cierre', value: money(P0.proj) }],
+      totals: [{ value: camps.filter(x => ['Activa', 'Por vencer', 'Sin entrega'].includes(x.estado)).length, label: 'Campañas activas' }, { value: P0.conjuntos, label: 'Conjuntos vivos' }, { value: money(camps.reduce((a, x) => a + x.gasto7, 0)), label: 'Gasto de los últimos 7 días' }, { value: pendAll.length, label: 'Recomendaciones pendientes' }],
+      openCalidad: () => this.setState({ calidadOpen: true }), toggleCalidad: () => this.setState({ calidadOpen: !s.calidadOpen }),
+      calidadOpen: s.calidadOpen, calidadToggle: s.calidadOpen ? 'Plegar' : 'Desplegar', calidadCount: P0.calidad.length,
+      rows, noRows: rows.length === 0,
+      emptyPanel: s.proyecto === 'lsf' ? '3 campañas cargadas como "Stories", "IG/FB Feed" o sin comunicación. No se pueden comparar por campaña.' : 'No hay campañas con estos filtros.',
+      backToPanel: () => this.setState({ campId: null }),
+      D, K, B, chart, rankings, campRecs, noCampRecs: c ? campRecs.length === 0 : false,
+      decide: this.decide, undo: this.undo, markDone: this.markDone, openCamp: this.openCamp,
+      counter, showSilenced: s.proyecto === 'chaco' && !s.unsilenced, unsilence: () => this.setState({ unsilenced: true }),
+      toggleSolo: () => this.setState({ soloPend: !s.soloPend }), soloBg: s.soloPend ? '#3C3C3C' : '#D5D5D5', soloKnob: s.soloPend ? 15 : 3,
+      recSelects: [sel('Tipo', 'fTipo', tipos), sel('Vía', 'fVia', ['Todas', 'API (simulado)', 'Manual', 'PAUTADOR']), sel('Confianza', 'fConf', ['Todas', 'Alta', 'Media', 'Baja'])],
+      groupOpts: this.seg(['Ninguno', 'Eje', 'Campaña'], s.agrupar, 'agrupar'),
+      recGroups, noRecs: list.length === 0,
+      histSelects: [sel('Implementador', 'hImpl', ['Todos', ...new Set(allHist.map(h => h.quien))]), sel('Decisión', 'hDec', ['Todas', ...Object.values(DEC)]), sel('Tipo de cambio', 'hTipo', ['Todos', ...new Set(allHist.map(h => h.tipo))])],
+      histRows, histCount: `${histRows.length} decisiones`, exportCsv: () => this.exportCsv(histRows),
+      hasToast: !!s.toast, toastText: s.toast ? s.toast.text : '', toastUndo: () => s.toast && this.undo(s.toast.id),
+    };
+  }
+}
+</script>
+</body>
+</html>

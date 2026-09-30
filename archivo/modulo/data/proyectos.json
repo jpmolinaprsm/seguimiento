@@ -1,0 +1,7 @@
+{
+  "Gobierno de Santa Fe": { "codigos": ["GSFOFI", "GSFJUE", "GSFLOT"], "nombres": ["Gobierno de Santa Fe", "Juegos Suramericanos & Soy Capi", "Lotería de Santa Fe"] },
+  "Gobierno del Chaco": { "codigos": ["GDCHAC"], "nombres": ["Gobierno del Chaco"] },
+  "Gobierno del Chubut": { "codigos": ["GCHUBU", "GCHNTO", "GCHTUR", "GCHDNO", "GCHLOT"], "nombres": ["Gobierno del Chubut", "Nacho Torres", "Turismo Chubut", "Dino", "Lotería del Chubut"] },
+  "Catamarca Provincia": { "codigos": ["CTMPRV", "CTMFDP"], "nombres": ["Catamarca Provincia Oficial", "Festival del Poncho"] },
+  "Gobierno de Corrientes": { "codigos": ["GCORIE", "GCOJPV", "GCOLOT"], "nombres": ["Gobierno de Corrientes", "Juan Pablo Valdés Campaña", "Loteria de Corrientes"] }
+}
