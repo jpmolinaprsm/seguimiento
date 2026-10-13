@@ -458,6 +458,28 @@ const SIN_SALUD = { hay: false, ritmo: '', dot: '', bg: 'transparent', restante:
 const FILTROS_CAMP = [['Todas', () => true], ['Activas', (c) => c.act], ['Finalizadas', (c) => !c.act], ['Constantes', (c) => c.tipo === 'constante'], ['Estacionales', (c) => c.tipo === 'estacional'], ['Largas', (c) => c.tipo === 'larga'], ['Puntuales', (c) => c.tipo === 'puntual']];
 const TAG_TIPO = { constante: 'constante', estacional: 'estacional', larga: 'larga', puntual: 'puntual' };
 // decisiones guardadas antes ("es estacional / no es") pasan al esquema nuevo
+// <alias-campanas>
+// Lo guardado por nombre de campaña (tipos, decisiones, comentarios) se busca con la clave exacta y, si no está, por el nombre normalizado,
+// el oficial o el viejo (DATA.aliasCampanas: la tabla de borrador/nombres-oficiales.js, vía app/alias-campanas.js). Sin migrar nada.
+const normCamp = (s) => String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+const oficialCamp = (pid, n) => { const p = DATA.proyectos.find((x) => x.id === pid), al = DATA.aliasCampanas || {}, nn = normCamp(n); if (p) for (const q of [p.cliente, p.cliente + ' Oficial']) if (al[q] && al[q][nn]) return al[q][nn]; return n; };
+const _idxTipos = new WeakMap();
+const tipoGuardado = (tipos, key) => {
+  if (tipos[key] !== undefined) return tipos[key];
+  let ix = _idxTipos.get(tipos);
+  if (!ix) {
+    ix = {};
+    for (const [k, v] of Object.entries(tipos)) {
+      const a = k.split('|'); if (a.length < 3) continue;
+      const c = a.slice(2).join('|');
+      for (const n of new Set([normCamp(c), normCamp(oficialCamp(a[0], c))])) ix[a[0] + '|' + a[1] + '|' + n] = v;
+    }
+    _idxTipos.set(tipos, ix);
+  }
+  const a = key.split('|'); if (a.length < 3) return undefined;
+  return ix[a[0] + '|' + a[1] + '|' + normCamp(a.slice(2).join('|'))];
+};
+// </alias-campanas>
 const tiposGuardados = () => { const t = store('syo.tipos', null); if (t) return t; const v = store('syo.seasonal', {}); return Object.fromEntries(Object.entries(v).filter(([, x]) => x).map(([k, x]) => [k, x === 'si' ? 'estacional' : 'ninguna'])); };
 const chipsDe = (codes) => codes.map((code) => ({ code, name: DATA.nombres[code] || code, icon: DATA.logos[code] || DATA.logos.OT }));
 const conLogo = (plats) => (plats || []).map((p) => ({ ...p, icon: DATA.logos[p.code] || DATA.logos.OT }));
@@ -883,10 +905,10 @@ class Component extends DCLogic {
     // tipo efectivo de una campaña: lo que eligió el usuario en Insights o, si no eligió, lo sugerido por los datos
     // tkey = proyecto|canal|campaña de la decisión (en las vistas que juntan, el proyecto y el canal reales de la campaña)
     const claveTipo = (id, tkey) => tkey || `${p ? p.id : s.pid}|${canalR}|${id}`;
-    const tipoDe = (id, sug, larga, tkey) => { const d = s.tipos[claveTipo(id, tkey)]; const t = d || sug || ''; return t === 'constante' || t === 'estacional' ? t : larga ? 'larga' : 'puntual'; };
+    const tipoDe = (id, sug, larga, tkey) => { const d = tipoGuardado(s.tipos, claveTipo(id, tkey)); const t = d || sug || ''; return t === 'constante' || t === 'estacional' ? t : larga ? 'larga' : 'puntual'; };
     const tipoCamp = (id, tkey) => { const c = b && b.campanas[id]; return c ? tipoDe(id, c.hist ? c.hist.sug : '', !!c.hist && c.hist.span >= 30, tkey) : ''; };
     // botones Constante · Estacional · Ninguna de una campaña (en Insights y en el encabezado de la campaña); gris = sugerido, negro = confirmado
-    const tipoOps = (id, sug, larga, tkey) => { const key = claveTipo(id, tkey), d = s.tipos[key], actual = d || sug || 'ninguna', [kp, kc] = key.split('|');
+    const tipoOps = (id, sug, larga, tkey) => { const key = claveTipo(id, tkey), d = tipoGuardado(s.tipos, key), actual = d || sug || 'ninguna', [kp, kc] = key.split('|');
       const donde = tkey ? { proyecto: (DATA.proyectos.find((x) => x.id === kp) || {}).nombre || null, canal: kc } : null;
       const set = (v) => { this.setState((st) => { const tipos = { ...st.tipos, [key]: v }; keep('syo.tipos', tipos); return { tipos }; }); this.enviar({ clase: 'tipo_campana', campana: sinPid(id), tipo: v === 'ninguna' ? (larga ? 'larga' : 'puntual') : v, sugerido: sug || null }, donde); };
       return { confirmado: !!d, ops: [['constante', 'Constante'], ['estacional', 'Estacional'], ['ninguna', larga ? 'Larga' : 'Puntual']].map(([k, label]) => { const on = actual === k; return { label, bg: on ? (d ? '#3C3C3C' : '#FFFFFF') : 'transparent', color: on && d ? '#FFFFFF' : '#3C3C3C', shadow: on && !d ? 'var(--shadow-sm)' : 'none', onClick: () => set(k) }; }) }; };

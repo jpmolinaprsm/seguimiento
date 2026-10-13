@@ -32,7 +32,7 @@ Para Juan Pablo. Acá van solo **nombres** de variables y para qué sirven. Los 
 | `NEXO_MODO` | `real` para consultar accesos a PAUTADOR (sin esto, solo la lista provisoria) | Sí |
 | `NEXO_CLAVE` | Clave compartida con PAUTADOR (la misma que `SERVICIO_CLAVE_SEGUIMIENTO` allá) | Sí |
 | `NEXO_ENVIO` | **Arranca sin cargar.** Con `1` se envían pedidos de cambio a PAUTADOR; sin cargar, el botón "pedir un cambio" queda en "solo ver" y explica por qué. Se prende cuando Auditoría lo apruebe | No (hasta el visto bueno) |
-| `NEXO_ACCESOS_JSON` | Plan B: lista provisoria de accesos (con mails) si la consulta a PAUTADOR no está prendida o falla. Se descarta al conectar | Solo plan B |
+| `NEXO_ACCESOS_JSON` | Plan B: lista provisoria de accesos (con mails), con el formato `{ "generada_el": "AAAA-MM-DD", "accesos": [...] }`. Se usa si la consulta a PAUTADOR está apagada o no contesta (timeout, error 5xx, demasiadas consultas), pero **solo si `generada_el` es de hace 7 días o menos**; sin fecha o vencida, nadie entra. Si PAUTADOR rechaza la clave (401/403) tampoco se usa. Se descarta al conectar | Solo plan B |
 | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Base de Seguimiento: si están, las respuestas del equipo van a la base; si no, a archivos del volumen | Cuando exista la base |
 | `ACTUALIZACION_AUTOMATICA` | `0` apaga el disparo automático de la actualización diaria; `1` lo prende; sin cargar, queda prendido solo con `NODE_ENV=production` | No |
 | `BQ_CREDENTIALS_JSON`, `SHEETS_CREDENTIALS_JSON` | Claves de BigQuery y Sheets: no las usa el servidor web sino la actualización diaria, que el servidor lanza como proceso aparte (hereda estas variables) | Para la actualización diaria |
@@ -185,3 +185,9 @@ El volumen de Railway se conecta **a un solo servicio**, y el HTML tiene que que
 - **Repositorio de recomendaciones y lectura temprana:** el armado todavía los escribe en `app/repositorio/` del código, que en Railway se borra al reiniciar. Pasarlos a la base es de Recomendaciones.
 - **El aviso en pantalla** "Sin dato de hoy": la app todavía no lee `estado.json`; lo muestra Interfaz.
 <!-- ===== FIN SECCIÓN: Actualización diaria ===== -->
+
+## Si PAUTADOR falla (accesos)
+- **Clave rechazada (401/403):** nadie entra; el registro del servidor dice "PAUTADOR rechazó la clave del servicio" y `/salud` muestra `"accesos":"degradado"`. Revisar `NEXO_CLAVE` y la del lado de PAUTADOR.
+- **No contesta (timeout, 5xx, 429 después de un reintento):** entra solo quien esté en la lista provisoria, si esa lista tiene 7 días o menos; si no, nadie.
+- **Baja en PAUTADOR:** se respeta siempre (la lista no la pisa).
+- **Vaciar la memoria de 5 minutos de accesos** (cuando cambian permisos en PAUTADOR y no se quiere esperar): un administrador global hace `POST /api/admin/accesos/vaciar` estando logueado.

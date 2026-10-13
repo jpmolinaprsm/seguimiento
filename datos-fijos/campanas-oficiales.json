@@ -1,0 +1,3746 @@
+{
+ "generado_el": "2026-10-13T16:37:25.492Z",
+ "campanas": [
+  {
+   "id": 492,
+   "proyecto": "Argentinos por Israel",
+   "nombre": "Argentinos judíos",
+   "nombre_norm": "argentinos judios"
+  },
+  {
+   "id": 491,
+   "proyecto": "Argentinos por Israel",
+   "nombre": "Eitan Horn",
+   "nombre_norm": "eitan horn"
+  },
+  {
+   "id": 493,
+   "proyecto": "Argentinos por Israel",
+   "nombre": "UNRWA",
+   "nombre_norm": "unrwa"
+  },
+  {
+   "id": 327,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "100% de iluminación LED",
+   "nombre_norm": "100 de iluminacion led"
+  },
+  {
+   "id": 341,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "App CERCA",
+   "nombre_norm": "app cerca"
+  },
+  {
+   "id": 365,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Catamarca Da la Nota",
+   "nombre_norm": "catamarca da la nota"
+  },
+  {
+   "id": 360,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Centro de Emisión de Licencias",
+   "nombre_norm": "centro de emision de licencias"
+  },
+  {
+   "id": 340,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Ciudad Limpia",
+   "nombre_norm": "ciudad limpia"
+  },
+  {
+   "id": 356,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Club de Emprendedores",
+   "nombre_norm": "club de emprendedores"
+  },
+  {
+   "id": 336,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Cocina de Emprendedores",
+   "nombre_norm": "cocina de emprendedores"
+  },
+  {
+   "id": 346,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Congreso de Ciudades y Pueblos del Interior",
+   "nombre_norm": "congreso de ciudades y pueblos del interior"
+  },
+  {
+   "id": 357,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Deporte en la ciudad",
+   "nombre_norm": "deporte en la ciudad"
+  },
+  {
+   "id": 369,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Destino Turístico Inteligente",
+   "nombre_norm": "destino turistico inteligente"
+  },
+  {
+   "id": 350,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Diplomatura en Desarrollo Emprendedor",
+   "nombre_norm": "diplomatura en desarrollo emprendedor"
+  },
+  {
+   "id": 348,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "El Jumeal",
+   "nombre_norm": "el jumeal"
+  },
+  {
+   "id": 368,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "El Niño",
+   "nombre_norm": "el nino"
+  },
+  {
+   "id": 370,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Encuentro Interescolar Municipal de Teatro",
+   "nombre_norm": "encuentro interescolar municipal de teatro"
+  },
+  {
+   "id": 361,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Encuentro Nacional del CECA",
+   "nombre_norm": "encuentro nacional del ceca"
+  },
+  {
+   "id": 377,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Escuelas Inclusivas",
+   "nombre_norm": "escuelas inclusivas"
+  },
+  {
+   "id": 373,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Espacios Públicos",
+   "nombre_norm": "espacios publicos"
+  },
+  {
+   "id": 366,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Examen Cambridge",
+   "nombre_norm": "examen cambridge"
+  },
+  {
+   "id": 344,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Expo Catamarca",
+   "nombre_norm": "expo catamarca"
+  },
+  {
+   "id": 339,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Feria de las colectividades",
+   "nombre_norm": "feria de las colectividades"
+  },
+  {
+   "id": 358,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Feria del Parque",
+   "nombre_norm": "feria del parque"
+  },
+  {
+   "id": 342,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Horario de recolección de residuos",
+   "nombre_norm": "horario de recoleccion de residuos"
+  },
+  {
+   "id": 375,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Huertas terapéuticas",
+   "nombre_norm": "huertas terapeuticas"
+  },
+  {
+   "id": 372,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Industriales",
+   "nombre_norm": "industriales"
+  },
+  {
+   "id": 338,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "InfoMuni",
+   "nombre_norm": "infomuni"
+  },
+  {
+   "id": 329,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Instituto Municipal de Emprendedores",
+   "nombre_norm": "instituto municipal de emprendedores"
+  },
+  {
+   "id": 364,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "La Capital tiene opciones",
+   "nombre_norm": "la capital tiene opciones"
+  },
+  {
+   "id": 374,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "La Ciudad va con Vos",
+   "nombre_norm": "la ciudad va con vos"
+  },
+  {
+   "id": 347,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Limpieza en canales",
+   "nombre_norm": "limpieza en canales"
+  },
+  {
+   "id": 352,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Mi Capital es Cultura",
+   "nombre_norm": "mi capital es cultura"
+  },
+  {
+   "id": 345,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Municipio en tu barrio",
+   "nombre_norm": "municipio en tu barrio"
+  },
+  {
+   "id": 332,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Nodo Tecnológico",
+   "nombre_norm": "nodo tecnologico"
+  },
+  {
+   "id": 371,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Obras en Av. Cobacho",
+   "nombre_norm": "obras en av cobacho"
+  },
+  {
+   "id": 337,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Obras en la Capital",
+   "nombre_norm": "obras en la capital"
+  },
+  {
+   "id": 328,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Obras en plazas",
+   "nombre_norm": "obras en plazas"
+  },
+  {
+   "id": 354,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Operativos Descarrachado",
+   "nombre_norm": "operativos descarrachado"
+  },
+  {
+   "id": 330,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Plan Forestal",
+   "nombre_norm": "plan forestal"
+  },
+  {
+   "id": 359,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Plaza La Alameda",
+   "nombre_norm": "plaza la alameda"
+  },
+  {
+   "id": 351,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Prevención del Suicidio",
+   "nombre_norm": "prevencion del suicidio"
+  },
+  {
+   "id": 367,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Primavera",
+   "nombre_norm": "primavera"
+  },
+  {
+   "id": 355,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Programa Baja y Sube",
+   "nombre_norm": "programa baja y sube"
+  },
+  {
+   "id": 379,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Programa de oficios",
+   "nombre_norm": "programa de oficios"
+  },
+  {
+   "id": 343,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Propuestas participativas para vecinos",
+   "nombre_norm": "propuestas participativas para vecinos"
+  },
+  {
+   "id": 362,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Puntos Giro",
+   "nombre_norm": "puntos giro"
+  },
+  {
+   "id": 363,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Reciclaje de residuos",
+   "nombre_norm": "reciclaje de residuos"
+  },
+  {
+   "id": 331,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Recorrida Gustavo Saadi",
+   "nombre_norm": "recorrida gustavo saadi"
+  },
+  {
+   "id": 335,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Renovación del parque automotor",
+   "nombre_norm": "renovacion del parque automotor"
+  },
+  {
+   "id": 353,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Revendedores Plaza 25 de Mayo",
+   "nombre_norm": "revendedores plaza 25 de mayo"
+  },
+  {
+   "id": 333,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Sembrando Bienestar",
+   "nombre_norm": "sembrando bienestar"
+  },
+  {
+   "id": 349,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Tu primera licencia",
+   "nombre_norm": "tu primera licencia"
+  },
+  {
+   "id": 378,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Vamos en bici",
+   "nombre_norm": "vamos en bici"
+  },
+  {
+   "id": 334,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Ver para Crecer",
+   "nombre_norm": "ver para crecer"
+  },
+  {
+   "id": 376,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Video vecinos",
+   "nombre_norm": "video vecinos"
+  },
+  {
+   "id": 324,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Acercate a los centros de vacunación",
+   "nombre_norm": "acercate a los centros de vacunacion"
+  },
+  {
+   "id": 286,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Adjudicación vivienda",
+   "nombre_norm": "adjudicacion vivienda"
+  },
+  {
+   "id": 296,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Argentina Week",
+   "nombre_norm": "argentina week"
+  },
+  {
+   "id": 280,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Campaña Hitos",
+   "nombre_norm": "campana hitos"
+  },
+  {
+   "id": 282,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Campaña Prevención Incendios",
+   "nombre_norm": "campana prevencion incendios"
+  },
+  {
+   "id": 272,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Campus de Entrenamiento Laboral",
+   "nombre_norm": "campus de entrenamiento laboral"
+  },
+  {
+   "id": 292,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Capacitación",
+   "nombre_norm": "capacitacion"
+  },
+  {
+   "id": 288,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "CATA",
+   "nombre_norm": "cata"
+  },
+  {
+   "id": 289,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Catamarca elimina Ingresos Brutos para la industria",
+   "nombre_norm": "catamarca elimina ingresos brutos para la industria"
+  },
+  {
+   "id": 300,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Clases de Samba",
+   "nombre_norm": "clases de samba"
+  },
+  {
+   "id": 281,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Conflicto Comunidad Peñas Negras",
+   "nombre_norm": "conflicto comunidad penas negras"
+  },
+  {
+   "id": 317,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Crédito Activar",
+   "nombre_norm": "credito activar"
+  },
+  {
+   "id": 283,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Cuándo Cobro",
+   "nombre_norm": "cuando cobro"
+  },
+  {
+   "id": 314,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Día de las Infancias",
+   "nombre_norm": "dia de las infancias"
+  },
+  {
+   "id": 290,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Efemérides",
+   "nombre_norm": "efemerides"
+  },
+  {
+   "id": 271,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "El Marcatón",
+   "nombre_norm": "el marcaton"
+  },
+  {
+   "id": 295,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Entrega de ambulancias",
+   "nombre_norm": "entrega de ambulancias"
+  },
+  {
+   "id": 275,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Entrega de viviendas",
+   "nombre_norm": "entrega de viviendas"
+  },
+  {
+   "id": 284,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Expo Catamarca",
+   "nombre_norm": "expo catamarca"
+  },
+  {
+   "id": 307,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Fenómeno de \"El Niño\"",
+   "nombre_norm": "fenomeno de el nino"
+  },
+  {
+   "id": 291,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Feria del Libro en Catamarca",
+   "nombre_norm": "feria del libro en catamarca"
+  },
+  {
+   "id": 318,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Feria Internacional de Turismo",
+   "nombre_norm": "feria internacional de turismo"
+  },
+  {
+   "id": 309,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Feria Provincial de Ciencias 2026",
+   "nombre_norm": "feria provincial de ciencias 2026"
+  },
+  {
+   "id": 293,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Festejo Adultos Mayores",
+   "nombre_norm": "festejo adultos mayores"
+  },
+  {
+   "id": 304,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Foro EE UU",
+   "nombre_norm": "foro ee uu"
+  },
+  {
+   "id": 279,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Inauguración Polo Técnico Santa María",
+   "nombre_norm": "inauguracion polo tecnico santa maria"
+  },
+  {
+   "id": 274,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Inauguración Puente Santa María",
+   "nombre_norm": "inauguracion puente santa maria"
+  },
+  {
+   "id": 322,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Infraestructura digital",
+   "nombre_norm": "infraestructura digital"
+  },
+  {
+   "id": 325,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "KM que nos acercan",
+   "nombre_norm": "km que nos acercan"
+  },
+  {
+   "id": 294,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Ley de Zonas Frías",
+   "nombre_norm": "ley de zonas frias"
+  },
+  {
+   "id": 303,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Línea de Créditos para Minipymes",
+   "nombre_norm": "linea de creditos para minipymes"
+  },
+  {
+   "id": 310,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Medicamentos más cerca",
+   "nombre_norm": "medicamentos mas cerca"
+  },
+  {
+   "id": 311,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Mesa de Gobernadores IAEF",
+   "nombre_norm": "mesa de gobernadores iaef"
+  },
+  {
+   "id": 313,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Minería",
+   "nombre_norm": "mineria"
+  },
+  {
+   "id": 285,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Modernización Hospital de San Juan Bautista",
+   "nombre_norm": "modernizacion hospital de san juan bautista"
+  },
+  {
+   "id": 297,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Museo CATA",
+   "nombre_norm": "museo cata"
+  },
+  {
+   "id": 323,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Obras en Capital",
+   "nombre_norm": "obras en capital"
+  },
+  {
+   "id": 308,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Obras en Fiambalá",
+   "nombre_norm": "obras en fiambala"
+  },
+  {
+   "id": 299,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Obras en Pomán",
+   "nombre_norm": "obras en poman"
+  },
+  {
+   "id": 305,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Obras en Santa María",
+   "nombre_norm": "obras en santa maria"
+  },
+  {
+   "id": 298,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Obras en Valle Viejo",
+   "nombre_norm": "obras en valle viejo"
+  },
+  {
+   "id": 301,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Obras Ruta 1",
+   "nombre_norm": "obras ruta 1"
+  },
+  {
+   "id": 277,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Octubre Cultural",
+   "nombre_norm": "octubre cultural"
+  },
+  {
+   "id": 316,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Orgullo",
+   "nombre_norm": "orgullo"
+  },
+  {
+   "id": 276,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Parque Solar De Ampajango",
+   "nombre_norm": "parque solar de ampajango"
+  },
+  {
+   "id": 319,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Policía Montada",
+   "nombre_norm": "policia montada"
+  },
+  {
+   "id": 320,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Puesta en valor del Complejo Termal Fiambalá",
+   "nombre_norm": "puesta en valor del complejo termal fiambala"
+  },
+  {
+   "id": 287,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Salud sexual",
+   "nombre_norm": "salud sexual"
+  },
+  {
+   "id": 312,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Sede universitaria de UNC en Andalgalá",
+   "nombre_norm": "sede universitaria de unc en andalgala"
+  },
+  {
+   "id": 306,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Subsidios energía",
+   "nombre_norm": "subsidios energia"
+  },
+  {
+   "id": 315,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Testimonio Casa Propia",
+   "nombre_norm": "testimonio casa propia"
+  },
+  {
+   "id": 321,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Titularización docente",
+   "nombre_norm": "titularizacion docente"
+  },
+  {
+   "id": 326,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Transplante de córnea salud",
+   "nombre_norm": "transplante de cornea salud"
+  },
+  {
+   "id": 302,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Web Visit Catamarca",
+   "nombre_norm": "web visit catamarca"
+  },
+  {
+   "id": 278,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "XXIII Gran Premio Argentino Histórico",
+   "nombre_norm": "xxiii gran premio argentino historico"
+  },
+  {
+   "id": 273,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Zona Franca en Tinogasta",
+   "nombre_norm": "zona franca en tinogasta"
+  },
+  {
+   "id": 490,
+   "proyecto": "Dino",
+   "nombre": "Chubut Avanza",
+   "nombre_norm": "chubut avanza"
+  },
+  {
+   "id": 487,
+   "proyecto": "Dino",
+   "nombre": "Efemérides",
+   "nombre_norm": "efemerides"
+  },
+  {
+   "id": 488,
+   "proyecto": "Dino",
+   "nombre": "Turnos médicos",
+   "nombre_norm": "turnos medicos"
+  },
+  {
+   "id": 489,
+   "proyecto": "Dino",
+   "nombre": "Vacantes Escolares",
+   "nombre_norm": "vacantes escolares"
+  },
+  {
+   "id": 405,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "\"Vuelve\" (Video)",
+   "nombre_norm": "vuelve video"
+  },
+  {
+   "id": 410,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "212 Barrios",
+   "nombre_norm": "212 barrios"
+  },
+  {
+   "id": 416,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "2505+06+07+08+09+10+11+12+202601+02+03+04+05+06+07+08+09",
+   "nombre_norm": "2505 06 07 08 09 10 11 12 202601 02 03 04 05 06 07 08 09"
+  },
+  {
+   "id": 397,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "2609",
+   "nombre_norm": "2609"
+  },
+  {
+   "id": 392,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "90 Barrios Nuevos",
+   "nombre_norm": "90 barrios nuevos"
+  },
+  {
+   "id": 383,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Agenda MLL",
+   "nombre_norm": "agenda mll"
+  },
+  {
+   "id": 418,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Avenida Bodereau",
+   "nombre_norm": "avenida bodereau"
+  },
+  {
+   "id": 385,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Comunicación Institucional",
+   "nombre_norm": "comunicacion institucional"
+  },
+  {
+   "id": 401,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Consultorio Apross",
+   "nombre_norm": "consultorio apross"
+  },
+  {
+   "id": 414,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Córdoba Cerca Tuyo",
+   "nombre_norm": "cordoba cerca tuyo"
+  },
+  {
+   "id": 422,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Córdoba emprendedora",
+   "nombre_norm": "cordoba emprendedora"
+  },
+  {
+   "id": 404,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "CÓRDOBA ES CULTURA",
+   "nombre_norm": "cordoba es cultura"
+  },
+  {
+   "id": 380,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Cordobeses en Alerta",
+   "nombre_norm": "cordobeses en alerta"
+  },
+  {
+   "id": 409,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Entrevistas en Medios",
+   "nombre_norm": "entrevistas en medios"
+  },
+  {
+   "id": 407,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Escuchá",
+   "nombre_norm": "escucha"
+  },
+  {
+   "id": 424,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "FORTEC@CBA",
+   "nombre_norm": "fortec cba"
+  },
+  {
+   "id": 423,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Fuerzas de Seguridad",
+   "nombre_norm": "fuerzas de seguridad"
+  },
+  {
+   "id": 411,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Guante Parkinson Escuela ProA Alta Gracia",
+   "nombre_norm": "guante parkinson escuela proa alta gracia"
+  },
+  {
+   "id": 386,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Hacer para Crecer",
+   "nombre_norm": "hacer para crecer"
+  },
+  {
+   "id": 388,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Hitos de Gestión",
+   "nombre_norm": "hitos de gestion"
+  },
+  {
+   "id": 415,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "HOLA FAMILIA",
+   "nombre_norm": "hola familia"
+  },
+  {
+   "id": 393,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Lanzamiento PPP 2026",
+   "nombre_norm": "lanzamiento ppp 2026"
+  },
+  {
+   "id": 391,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Ley de Promoción Industrial",
+   "nombre_norm": "ley de promocion industrial"
+  },
+  {
+   "id": 421,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Mercado Libre invierte en Córdoba",
+   "nombre_norm": "mercado libre invierte en cordoba"
+  },
+  {
+   "id": 387,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Ministerios",
+   "nombre_norm": "ministerios"
+  },
+  {
+   "id": 406,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Negociación Rally Mundial 2027",
+   "nombre_norm": "negociacion rally mundial 2027"
+  },
+  {
+   "id": 395,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Nos Vemos en la Plaza",
+   "nombre_norm": "nos vemos en la plaza"
+  },
+  {
+   "id": 389,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Obras en 25 localidades",
+   "nombre_norm": "obras en 25 localidades"
+  },
+  {
+   "id": 384,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Obras que Transforman",
+   "nombre_norm": "obras que transforman"
+  },
+  {
+   "id": 402,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "PAICOR",
+   "nombre_norm": "paicor"
+  },
+  {
+   "id": 403,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "PLAN 800 CUADRAS",
+   "nombre_norm": "plan 800 cuadras"
+  },
+  {
+   "id": 390,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Plan de reparación vial",
+   "nombre_norm": "plan de reparacion vial"
+  },
+  {
+   "id": 425,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Polideportivos",
+   "nombre_norm": "polideportivos"
+  },
+  {
+   "id": 394,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Programa Impulso Cordobés",
+   "nombre_norm": "programa impulso cordobes"
+  },
+  {
+   "id": 413,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Programa Manos",
+   "nombre_norm": "programa manos"
+  },
+  {
+   "id": 398,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "PROGRAMA transFORMAR@Cba",
+   "nombre_norm": "programa transformar cba"
+  },
+  {
+   "id": 396,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Proyecto de Ley Alivio Cordobés",
+   "nombre_norm": "proyecto de ley alivio cordobes"
+  },
+  {
+   "id": 382,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Pruebas Aprender",
+   "nombre_norm": "pruebas aprender"
+  },
+  {
+   "id": 381,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Pruebas PISA",
+   "nombre_norm": "pruebas pisa"
+  },
+  {
+   "id": 419,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Recortes nacionales en discapacidad",
+   "nombre_norm": "recortes nacionales en discapacidad"
+  },
+  {
+   "id": 400,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Reels FB",
+   "nombre_norm": "reels fb"
+  },
+  {
+   "id": 399,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Reels IG",
+   "nombre_norm": "reels ig"
+  },
+  {
+   "id": 420,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Sede de Grandes Eventos",
+   "nombre_norm": "sede de grandes eventos"
+  },
+  {
+   "id": 412,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Selección argentina en el Kempes",
+   "nombre_norm": "seleccion argentina en el kempes"
+  },
+  {
+   "id": 417,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Shorts",
+   "nombre_norm": "shorts"
+  },
+  {
+   "id": 427,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Tecnopresente",
+   "nombre_norm": "tecnopresente"
+  },
+  {
+   "id": 408,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "TU CASA TU ESCRITURA",
+   "nombre_norm": "tu casa tu escritura"
+  },
+  {
+   "id": 426,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Vidriera productiva",
+   "nombre_norm": "vidriera productiva"
+  },
+  {
+   "id": 165,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "4to Congreso Ecoturístico del Litoral",
+   "nombre_norm": "4to congreso ecoturistico del litoral"
+  },
+  {
+   "id": 166,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Aeropuerto de Paso de los Libres",
+   "nombre_norm": "aeropuerto de paso de los libres"
+  },
+  {
+   "id": 174,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Aniversario de Concepción del Yaguareté Corá",
+   "nombre_norm": "aniversario de concepcion del yaguarete cora"
+  },
+  {
+   "id": 154,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Aniversario Ituzaingo",
+   "nombre_norm": "aniversario ituzaingo"
+  },
+  {
+   "id": 170,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Aniversario Loreto",
+   "nombre_norm": "aniversario loreto"
+  },
+  {
+   "id": 108,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Aniversario Paso de los Libres",
+   "nombre_norm": "aniversario paso de los libres"
+  },
+  {
+   "id": 115,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Aniversario Riachuelo",
+   "nombre_norm": "aniversario riachuelo"
+  },
+  {
+   "id": 172,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Aniversario San Luis del Palmar",
+   "nombre_norm": "aniversario san luis del palmar"
+  },
+  {
+   "id": 117,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Aniversario Santa Rosa",
+   "nombre_norm": "aniversario santa rosa"
+  },
+  {
+   "id": 112,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Aniversario Virasoro",
+   "nombre_norm": "aniversario virasoro"
+  },
+  {
+   "id": 136,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Argentina Week",
+   "nombre_norm": "argentina week"
+  },
+  {
+   "id": 148,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Baja de homicidios",
+   "nombre_norm": "baja de homicidios"
+  },
+  {
+   "id": 124,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Campaña Change Segundo Puente Chaco Corrientes",
+   "nombre_norm": "campana change segundo puente chaco corrientes"
+  },
+  {
+   "id": 120,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Centro de Interpretación del Iberá",
+   "nombre_norm": "centro de interpretacion del ibera"
+  },
+  {
+   "id": 144,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Charla a productores",
+   "nombre_norm": "charla a productores"
+  },
+  {
+   "id": 116,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Convención Anual del IAEF",
+   "nombre_norm": "convencion anual del iaef"
+  },
+  {
+   "id": 175,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Convenio con el CFI",
+   "nombre_norm": "convenio con el cfi"
+  },
+  {
+   "id": 157,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Copa Robótica Educabot 2026",
+   "nombre_norm": "copa robotica educabot 2026"
+  },
+  {
+   "id": 135,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Corrientes destaca en inversión en educación",
+   "nombre_norm": "corrientes destaca en inversion en educacion"
+  },
+  {
+   "id": 106,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Corrientes Potencia",
+   "nombre_norm": "corrientes potencia"
+  },
+  {
+   "id": 102,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Corrientes Produce",
+   "nombre_norm": "corrientes produce"
+  },
+  {
+   "id": 160,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Corte de Ruta en Liebig",
+   "nombre_norm": "corte de ruta en liebig"
+  },
+  {
+   "id": 141,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Cronograma de pagos",
+   "nombre_norm": "cronograma de pagos"
+  },
+  {
+   "id": 123,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Datos contra el Narcomenudeo",
+   "nombre_norm": "datos contra el narcomenudeo"
+  },
+  {
+   "id": 145,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Datos finde XL",
+   "nombre_norm": "datos finde xl"
+  },
+  {
+   "id": 161,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Deportivas",
+   "nombre_norm": "deportivas"
+  },
+  {
+   "id": 128,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Desagüe Barrio Ponce",
+   "nombre_norm": "desague barrio ponce"
+  },
+  {
+   "id": 169,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Destino Corrientes",
+   "nombre_norm": "destino corrientes"
+  },
+  {
+   "id": 133,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Estación Carnaval",
+   "nombre_norm": "estacion carnaval"
+  },
+  {
+   "id": 103,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Fábrica de CLT",
+   "nombre_norm": "fabrica de clt"
+  },
+  {
+   "id": 171,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Fiesta del Guiso",
+   "nombre_norm": "fiesta del guiso"
+  },
+  {
+   "id": 163,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Fiesta Nacional de la Yerra y Doma Correntina",
+   "nombre_norm": "fiesta nacional de la yerra y doma correntina"
+  },
+  {
+   "id": 151,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "FiT 2026",
+   "nombre_norm": "fit 2026"
+  },
+  {
+   "id": 118,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Inauguración Jardín de Infantes",
+   "nombre_norm": "inauguracion jardin de infantes"
+  },
+  {
+   "id": 167,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Incorporación equipo materno/infantil",
+   "nombre_norm": "incorporacion equipo materno infantil"
+  },
+  {
+   "id": 105,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Invico",
+   "nombre_norm": "invico"
+  },
+  {
+   "id": 150,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "IPS - Testimonios",
+   "nombre_norm": "ips testimonios"
+  },
+  {
+   "id": 140,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "JPV en Democracia y Desarrollo",
+   "nombre_norm": "jpv en democracia y desarrollo"
+  },
+  {
+   "id": 137,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Juegos Suramericanos",
+   "nombre_norm": "juegos suramericanos"
+  },
+  {
+   "id": 107,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Lucha contra el Fuego",
+   "nombre_norm": "lucha contra el fuego"
+  },
+  {
+   "id": 162,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Mantenimiento vial",
+   "nombre_norm": "mantenimiento vial"
+  },
+  {
+   "id": 156,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Mi Corrientes",
+   "nombre_norm": "mi corrientes"
+  },
+  {
+   "id": 129,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Mundialito de Ciudades",
+   "nombre_norm": "mundialito de ciudades"
+  },
+  {
+   "id": 110,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Ñande Rio",
+   "nombre_norm": "nande rio"
+  },
+  {
+   "id": 168,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Nueva Av Pago Largo",
+   "nombre_norm": "nueva av pago largo"
+  },
+  {
+   "id": 173,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Nuevo BRIF",
+   "nombre_norm": "nuevo brif"
+  },
+  {
+   "id": 155,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Nuevo cuartel de bomberos",
+   "nombre_norm": "nuevo cuartel de bomberos"
+  },
+  {
+   "id": 109,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Nuevo Sambodromo en Santo Tome",
+   "nombre_norm": "nuevo sambodromo en santo tome"
+  },
+  {
+   "id": 113,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Obras en RN 14",
+   "nombre_norm": "obras en rn 14"
+  },
+  {
+   "id": 152,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Obras en Santa Rosa",
+   "nombre_norm": "obras en santa rosa"
+  },
+  {
+   "id": 104,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Obras hídricas",
+   "nombre_norm": "obras hidricas"
+  },
+  {
+   "id": 122,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Obras Provinciales",
+   "nombre_norm": "obras provinciales"
+  },
+  {
+   "id": 127,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Oficinas Móviles IPS",
+   "nombre_norm": "oficinas moviles ips"
+  },
+  {
+   "id": 143,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Online",
+   "nombre_norm": "online"
+  },
+  {
+   "id": 139,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Operativos de seguridad",
+   "nombre_norm": "operativos de seguridad"
+  },
+  {
+   "id": 111,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Parque solar",
+   "nombre_norm": "parque solar"
+  },
+  {
+   "id": 149,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Pavimentación maderera Santo Tomé",
+   "nombre_norm": "pavimentacion maderera santo tome"
+  },
+  {
+   "id": 153,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Plan de viviendas",
+   "nombre_norm": "plan de viviendas"
+  },
+  {
+   "id": 142,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Poceada",
+   "nombre_norm": "poceada"
+  },
+  {
+   "id": 121,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Prevención de Dengue",
+   "nombre_norm": "prevencion de dengue"
+  },
+  {
+   "id": 158,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Recap Agosto",
+   "nombre_norm": "recap agosto"
+  },
+  {
+   "id": 134,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Récord de exportaciones",
+   "nombre_norm": "record de exportaciones"
+  },
+  {
+   "id": 130,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Resumen de Seguridad",
+   "nombre_norm": "resumen de seguridad"
+  },
+  {
+   "id": 114,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Reunión con Embajador de EEUU",
+   "nombre_norm": "reunion con embajador de eeuu"
+  },
+  {
+   "id": 119,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Reunión Embajador de Corea",
+   "nombre_norm": "reunion embajador de corea"
+  },
+  {
+   "id": 164,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Reunión jóvenes del Concejo Deliberante Estudiantil",
+   "nombre_norm": "reunion jovenes del concejo deliberante estudiantil"
+  },
+  {
+   "id": 126,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Reunion zona calida",
+   "nombre_norm": "reunion zona calida"
+  },
+  {
+   "id": 132,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Seis meses en seguridad",
+   "nombre_norm": "seis meses en seguridad"
+  },
+  {
+   "id": 159,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Semifinal de Copa Robótica 2026",
+   "nombre_norm": "semifinal de copa robotica 2026"
+  },
+  {
+   "id": 146,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Taragüi Rock",
+   "nombre_norm": "taragui rock"
+  },
+  {
+   "id": 147,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Torneo Interescolar 2026",
+   "nombre_norm": "torneo interescolar 2026"
+  },
+  {
+   "id": 138,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Veda de pesca en el Paraná",
+   "nombre_norm": "veda de pesca en el parana"
+  },
+  {
+   "id": 125,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Ver para ser Libres",
+   "nombre_norm": "ver para ser libres"
+  },
+  {
+   "id": 131,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Zona Fria",
+   "nombre_norm": "zona fria"
+  },
+  {
+   "id": 264,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Aniversario de la Policía provincial",
+   "nombre_norm": "aniversario de la policia provincial"
+  },
+  {
+   "id": 243,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Baja de la edad de imputabilidad",
+   "nombre_norm": "baja de la edad de imputabilidad"
+  },
+  {
+   "id": 250,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Baja histórica de homicidios",
+   "nombre_norm": "baja historica de homicidios"
+  },
+  {
+   "id": 233,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Cárceles",
+   "nombre_norm": "carceles"
+  },
+  {
+   "id": 258,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Contra el garantismo",
+   "nombre_norm": "contra el garantismo"
+  },
+  {
+   "id": 239,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Contra los contadores y abogados de las bandas criminales",
+   "nombre_norm": "contra los contadores y abogados de las bandas criminales"
+  },
+  {
+   "id": 259,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Delitos Rurales",
+   "nombre_norm": "delitos rurales"
+  },
+  {
+   "id": 265,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Denuncia de campaña contra el Minseg",
+   "nombre_norm": "denuncia de campana contra el minseg"
+  },
+  {
+   "id": 237,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Derribo de bunkers del narcotráfico",
+   "nombre_norm": "derribo de bunkers del narcotrafico"
+  },
+  {
+   "id": 260,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Endurecimiento de penas contra violencia de género",
+   "nombre_norm": "endurecimiento de penas contra violencia de genero"
+  },
+  {
+   "id": 247,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Equativ",
+   "nombre_norm": "equativ"
+  },
+  {
+   "id": 263,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Fondos FANI",
+   "nombre_norm": "fondos fani"
+  },
+  {
+   "id": 253,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Impuestos",
+   "nombre_norm": "impuestos"
+  },
+  {
+   "id": 230,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Inauguración Cárcel de Recreo",
+   "nombre_norm": "inauguracion carcel de recreo"
+  },
+  {
+   "id": 244,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Incendios",
+   "nombre_norm": "incendios"
+  },
+  {
+   "id": 240,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Inscripción al Servicio Penitenciario",
+   "nombre_norm": "inscripcion al servicio penitenciario"
+  },
+  {
+   "id": 266,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Juegos Panamericanos 2029",
+   "nombre_norm": "juegos panamericanos 2029"
+  },
+  {
+   "id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Juegos Suramericanos",
+   "nombre_norm": "juegos suramericanos"
+  },
+  {
+   "id": 231,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Lince",
+   "nombre_norm": "lince"
+  },
+  {
+   "id": 242,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Microsoft Pubmatic",
+   "nombre_norm": "microsoft pubmatic"
+  },
+  {
+   "id": 270,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Mil Aulas",
+   "nombre_norm": "mil aulas"
+  },
+  {
+   "id": 268,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Nación cede rutas",
+   "nombre_norm": "nacion cede rutas"
+  },
+  {
+   "id": 234,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Obras hídricas",
+   "nombre_norm": "obras hidricas"
+  },
+  {
+   "id": 249,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Obras que Sí",
+   "nombre_norm": "obras que si"
+  },
+  {
+   "id": 269,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Operativo Verano",
+   "nombre_norm": "operativo verano"
+  },
+  {
+   "id": 235,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Operativos de Seguridad",
+   "nombre_norm": "operativos de seguridad"
+  },
+  {
+   "id": 241,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Posicionamiento",
+   "nombre_norm": "posicionamiento"
+  },
+  {
+   "id": 256,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Promesa de terminar con los narcos",
+   "nombre_norm": "promesa de terminar con los narcos"
+  },
+  {
+   "id": 238,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Puente Carretero",
+   "nombre_norm": "puente carretero"
+  },
+  {
+   "id": 248,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Pullaro contra el kirchnerismo",
+   "nombre_norm": "pullaro contra el kirchnerismo"
+  },
+  {
+   "id": 251,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Recompensas",
+   "nombre_norm": "recompensas"
+  },
+  {
+   "id": 254,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Recursos a la Policía",
+   "nombre_norm": "recursos a la policia"
+  },
+  {
+   "id": 236,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Santa Fe Business Forum 2026",
+   "nombre_norm": "santa fe business forum 2026"
+  },
+  {
+   "id": 232,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Subasta de bienes incautados al delito",
+   "nombre_norm": "subasta de bienes incautados al delito"
+  },
+  {
+   "id": 246,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Tren metropolitano de Rosario",
+   "nombre_norm": "tren metropolitano de rosario"
+  },
+  {
+   "id": 257,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Unidad de Capturas de Alto Perfil",
+   "nombre_norm": "unidad de capturas de alto perfil"
+  },
+  {
+   "id": 255,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Uso de pistolas taser",
+   "nombre_norm": "uso de pistolas taser"
+  },
+  {
+   "id": 252,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Vacunas",
+   "nombre_norm": "vacunas"
+  },
+  {
+   "id": 245,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "VAXTEAM",
+   "nombre_norm": "vaxteam"
+  },
+  {
+   "id": 261,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Viviendas",
+   "nombre_norm": "viviendas"
+  },
+  {
+   "id": 262,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "WhatsApp La Verdad Santa Fe",
+   "nombre_norm": "whatsapp la verdad santa fe"
+  },
+  {
+   "id": 267,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Zonas Frías",
+   "nombre_norm": "zonas frias"
+  },
+  {
+   "id": 184,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "1000 días de gestión",
+   "nombre_norm": "1000 dias de gestion"
+  },
+  {
+   "id": 204,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Alfabetización: reconocimiento por logros",
+   "nombre_norm": "alfabetizacion reconocimiento por logros"
+  },
+  {
+   "id": 202,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Apoyo de intendente de Campo Largo",
+   "nombre_norm": "apoyo de intendente de campo largo"
+  },
+  {
+   "id": 208,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Aprendo Leyendo",
+   "nombre_norm": "aprendo leyendo"
+  },
+  {
+   "id": 205,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Argentina Week",
+   "nombre_norm": "argentina week"
+  },
+  {
+   "id": 197,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Chaco en Marcha",
+   "nombre_norm": "chaco en marcha"
+  },
+  {
+   "id": 183,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Chaco Invierte",
+   "nombre_norm": "chaco invierte"
+  },
+  {
+   "id": 195,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Consultorios con fondos de subastas",
+   "nombre_norm": "consultorios con fondos de subastas"
+  },
+  {
+   "id": 206,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Detención de taladores ilegales",
+   "nombre_norm": "detencion de taladores ilegales"
+  },
+  {
+   "id": 226,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Entrega de créditos a sector industrial",
+   "nombre_norm": "entrega de creditos a sector industrial"
+  },
+  {
+   "id": 192,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Entrega de patrulleros",
+   "nombre_norm": "entrega de patrulleros"
+  },
+  {
+   "id": 207,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Entrega de viviendas",
+   "nombre_norm": "entrega de viviendas"
+  },
+  {
+   "id": 217,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Exportación de alimento para mascotas",
+   "nombre_norm": "exportacion de alimento para mascotas"
+  },
+  {
+   "id": 180,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Exportación de Carbón Vegetal",
+   "nombre_norm": "exportacion de carbon vegetal"
+  },
+  {
+   "id": 228,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Exportación de cuero caprino",
+   "nombre_norm": "exportacion de cuero caprino"
+  },
+  {
+   "id": 198,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Feria Iberoamericana del Libro",
+   "nombre_norm": "feria iberoamericana del libro"
+  },
+  {
+   "id": 189,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Habilitación de Puerto Las Palmas",
+   "nombre_norm": "habilitacion de puerto las palmas"
+  },
+  {
+   "id": 222,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Inscripción a la Policía",
+   "nombre_norm": "inscripcion a la policia"
+  },
+  {
+   "id": 199,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Ley de Reiterancia",
+   "nombre_norm": "ley de reiterancia"
+  },
+  {
+   "id": 214,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Luz Rural",
+   "nombre_norm": "luz rural"
+  },
+  {
+   "id": 176,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Más Futuro",
+   "nombre_norm": "mas futuro"
+  },
+  {
+   "id": 225,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Mejor Escuela",
+   "nombre_norm": "mejor escuela"
+  },
+  {
+   "id": 193,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Mejora de calidad de vida infantil",
+   "nombre_norm": "mejora de calidad de vida infantil"
+  },
+  {
+   "id": 201,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Ñande",
+   "nombre_norm": "nande"
+  },
+  {
+   "id": 203,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Nueva pista de aterrizaje",
+   "nombre_norm": "nueva pista de aterrizaje"
+  },
+  {
+   "id": 216,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Nuevo hotel 5 estrellas",
+   "nombre_norm": "nuevo hotel 5 estrellas"
+  },
+  {
+   "id": 215,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Nuevo Registro Civil Charata",
+   "nombre_norm": "nuevo registro civil charata"
+  },
+  {
+   "id": 218,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Obra en el polideportivo Jaime Zapata",
+   "nombre_norm": "obra en el polideportivo jaime zapata"
+  },
+  {
+   "id": 221,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Obras de infraestructura en la red vial rural de Basail",
+   "nombre_norm": "obras de infraestructura en la red vial rural de basail"
+  },
+  {
+   "id": 190,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Obras de pavimentación en Resistencia",
+   "nombre_norm": "obras de pavimentacion en resistencia"
+  },
+  {
+   "id": 186,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Obras en Av. Las Piedras",
+   "nombre_norm": "obras en av las piedras"
+  },
+  {
+   "id": 187,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Obras en centros de salud",
+   "nombre_norm": "obras en centros de salud"
+  },
+  {
+   "id": 213,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Obras en Chaco For Ever",
+   "nombre_norm": "obras en chaco for ever"
+  },
+  {
+   "id": 209,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Obras en Colonia Benítez",
+   "nombre_norm": "obras en colonia benitez"
+  },
+  {
+   "id": 223,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Obras en el Hospital de Villa Berthet",
+   "nombre_norm": "obras en el hospital de villa berthet"
+  },
+  {
+   "id": 220,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Obras en el SUM ferroviario de Quitilipi",
+   "nombre_norm": "obras en el sum ferroviario de quitilipi"
+  },
+  {
+   "id": 194,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Obras en escuela de General San Martín",
+   "nombre_norm": "obras en escuela de general san martin"
+  },
+  {
+   "id": 188,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Obras en Hospital Pedro Raúl Salica",
+   "nombre_norm": "obras en hospital pedro raul salica"
+  },
+  {
+   "id": 224,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Obras en Margarita Belén",
+   "nombre_norm": "obras en margarita belen"
+  },
+  {
+   "id": 210,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Obras en microestadio de Quitilipi",
+   "nombre_norm": "obras en microestadio de quitilipi"
+  },
+  {
+   "id": 177,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Obras en rutas",
+   "nombre_norm": "obras en rutas"
+  },
+  {
+   "id": 196,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Obras Terminal de Ómnibus en Villa Río Bermejito",
+   "nombre_norm": "obras terminal de omnibus en villa rio bermejito"
+  },
+  {
+   "id": 227,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Pago de deuda provincial",
+   "nombre_norm": "pago de deuda provincial"
+  },
+  {
+   "id": 211,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Pavimentación de Rutas Provinciales",
+   "nombre_norm": "pavimentacion de rutas provinciales"
+  },
+  {
+   "id": 191,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Pesca del Dorado",
+   "nombre_norm": "pesca del dorado"
+  },
+  {
+   "id": 179,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Progano",
+   "nombre_norm": "progano"
+  },
+  {
+   "id": 219,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Recuperación del SOTAI N°6",
+   "nombre_norm": "recuperacion del sotai n 6"
+  },
+  {
+   "id": 182,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Red Estratégica de Salud",
+   "nombre_norm": "red estrategica de salud"
+  },
+  {
+   "id": 178,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Ruta del Impenetrable",
+   "nombre_norm": "ruta del impenetrable"
+  },
+  {
+   "id": 181,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Super Niño",
+   "nombre_norm": "super nino"
+  },
+  {
+   "id": 200,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Suspensión PASO",
+   "nombre_norm": "suspension paso"
+  },
+  {
+   "id": 212,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Vacunación Qdenga",
+   "nombre_norm": "vacunacion qdenga"
+  },
+  {
+   "id": 185,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Ver para ser libres",
+   "nombre_norm": "ver para ser libres"
+  },
+  {
+   "id": 28,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "10 de octubre Fiesta del Novillito",
+   "nombre_norm": "10 de octubre fiesta del novillito"
+  },
+  {
+   "id": 68,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Abstención del débito laboral y retiro voluntario",
+   "nombre_norm": "abstencion del debito laboral y retiro voluntario"
+  },
+  {
+   "id": 10,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Acueducto en Comodoro",
+   "nombre_norm": "acueducto en comodoro"
+  },
+  {
+   "id": 35,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Aniversario Rawson",
+   "nombre_norm": "aniversario rawson"
+  },
+  {
+   "id": 7,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Apertura Temporada de Pingüinos Punta Tombo",
+   "nombre_norm": "apertura temporada de pinguinos punta tombo"
+  },
+  {
+   "id": 6,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Asistencia a familias afectadas por el Cerro Hermitte",
+   "nombre_norm": "asistencia a familias afectadas por el cerro hermitte"
+  },
+  {
+   "id": 31,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Cámaras de detección temprana de focos de incendios",
+   "nombre_norm": "camaras de deteccion temprana de focos de incendios"
+  },
+  {
+   "id": 66,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Canal de WA",
+   "nombre_norm": "canal de wa"
+  },
+  {
+   "id": 92,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Capacitación para la policía",
+   "nombre_norm": "capacitacion para la policia"
+  },
+  {
+   "id": 45,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Capacitaciones",
+   "nombre_norm": "capacitaciones"
+  },
+  {
+   "id": 86,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Carbono Chubut",
+   "nombre_norm": "carbono chubut"
+  },
+  {
+   "id": 37,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Casa de Gobierno",
+   "nombre_norm": "casa de gobierno"
+  },
+  {
+   "id": 95,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Casa del Chubut",
+   "nombre_norm": "casa del chubut"
+  },
+  {
+   "id": 2,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Chubut Avanza",
+   "nombre_norm": "chubut avanza"
+  },
+  {
+   "id": 36,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Chubut mantiene el subsidio de Zona Fría",
+   "nombre_norm": "chubut mantiene el subsidio de zona fria"
+  },
+  {
+   "id": 96,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Chubut Naturaleza",
+   "nombre_norm": "chubut naturaleza"
+  },
+  {
+   "id": 83,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Ciencia, innovación y producción local",
+   "nombre_norm": "ciencia innovacion y produccion local"
+  },
+  {
+   "id": 54,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Complejo Hidroeléctrico Futaleufú",
+   "nombre_norm": "complejo hidroelectrico futaleufu"
+  },
+  {
+   "id": 55,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Condena Clan Vera",
+   "nombre_norm": "condena clan vera"
+  },
+  {
+   "id": 18,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Conducto pluvial en Comodoro",
+   "nombre_norm": "conducto pluvial en comodoro"
+  },
+  {
+   "id": 3,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Conectar Salud",
+   "nombre_norm": "conectar salud"
+  },
+  {
+   "id": 101,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Conectividad aérea",
+   "nombre_norm": "conectividad aerea"
+  },
+  {
+   "id": 81,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "DINO",
+   "nombre_norm": "dino"
+  },
+  {
+   "id": 80,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Donación de órganos",
+   "nombre_norm": "donacion de organos"
+  },
+  {
+   "id": 34,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Efemérides",
+   "nombre_norm": "efemerides"
+  },
+  {
+   "id": 88,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Encuentro de Becarios",
+   "nombre_norm": "encuentro de becarios"
+  },
+  {
+   "id": 51,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Energía Chubut 2050",
+   "nombre_norm": "energia chubut 2050"
+  },
+  {
+   "id": 40,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Energía estable para la Comarca",
+   "nombre_norm": "energia estable para la comarca"
+  },
+  {
+   "id": 38,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Entrega de equipamiento a brigadistas",
+   "nombre_norm": "entrega de equipamiento a brigadistas"
+  },
+  {
+   "id": 17,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Entrega de viviendas",
+   "nombre_norm": "entrega de viviendas"
+  },
+  {
+   "id": 32,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Equipamiento de Hospitales",
+   "nombre_norm": "equipamiento de hospitales"
+  },
+  {
+   "id": 97,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Escuela Tecnológica de la Patagonia Austral",
+   "nombre_norm": "escuela tecnologica de la patagonia austral"
+  },
+  {
+   "id": 5,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Evento Colón",
+   "nombre_norm": "evento colon"
+  },
+  {
+   "id": 21,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Eventos en Buenos Aires",
+   "nombre_norm": "eventos en buenos aires"
+  },
+  {
+   "id": 77,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Familias Solidarias",
+   "nombre_norm": "familias solidarias"
+  },
+  {
+   "id": 44,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Feria Internacional de Turismo",
+   "nombre_norm": "feria internacional de turismo"
+  },
+  {
+   "id": 15,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Gasoducto Cordillerano",
+   "nombre_norm": "gasoducto cordillerano"
+  },
+  {
+   "id": 74,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Gestión de actividades náuticas en Golfo Nuevo",
+   "nombre_norm": "gestion de actividades nauticas en golfo nuevo"
+  },
+  {
+   "id": 62,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Hogar Volver a Empezar",
+   "nombre_norm": "hogar volver a empezar"
+  },
+  {
+   "id": 41,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Homenaje a pioneros",
+   "nombre_norm": "homenaje a pioneros"
+  },
+  {
+   "id": 85,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Hospital Alvear",
+   "nombre_norm": "hospital alvear"
+  },
+  {
+   "id": 29,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Hospital María Humphreys",
+   "nombre_norm": "hospital maria humphreys"
+  },
+  {
+   "id": 94,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "IA en acción",
+   "nombre_norm": "ia en accion"
+  },
+  {
+   "id": 91,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Impulso Joven",
+   "nombre_norm": "impulso joven"
+  },
+  {
+   "id": 67,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Inauguración Gimnasio Gan Gan",
+   "nombre_norm": "inauguracion gimnasio gan gan"
+  },
+  {
+   "id": 58,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Infraestructura deportiva en Rawson",
+   "nombre_norm": "infraestructura deportiva en rawson"
+  },
+  {
+   "id": 100,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Interna UCR",
+   "nombre_norm": "interna ucr"
+  },
+  {
+   "id": 78,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Jornada de Sanidad Animal",
+   "nombre_norm": "jornada de sanidad animal"
+  },
+  {
+   "id": 11,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Jubilados",
+   "nombre_norm": "jubilados"
+  },
+  {
+   "id": 89,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Juegos Chubutenses",
+   "nombre_norm": "juegos chubutenses"
+  },
+  {
+   "id": 27,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Juegos Comunales",
+   "nombre_norm": "juegos comunales"
+  },
+  {
+   "id": 99,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Juegos de la Araucanía",
+   "nombre_norm": "juegos de la araucania"
+  },
+  {
+   "id": 84,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Juegos Evita",
+   "nombre_norm": "juegos evita"
+  },
+  {
+   "id": 87,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Juegos Nacionales para Personas Mayores",
+   "nombre_norm": "juegos nacionales para personas mayores"
+  },
+  {
+   "id": 16,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Juegos Suramericanos",
+   "nombre_norm": "juegos suramericanos"
+  },
+  {
+   "id": 33,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "La Hoya",
+   "nombre_norm": "la hoya"
+  },
+  {
+   "id": 76,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "La Trochita",
+   "nombre_norm": "la trochita"
+  },
+  {
+   "id": 14,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Ley de Promoción de Inversiones Turísticas",
+   "nombre_norm": "ley de promocion de inversiones turisticas"
+  },
+  {
+   "id": 9,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Medidas de alivio financiero",
+   "nombre_norm": "medidas de alivio financiero"
+  },
+  {
+   "id": 65,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Mejores promedios",
+   "nombre_norm": "mejores promedios"
+  },
+  {
+   "id": 4,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Mil Días",
+   "nombre_norm": "mil dias"
+  },
+  {
+   "id": 90,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Muestra de Artesanías",
+   "nombre_norm": "muestra de artesanias"
+  },
+  {
+   "id": 64,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Nacional U18",
+   "nombre_norm": "nacional u18"
+  },
+  {
+   "id": 19,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Nexo Cloacal Esquel",
+   "nombre_norm": "nexo cloacal esquel"
+  },
+  {
+   "id": 57,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Obra de modernización del aeropuerto de Esquel",
+   "nombre_norm": "obra de modernizacion del aeropuerto de esquel"
+  },
+  {
+   "id": 72,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Obra Hospital Subzonal Santa Teresita",
+   "nombre_norm": "obra hospital subzonal santa teresita"
+  },
+  {
+   "id": 47,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Obras en escuelas",
+   "nombre_norm": "obras en escuelas"
+  },
+  {
+   "id": 56,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Obras en Hospitales",
+   "nombre_norm": "obras en hospitales"
+  },
+  {
+   "id": 69,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Obras para la Comarca",
+   "nombre_norm": "obras para la comarca"
+  },
+  {
+   "id": 1,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Operativos de seguridad",
+   "nombre_norm": "operativos de seguridad"
+  },
+  {
+   "id": 53,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Orgullo Chubutense",
+   "nombre_norm": "orgullo chubutense"
+  },
+  {
+   "id": 60,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Orgullo Mayor",
+   "nombre_norm": "orgullo mayor"
+  },
+  {
+   "id": 71,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Parque Solar Fotovoltaico Puerto Madryn",
+   "nombre_norm": "parque solar fotovoltaico puerto madryn"
+  },
+  {
+   "id": 98,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Poder Judicial",
+   "nombre_norm": "poder judicial"
+  },
+  {
+   "id": 82,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Portal Web",
+   "nombre_norm": "portal web"
+  },
+  {
+   "id": 48,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Prevención de Monóxido",
+   "nombre_norm": "prevencion de monoxido"
+  },
+  {
+   "id": 73,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Provincia regulariza terrenos en el Máximo Abásolo",
+   "nombre_norm": "provincia regulariza terrenos en el maximo abasolo"
+  },
+  {
+   "id": 79,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Pruebas Aprender",
+   "nombre_norm": "pruebas aprender"
+  },
+  {
+   "id": 70,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Reactivación perforación petrolera El Tordillo",
+   "nombre_norm": "reactivacion perforacion petrolera el tordillo"
+  },
+  {
+   "id": 93,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Recitales SADAIC en Chubut",
+   "nombre_norm": "recitales sadaic en chubut"
+  },
+  {
+   "id": 52,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Reconocimiento referentes Turísticos",
+   "nombre_norm": "reconocimiento referentes turisticos"
+  },
+  {
+   "id": 61,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Reconocimiento UNICEF",
+   "nombre_norm": "reconocimiento unicef"
+  },
+  {
+   "id": 39,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Recortes en el PAMI",
+   "nombre_norm": "recortes en el pami"
+  },
+  {
+   "id": 46,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Repavimentación de la Ruta 40",
+   "nombre_norm": "repavimentacion de la ruta 40"
+  },
+  {
+   "id": 20,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Resumen de toda la provincia",
+   "nombre_norm": "resumen de toda la provincia"
+  },
+  {
+   "id": 59,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Salud Mental",
+   "nombre_norm": "salud mental"
+  },
+  {
+   "id": 43,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Sorteo 200 millones",
+   "nombre_norm": "sorteo 200 millones"
+  },
+  {
+   "id": 75,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Sostenibilidad",
+   "nombre_norm": "sostenibilidad"
+  },
+  {
+   "id": 12,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Subzona franca en Trelew",
+   "nombre_norm": "subzona franca en trelew"
+  },
+  {
+   "id": 25,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Temporada de Ballenas",
+   "nombre_norm": "temporada de ballenas"
+  },
+  {
+   "id": 22,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Temporada de Invierno 2026",
+   "nombre_norm": "temporada de invierno 2026"
+  },
+  {
+   "id": 23,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Temporada de Primavera",
+   "nombre_norm": "temporada de primavera"
+  },
+  {
+   "id": 42,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Temporada de Tulipanes 2026",
+   "nombre_norm": "temporada de tulipanes 2026"
+  },
+  {
+   "id": 13,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Torres apuntó contra jueces garantistas",
+   "nombre_norm": "torres apunto contra jueces garantistas"
+  },
+  {
+   "id": 63,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Transporte público",
+   "nombre_norm": "transporte publico"
+  },
+  {
+   "id": 26,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Turnos de salud",
+   "nombre_norm": "turnos de salud"
+  },
+  {
+   "id": 8,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Turnos digitales con DINO",
+   "nombre_norm": "turnos digitales con dino"
+  },
+  {
+   "id": 49,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Vacantes Escolares",
+   "nombre_norm": "vacantes escolares"
+  },
+  {
+   "id": 50,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Viviendas para el Barrio LU4",
+   "nombre_norm": "viviendas para el barrio lu4"
+  },
+  {
+   "id": 30,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Viviendas para los afectados por los incendios",
+   "nombre_norm": "viviendas para los afectados por los incendios"
+  },
+  {
+   "id": 24,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Vuelos Córdoba - Esquel",
+   "nombre_norm": "vuelos cordoba esquel"
+  },
+  {
+   "id": 495,
+   "proyecto": "Javier Bee Sellares",
+   "nombre": "El ABC de la ciudad",
+   "nombre_norm": "el abc de la ciudad"
+  },
+  {
+   "id": 494,
+   "proyecto": "Javier Bee Sellares",
+   "nombre": "Entrevistas en Medios",
+   "nombre_norm": "entrevistas en medios"
+  },
+  {
+   "id": 449,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "4to Congreso Ecoturístico del Litoral",
+   "nombre_norm": "4to congreso ecoturistico del litoral"
+  },
+  {
+   "id": 430,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Aniversario de Concepción del Yaguareté Corá",
+   "nombre_norm": "aniversario de concepcion del yaguarete cora"
+  },
+  {
+   "id": 446,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Aniversario Loreto",
+   "nombre_norm": "aniversario loreto"
+  },
+  {
+   "id": 442,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Aniversario Paso de los Libres - Acto",
+   "nombre_norm": "aniversario paso de los libres acto"
+  },
+  {
+   "id": 434,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Aniversario Paso de los Libres - Inauguración",
+   "nombre_norm": "aniversario paso de los libres inauguracion"
+  },
+  {
+   "id": 429,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Aniversario Riachuelo",
+   "nombre_norm": "aniversario riachuelo"
+  },
+  {
+   "id": 428,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Aniversario Virasoro",
+   "nombre_norm": "aniversario virasoro"
+  },
+  {
+   "id": 450,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Convención Anual del IAEF",
+   "nombre_norm": "convencion anual del iaef"
+  },
+  {
+   "id": 443,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Corrientes Potencia",
+   "nombre_norm": "corrientes potencia"
+  },
+  {
+   "id": 447,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Corrientes Produce",
+   "nombre_norm": "corrientes produce"
+  },
+  {
+   "id": 444,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Destino Corrientes",
+   "nombre_norm": "destino corrientes"
+  },
+  {
+   "id": 437,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Fábrica de CLT - Llegada de contenedores",
+   "nombre_norm": "fabrica de clt llegada de contenedores"
+  },
+  {
+   "id": 435,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Fiesta Nacional de la Yerra y Doma Correntina",
+   "nombre_norm": "fiesta nacional de la yerra y doma correntina"
+  },
+  {
+   "id": 438,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Inversiones",
+   "nombre_norm": "inversiones"
+  },
+  {
+   "id": 432,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Invico",
+   "nombre_norm": "invico"
+  },
+  {
+   "id": 433,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Juegos Suramericanos",
+   "nombre_norm": "juegos suramericanos"
+  },
+  {
+   "id": 431,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Mi Corrientes",
+   "nombre_norm": "mi corrientes"
+  },
+  {
+   "id": 439,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Ñande Rio",
+   "nombre_norm": "nande rio"
+  },
+  {
+   "id": 448,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Nuevo BRIF",
+   "nombre_norm": "nuevo brif"
+  },
+  {
+   "id": 440,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Obras Hidricas",
+   "nombre_norm": "obras hidricas"
+  },
+  {
+   "id": 453,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Pavimentación maderera Santo Tomé",
+   "nombre_norm": "pavimentacion maderera santo tome"
+  },
+  {
+   "id": 452,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Recap Agosto",
+   "nombre_norm": "recap agosto"
+  },
+  {
+   "id": 441,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Reunión con Embajador de EEUU",
+   "nombre_norm": "reunion con embajador de eeuu"
+  },
+  {
+   "id": 445,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Reunión Embajador de Corea",
+   "nombre_norm": "reunion embajador de corea"
+  },
+  {
+   "id": 436,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Reunión jóvenes del Concejo Deliberante Estudiantil",
+   "nombre_norm": "reunion jovenes del concejo deliberante estudiantil"
+  },
+  {
+   "id": 451,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Torneo Interescolar 2026",
+   "nombre_norm": "torneo interescolar 2026"
+  },
+  {
+   "id": 478,
+   "proyecto": "Juegos Suramericanos & Soy Capi",
+   "nombre": "Juegos Suramericanos",
+   "nombre_norm": "juegos suramericanos"
+  },
+  {
+   "id": 473,
+   "proyecto": "Nacho Torres",
+   "nombre": "Acueducto en Comodoro",
+   "nombre_norm": "acueducto en comodoro"
+  },
+  {
+   "id": 467,
+   "proyecto": "Nacho Torres",
+   "nombre": "Aniversario El Hoyo",
+   "nombre_norm": "aniversario el hoyo"
+  },
+  {
+   "id": 463,
+   "proyecto": "Nacho Torres",
+   "nombre": "Aniversario Rawson",
+   "nombre_norm": "aniversario rawson"
+  },
+  {
+   "id": 460,
+   "proyecto": "Nacho Torres",
+   "nombre": "Asistencia a Centros de Jubilados Comodoro",
+   "nombre_norm": "asistencia a centros de jubilados comodoro"
+  },
+  {
+   "id": 456,
+   "proyecto": "Nacho Torres",
+   "nombre": "Asistencia a familias afectadas por el Cerro Hermitte",
+   "nombre_norm": "asistencia a familias afectadas por el cerro hermitte"
+  },
+  {
+   "id": 454,
+   "proyecto": "Nacho Torres",
+   "nombre": "Chubut Avanza",
+   "nombre_norm": "chubut avanza"
+  },
+  {
+   "id": 470,
+   "proyecto": "Nacho Torres",
+   "nombre": "Energía Chubut 2050",
+   "nombre_norm": "energia chubut 2050"
+  },
+  {
+   "id": 457,
+   "proyecto": "Nacho Torres",
+   "nombre": "Entrega de equipamiento a brigadistas",
+   "nombre_norm": "entrega de equipamiento a brigadistas"
+  },
+  {
+   "id": 459,
+   "proyecto": "Nacho Torres",
+   "nombre": "Escuela Tecnológica de la Patagonia Austral",
+   "nombre_norm": "escuela tecnologica de la patagonia austral"
+  },
+  {
+   "id": 455,
+   "proyecto": "Nacho Torres",
+   "nombre": "Evento Colón",
+   "nombre_norm": "evento colon"
+  },
+  {
+   "id": 464,
+   "proyecto": "Nacho Torres",
+   "nombre": "Homenaje a los pioneros",
+   "nombre_norm": "homenaje a los pioneros"
+  },
+  {
+   "id": 462,
+   "proyecto": "Nacho Torres",
+   "nombre": "Inauguración Gimnasio Gan Gan",
+   "nombre_norm": "inauguracion gimnasio gan gan"
+  },
+  {
+   "id": 477,
+   "proyecto": "Nacho Torres",
+   "nombre": "Inversiones",
+   "nombre_norm": "inversiones"
+  },
+  {
+   "id": 474,
+   "proyecto": "Nacho Torres",
+   "nombre": "Juegos Comunales",
+   "nombre_norm": "juegos comunales"
+  },
+  {
+   "id": 468,
+   "proyecto": "Nacho Torres",
+   "nombre": "Obras de gas natural",
+   "nombre_norm": "obras de gas natural"
+  },
+  {
+   "id": 475,
+   "proyecto": "Nacho Torres",
+   "nombre": "Obras en Hospitales",
+   "nombre_norm": "obras en hospitales"
+  },
+  {
+   "id": 476,
+   "proyecto": "Nacho Torres",
+   "nombre": "Orgullo Chubutense",
+   "nombre_norm": "orgullo chubutense"
+  },
+  {
+   "id": 465,
+   "proyecto": "Nacho Torres",
+   "nombre": "Pioneros del Turismo",
+   "nombre_norm": "pioneros del turismo"
+  },
+  {
+   "id": 458,
+   "proyecto": "Nacho Torres",
+   "nombre": "Promoción Turística",
+   "nombre_norm": "promocion turistica"
+  },
+  {
+   "id": 469,
+   "proyecto": "Nacho Torres",
+   "nombre": "Reconocimiento referentes Turísticos",
+   "nombre_norm": "reconocimiento referentes turisticos"
+  },
+  {
+   "id": 472,
+   "proyecto": "Nacho Torres",
+   "nombre": "Reconstrucción Barrio LU4",
+   "nombre_norm": "reconstruccion barrio lu4"
+  },
+  {
+   "id": 461,
+   "proyecto": "Nacho Torres",
+   "nombre": "Sub zona franca",
+   "nombre_norm": "sub zona franca"
+  },
+  {
+   "id": 466,
+   "proyecto": "Nacho Torres",
+   "nombre": "Temporada de pinguinos",
+   "nombre_norm": "temporada de pinguinos"
+  },
+  {
+   "id": 471,
+   "proyecto": "Nacho Torres",
+   "nombre": "Viviendas para los afectados por Incendios",
+   "nombre_norm": "viviendas para los afectados por incendios"
+  },
+  {
+   "id": 496,
+   "proyecto": "Nosotras por la paz",
+   "nombre": "Afganistan",
+   "nombre_norm": "afganistan"
+  },
+  {
+   "id": 479,
+   "proyecto": "Turismo Chubut",
+   "nombre": "Eventos en Buenos Aires",
+   "nombre_norm": "eventos en buenos aires"
+  },
+  {
+   "id": 483,
+   "proyecto": "Turismo Chubut",
+   "nombre": "FIT 2026",
+   "nombre_norm": "fit 2026"
+  },
+  {
+   "id": 486,
+   "proyecto": "Turismo Chubut",
+   "nombre": "Gestión de actividades náuticas en Golfo Nuevo",
+   "nombre_norm": "gestion de actividades nauticas en golfo nuevo"
+  },
+  {
+   "id": 484,
+   "proyecto": "Turismo Chubut",
+   "nombre": "Homenaje a pioneros",
+   "nombre_norm": "homenaje a pioneros"
+  },
+  {
+   "id": 485,
+   "proyecto": "Turismo Chubut",
+   "nombre": "Ley de Promoción a las Inversiones Turísticas",
+   "nombre_norm": "ley de promocion a las inversiones turisticas"
+  },
+  {
+   "id": 480,
+   "proyecto": "Turismo Chubut",
+   "nombre": "Temporada de Pingüinos 2026",
+   "nombre_norm": "temporada de pinguinos 2026"
+  },
+  {
+   "id": 482,
+   "proyecto": "Turismo Chubut",
+   "nombre": "Temporada de Primavera 2026",
+   "nombre_norm": "temporada de primavera 2026"
+  },
+  {
+   "id": 481,
+   "proyecto": "Turismo Chubut",
+   "nombre": "Temporada de Tulipanes 2026",
+   "nombre_norm": "temporada de tulipanes 2026"
+  }
+ ],
+ "equivalentes": [
+  {
+   "campana_id": 332,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Cursos en NODO Tecnológico",
+   "nombre_norm": "cursos en nodo tecnologico",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 327,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Iluminación 100% LED",
+   "nombre_norm": "iluminacion 100 led",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 338,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Info Muni",
+   "nombre_norm": "info muni",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 347,
+   "proyecto": "Catamarca Ciudad Oficial",
+   "nombre": "Limpieza en canales y espacios",
+   "nombre_norm": "limpieza en canales y espacios",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 292,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Capacitación Salud Maternidad",
+   "nombre_norm": "capacitacion salud maternidad",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 283,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Cuando Cobro AUH MICA Placas Animadas",
+   "nombre_norm": "cuando cobro auh mica placas animadas",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 283,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Cuando Cobro AUH MICA Placas Fijas",
+   "nombre_norm": "cuando cobro auh mica placas fijas",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 283,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Cuando Cobro Chatbot MICA",
+   "nombre_norm": "cuando cobro chatbot mica",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 283,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Cuando Cobro Jubilaciones \"Apoderados\"",
+   "nombre_norm": "cuando cobro jubilaciones apoderados",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 283,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Cuando Cobro Jubilaciones MICA Placas Animadas",
+   "nombre_norm": "cuando cobro jubilaciones mica placas animadas",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 283,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Cuando Cobro Jubilaciones MICA Placas Fijas",
+   "nombre_norm": "cuando cobro jubilaciones mica placas fijas",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 283,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Cuando Cobro MICA Placas Animadas",
+   "nombre_norm": "cuando cobro mica placas animadas",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 272,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Cursos Campus Laboral",
+   "nombre_norm": "cursos campus laboral",
+   "vertical": "Informativo"
+  },
+  {
+   "campana_id": 275,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Entrega de viviendas en el interior",
+   "nombre_norm": "entrega de viviendas en el interior",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 275,
+   "proyecto": "Catamarca Provincia Oficial",
+   "nombre": "Entrega de viviendas en San José",
+   "nombre_norm": "entrega de viviendas en san jose",
+   "vertical": "Informativo"
+  },
+  {
+   "campana_id": 383,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Agenda de Martín",
+   "nombre_norm": "agenda de martin",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 380,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Llaryora impulsa el programa Cordobeses en Alerta",
+   "nombre_norm": "llaryora impulsa el programa cordobeses en alerta",
+   "vertical": "Informativo"
+  },
+  {
+   "campana_id": 390,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Plan de Reparación Vial Integral",
+   "nombre_norm": "plan de reparacion vial integral",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 399,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Reels IG- Publico 3",
+   "nombre_norm": "reels ig publico 3",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 381,
+   "proyecto": "Gobierno de Córdoba",
+   "nombre": "Resultados Pruebas PISA",
+   "nombre_norm": "resultados pruebas pisa",
+   "vertical": "Informativo"
+  },
+  {
+   "campana_id": 108,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Aniversario Paso de los Libres - Acto",
+   "nombre_norm": "aniversario paso de los libres acto",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 108,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Aniversario Paso de los Libres - Inauguración",
+   "nombre_norm": "aniversario paso de los libres inauguracion",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 139,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Captura internacional",
+   "nombre_norm": "captura internacional",
+   "vertical": "Informativo"
+  },
+  {
+   "campana_id": 104,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "El Niño municipios",
+   "nombre_norm": "el nino municipios",
+   "vertical": "Informativo"
+  },
+  {
+   "campana_id": 103,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Fábrica de CLT - Llegada de contenedores",
+   "nombre_norm": "fabrica de clt llegada de contenedores",
+   "vertical": "Informativo"
+  },
+  {
+   "campana_id": 139,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Faena clandestina",
+   "nombre_norm": "faena clandestina",
+   "vertical": "Informativo"
+  },
+  {
+   "campana_id": 123,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Golpe al Narcomenudeo",
+   "nombre_norm": "golpe al narcomenudeo",
+   "vertical": "Informativo"
+  },
+  {
+   "campana_id": 107,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "INCENDIOS",
+   "nombre_norm": "incendios",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 116,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "JPV en la Convención Anual del IAEF",
+   "nombre_norm": "jpv en la convencion anual del iaef",
+   "vertical": "Informativo"
+  },
+  {
+   "campana_id": 120,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Nuevo centro de interpretacion",
+   "nombre_norm": "nuevo centro de interpretacion",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 104,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Obras que llegan - El Niño",
+   "nombre_norm": "obras que llegan el nino",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 107,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Prevención de incendios",
+   "nombre_norm": "prevencion de incendios",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 104,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Readecuación del Arroyo Pirayuí",
+   "nombre_norm": "readecuacion del arroyo pirayui",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 139,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Red de abigeato",
+   "nombre_norm": "red de abigeato",
+   "vertical": "Informativo"
+  },
+  {
+   "campana_id": 105,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Reunion INVICO",
+   "nombre_norm": "reunion invico",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 104,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Superniño",
+   "nombre_norm": "supernino",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 139,
+   "proyecto": "Gobierno de Corrientes",
+   "nombre": "Trafico ilegal de fauna",
+   "nombre_norm": "trafico ilegal de fauna",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Audio",
+   "nombre_norm": "audio",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Campaña Nacional Juegos Suramericanos",
+   "nombre_norm": "campana nacional juegos suramericanos",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Campaña Provincial Capi invita a los hinchas",
+   "nombre_norm": "campana provincial capi invita a los hinchas",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Canción",
+   "nombre_norm": "cancion",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 239,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Contra los contadores y abogados de las bandas criminales \"Pullaro apuntó con los profesionales que asesoran a las bandas\" (Placa Fija)",
+   "nombre_norm": "contra los contadores y abogados de las bandas criminales pullaro apunto con los profesionales que asesoran a las bandas placa fija",
+   "vertical": "Informativo"
+  },
+  {
+   "campana_id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Cuenta Regresiva",
+   "nombre_norm": "cuenta regresiva",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Deportes",
+   "nombre_norm": "deportes",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Desarrollo de los Juegos",
+   "nombre_norm": "desarrollo de los juegos",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 235,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Desarticulación de bandas",
+   "nombre_norm": "desarticulacion de bandas",
+   "vertical": "Informativo"
+  },
+  {
+   "campana_id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Ecommerce",
+   "nombre_norm": "ecommerce",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Embajadores",
+   "nombre_norm": "embajadores",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Entradas",
+   "nombre_norm": "entradas",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Entradas QR",
+   "nombre_norm": "entradas qr",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 261,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Entrega de viviendas",
+   "nombre_norm": "entrega de viviendas",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Esports",
+   "nombre_norm": "esports",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Fan Fest",
+   "nombre_norm": "fan fest",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Gaming y formatos interactivos",
+   "nombre_norm": "gaming y formatos interactivos",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "IG/FB Feed",
+   "nombre_norm": "ig fb feed",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 230,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Inauguración",
+   "nombre_norm": "inauguracion",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Juegos Suramericanos 2026",
+   "nombre_norm": "juegos suramericanos 2026",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Medallas",
+   "nombre_norm": "medallas",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 244,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Nueva flota aérea para combatir incendios",
+   "nombre_norm": "nueva flota aerea para combatir incendios",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 234,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Obras hídricas Súper Niño",
+   "nombre_norm": "obras hidricas super nino",
+   "vertical": "Informativo"
+  },
+  {
+   "campana_id": 251,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Recompensas 2026",
+   "nombre_norm": "recompensas 2026",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 251,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Recompensas - Los 10 más buscados",
+   "nombre_norm": "recompensas los 10 mas buscados",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Seguridad vial con Capi",
+   "nombre_norm": "seguridad vial con capi",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Stories",
+   "nombre_norm": "stories",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 229,
+   "proyecto": "Gobierno de Santa Fe",
+   "nombre": "Video",
+   "nombre_norm": "video",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 182,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Red Estratégica de Salud \"Convocatoria El Sauzal y Wichí Pintado\"",
+   "nombre_norm": "red estrategica de salud convocatoria el sauzal y wichi pintado",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 182,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Red Estratégica de Salud \"Santa Sylvina\"",
+   "nombre_norm": "red estrategica de salud santa sylvina",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 182,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Red Estratégica de Salud \"Tres Isletas\"",
+   "nombre_norm": "red estrategica de salud tres isletas",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 178,
+   "proyecto": "Gobierno del Chaco",
+   "nombre": "Ruta al Impenetrable",
+   "nombre_norm": "ruta al impenetrable",
+   "vertical": "Informativo"
+  },
+  {
+   "campana_id": 4,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "1000 días",
+   "nombre_norm": "1000 dias",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 35,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Aniversario",
+   "nombre_norm": "aniversario",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 35,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Aniversario El Hoyo",
+   "nombre_norm": "aniversario el hoyo",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 11,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Asistencia a Centros de Jubilados Comodoro",
+   "nombre_norm": "asistencia a centros de jubilados comodoro",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 83,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "CIENCIA, INNOVACIÓN Y PRODUCCIÓN LOCAL EN CHUBUT",
+   "nombre_norm": "ciencia innovacion y produccion local en chubut",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 2,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Doble Trocha de Trelew a Puerto Madryn",
+   "nombre_norm": "doble trocha de trelew a puerto madryn",
+   "vertical": "Informativo"
+  },
+  {
+   "campana_id": 44,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "FIT 2026",
+   "nombre_norm": "fit 2026",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 1,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "GOLPE AL NARCOTRÁFICO EN COMODORO RIVADAVIA",
+   "nombre_norm": "golpe al narcotrafico en comodoro rivadavia",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 14,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Inversiones",
+   "nombre_norm": "inversiones",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 14,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Inversiones turísticas en Esquel",
+   "nombre_norm": "inversiones turisticas en esquel",
+   "vertical": "Informativo"
+  },
+  {
+   "campana_id": 9,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Medidas de alivio fiscal",
+   "nombre_norm": "medidas de alivio fiscal",
+   "vertical": "Informativo"
+  },
+  {
+   "campana_id": 9,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Medidas financieras para aliviar a las familias chubutenses GOB",
+   "nombre_norm": "medidas financieras para aliviar a las familias chubutenses gob",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 29,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "NEONATOLOGÍA - Hospital María Humphreys",
+   "nombre_norm": "neonatologia hospital maria humphreys",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 30,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Nuevas viviendas para los afectados por los incendios",
+   "nombre_norm": "nuevas viviendas para los afectados por los incendios",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 2,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Obra de Gas Aldea Beleiro",
+   "nombre_norm": "obra de gas aldea beleiro",
+   "vertical": "Informativo"
+  },
+  {
+   "campana_id": 2,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Obras de gas natural",
+   "nombre_norm": "obras de gas natural",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 2,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Obras en Rawson",
+   "nombre_norm": "obras en rawson",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 60,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Orgullo Mayo",
+   "nombre_norm": "orgullo mayo",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 41,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Pioneros del Turismo",
+   "nombre_norm": "pioneros del turismo",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 2,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Planta GLP Lago Blanco",
+   "nombre_norm": "planta glp lago blanco",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 14,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Promoción Turística",
+   "nombre_norm": "promocion turistica",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 12,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Sub zona franca",
+   "nombre_norm": "sub zona franca",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 7,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Temporada de pinguinos",
+   "nombre_norm": "temporada de pinguinos",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 7,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Temporada de Pingüinos 2026",
+   "nombre_norm": "temporada de pinguinos 2026",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 23,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Temporada de Primavera 2026",
+   "nombre_norm": "temporada de primavera 2026",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 26,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Turnos médicos",
+   "nombre_norm": "turnos medicos",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 30,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Viviendas para los afectados por Incendios",
+   "nombre_norm": "viviendas para los afectados por incendios",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 24,
+   "proyecto": "Gobierno del Chubut",
+   "nombre": "Vuelos Córdoba Esquel siguen en octubre",
+   "nombre_norm": "vuelos cordoba esquel siguen en octubre",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 440,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Readecuación Arroyo Pirayuí",
+   "nombre_norm": "readecuacion arroyo pirayui",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 432,
+   "proyecto": "Juan Pablo Valdés Campaña",
+   "nombre": "Reunion INVICO",
+   "nombre_norm": "reunion invico",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 478,
+   "proyecto": "Juegos Suramericanos & Soy Capi",
+   "nombre": "Desarrollo de los Juegos",
+   "nombre_norm": "desarrollo de los juegos",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 478,
+   "proyecto": "Juegos Suramericanos & Soy Capi",
+   "nombre": "Entradas",
+   "nombre_norm": "entradas",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 478,
+   "proyecto": "Juegos Suramericanos & Soy Capi",
+   "nombre": "Entradas QR",
+   "nombre_norm": "entradas qr",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 478,
+   "proyecto": "Juegos Suramericanos & Soy Capi",
+   "nombre": "Esports",
+   "nombre_norm": "esports",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 478,
+   "proyecto": "Juegos Suramericanos & Soy Capi",
+   "nombre": "Fan Fest",
+   "nombre_norm": "fan fest",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 478,
+   "proyecto": "Juegos Suramericanos & Soy Capi",
+   "nombre": "Inauguración",
+   "nombre_norm": "inauguracion",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 478,
+   "proyecto": "Juegos Suramericanos & Soy Capi",
+   "nombre": "Posicionamiento",
+   "nombre_norm": "posicionamiento",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 478,
+   "proyecto": "Juegos Suramericanos & Soy Capi",
+   "nombre": "Seguridad vial con Capi",
+   "nombre_norm": "seguridad vial con capi",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 458,
+   "proyecto": "Nacho Torres",
+   "nombre": "Ley de Promoción Turística",
+   "nombre_norm": "ley de promocion turistica",
+   "vertical": "Oficial"
+  },
+  {
+   "campana_id": 454,
+   "proyecto": "Nacho Torres",
+   "nombre": "Planta GLP Lago Blanco",
+   "nombre_norm": "planta glp lago blanco",
+   "vertical": "Oficial"
+  }
+ ]
+}

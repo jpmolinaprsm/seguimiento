@@ -51,9 +51,9 @@ const LISTA = [
 const sesionesPrueba = crearSesiones({ secreto: SECRETO, seguro: false });
 const cookieDe = (email) => 'syo_sesion=' + sesionesPrueba.crearValor({ email, nombre: email });
 
-async function levantar({ accesos, env = {}, google, nexo } = {}) {
+async function levantar({ accesos, env = {}, google, nexo, aliasCampanas } = {}) {
   const cfg = leerConfig({ SESSION_SECRET: SECRETO, GOOGLE_CLIENT_ID: 'x', GOOGLE_CLIENT_SECRET: 'x', AUTH_DOMINIO: 'empresa.test', URL_BASE: 'http://localhost', HTML_ARMADO: rutaHtml, DATOS_DIR: path.join(tmp, 'datos' + Math.random()), SUPABASE_URL: '', ...env });
-  const s = crearServidor({ cfg, log: () => {}, almacen: crearAlmacen({ tipo: 'archivo', carpeta: cfg.datosDir }), google, ...(nexo ? { nexo } : {}), accesosDe: accesos || crearAccesosDe({ cliente: null, lista: accesosDeLista(LISTA) }) });
+  const s = crearServidor({ cfg, log: () => {}, almacen: crearAlmacen({ tipo: 'archivo', carpeta: cfg.datosDir }), google, ...(nexo ? { nexo } : {}), ...(aliasCampanas ? { aliasCampanas } : {}), accesosDe: accesos || crearAccesosDe({ cliente: null, lista: accesosDeLista(LISTA) }) });
   await new Promise((r) => s.listen(0, '127.0.0.1', r));
   const base = 'http://127.0.0.1:' + s.address().port;
   const pedir = async (ruta, { cookie, metodo = 'GET', cuerpo, headers = {} } = {}) => {
@@ -69,7 +69,7 @@ const datosDe = (texto) => { const f = path.join(tmp, 'v' + Math.random() + '.ht
 
   console.log('1. /salud y pantalla de entrada: sin datos');
   let r = await A.pedir('/salud');
-  ok(r.status === 200 && JSON.parse(r.texto).ok === true && Object.keys(JSON.parse(r.texto)).length === 1, '/salud responde solo {ok:true}');
+  ok(r.status === 200 && JSON.parse(r.texto).ok === true && JSON.parse(r.texto).accesos === 'ok' && Object.keys(JSON.parse(r.texto)).length === 2, '/salud responde solo {ok, accesos} (sin datos)');
   r = await A.pedir('/entrar');
   ok(r.status === 200 && /Entrar con Google/.test(r.texto) && !/OFICIAL_|Alfa/.test(r.texto), '/entrar muestra el botón y ningún dato');
 
@@ -162,6 +162,61 @@ const datosDe = (texto) => { const f = path.join(tmp, 'v' + Math.random() + '.ht
   const lanza = async () => { throw new Error('se cayó'); };
   const D = await levantar({ accesos: lanza });
   r = await D.pedir('/api/yo', { cookie: cookieDe('admin@empresa.test') }); ok(r.status === 503, 'si el hook falla del todo → 503, sin datos');
+
+  console.log('7b. PAUTADOR falla: qué se hace en cada caso');
+  const hoyMs = Date.now(); const dias = (n) => new Date(hoyMs - n * 86400000).toISOString();
+  const listaCon = (generada) => { const f = accesosDeLista(LISTA); if (generada !== undefined) f.generada_el = generada; return f; };
+  const errHttp = (n) => async () => { throw new Error(`PAUTADOR respondió ${n}`); };
+  const SOLO = 'solo-alfa@empresa.test';
+  const probar = async (cliente, lista, mail = SOLO) => { const regs = []; const f = crearAccesosDe({ cliente, lista, registrar: (m) => regs.push(m), reloj: () => hoyMs, esperar: async () => {}, reintentoMs: 0 }); let res, err = null; try { res = await f(mail); } catch (e) { err = e; } return { res, err, regs, f }; };
+  for (const n of [401, 403]) {
+    const x = await probar(errHttp(n), listaCon(dias(1)));
+    ok(x.err && x.err.codigo === 'clave_rechazada' && x.res === undefined, `PAUTADOR ${n}: se cierra, no se usa la lista aunque esté vigente`);
+    ok(x.regs.some((m) => /ERROR accesos/.test(m) && /rechazó la clave/.test(m)) && !x.regs.join(' ').includes(SOLO), `PAUTADOR ${n}: queda un error claro en el registro, sin el mail`);
+    ok(x.f.salud().degradado === true && x.f.salud().motivo === 'clave_rechazada', `PAUTADOR ${n}: la salud queda degradada`);
+  }
+  for (const [nombre, cli] of [['timeout', async () => { throw new Error('PAUTADOR no contestó en 5 segundos'); }], ['sin conexión', async () => { throw new Error('no se pudo conectar con PAUTADOR'); }], ['503', errHttp(503)], ['500', errHttp(500)], ['formato raro', async () => { throw new Error('la respuesta de PAUTADOR no tiene el formato acordado'); }]]) {
+    let x = await probar(cli, listaCon(dias(2)));
+    ok(x.res && x.res.email === SOLO && x.f.salud().degradado === true, `${nombre}: con lista de hace 2 días entra por la lista (y la salud queda degradada)`);
+    x = await probar(cli, listaCon(dias(8))); ok(x.res === null, `${nombre}: con lista de hace 8 días nadie entra`);
+    x = await probar(cli, listaCon(null)); ok(x.res === null, `${nombre}: lista sin fecha → nadie entra`);
+    x = await probar(cli, listaCon(undefined === 1 ? 0 : '')); ok(x.res === null, `${nombre}: fecha vacía → nadie entra`);
+  }
+  let x = await probar(errHttp(503), listaCon(dias(8))); ok(x.regs.some((m) => /ERROR accesos/.test(m) && /más de 7 días/.test(m)), 'lista vencida: queda un error claro en el registro');
+  // 429: se reintenta una vez
+  let llamadas = 0; const una429 = async (m) => { llamadas++; if (llamadas === 1) throw new Error('PAUTADOR respondió 429 (demasiadas consultas)'); return await accesosDeLista(LISTA)(m); };
+  x = await probar(una429, listaCon(dias(1))); ok(llamadas === 2 && x.res && x.res.email === SOLO && x.f.salud().degradado === false, '429 y después responde: se reintenta una vez y se usa la respuesta de PAUTADOR');
+  llamadas = 0; const siempre429 = async () => { llamadas++; throw new Error('PAUTADOR respondió 429 (demasiadas consultas)'); };
+  x = await probar(siempre429, listaCon(dias(1))); ok(llamadas === 2 && x.res && x.res.email === SOLO, '429 dos veces: se trata como 5xx (lista vigente) tras un solo reintento');
+  llamadas = 0; x = await probar(siempre429, listaCon(dias(9))); ok(llamadas === 2 && x.res === null, '429 dos veces con lista vencida: nadie entra');
+  // baja explícita
+  const bajaP = async (m) => ({ email: m, habilitado: false, rol: null, administradorGlobal: false, accesos: [] });
+  x = await probar(bajaP, listaCon(dias(1))); ok(x.res && x.res.habilitado === false, 'baja explícita de PAUTADOR: se respeta, no se pisa con la lista');
+  // consulta apagada: la lista vale solo si es reciente
+  x = await probar(null, listaCon(dias(3))); ok(x.res && x.res.email === SOLO, 'consulta apagada y lista de hace 3 días: entra');
+  x = await probar(null, listaCon(dias(10))); ok(x.res === null, 'consulta apagada y lista de hace 10 días: nadie entra');
+  // el archivo de la lista: con fecha y sin fecha
+  const { crearAccesosDeLista } = require('../../nexo/accesos-lista');
+  const conJson = (o) => crearAccesosDeLista({ env: { NEXO_ACCESOS_JSON: JSON.stringify(o) } });
+  ok(conJson({ generada_el: '2026-10-13', accesos: LISTA }).generada_el === '2026-10-13', 'la lista nueva { generada_el, accesos } trae su fecha');
+  ok(conJson(LISTA).generada_el === null, 'la lista vieja (arreglo pelado) queda sin fecha: vencida');
+  // en el servidor: 401 → nadie entra y /salud degradado; 5xx con lista vigente entra; 5xx con lista vencida no
+  const regsS = [];
+  const S401 = await levantar({ accesos: crearAccesosDe({ cliente: errHttp(401), lista: listaCon(dias(1)), registrar: (m) => regsS.push(m) }) });
+  r = await S401.pedir('/api/yo', { cookie: cookieDe('admin@empresa.test') }); ok(r.status === 503, 'servidor con la clave rechazada: nadie entra');
+  r = await S401.pedir('/salud'); const js = JSON.parse(r.texto); ok(r.status === 200 && js.accesos === 'degradado' && !/401|clave|@/i.test(r.texto), '/salud muestra "degradado" sin datos sensibles');
+  ok(regsS.some((m) => /rechazó la clave/.test(m)), 'el servidor deja el error en el registro');
+  const S5 = await levantar({ accesos: crearAccesosDe({ cliente: errHttp(503), lista: listaCon(dias(1)), registrar: () => {} }) });
+  r = await S5.pedir('/api/yo', { cookie: cookieDe(SOLO) }); ok(r.status === 200, 'servidor con PAUTADOR caído y lista vigente: entra');
+  const S5v = await levantar({ accesos: crearAccesosDe({ cliente: errHttp(503), lista: listaCon(dias(8)), registrar: () => {} }) });
+  r = await S5v.pedir('/api/yo', { cookie: cookieDe(SOLO) }); ok(r.status === 403, 'servidor con PAUTADOR caído y lista vencida: nadie entra');
+  // vaciar la memoria de accesos: solo administrador
+  let vaciadas = 0; const conVaciar = crearAccesosDe({ cliente: null, lista: accesosDeLista(LISTA) }); const vaciarOriginal = conVaciar.vaciar; conVaciar.vaciar = (m) => { vaciadas++; return vaciarOriginal(m); };
+  const SV = await levantar({ accesos: conVaciar });
+  r = await SV.pedir('/api/admin/accesos/vaciar', { cookie: cookieDe(SOLO), metodo: 'POST', cuerpo: {} }); ok(r.status === 403 && vaciadas === 0, 'vaciar la memoria de accesos: un implementador no puede');
+  r = await SV.pedir('/api/admin/accesos/vaciar', { cookie: cookieDe('admin@empresa.test'), metodo: 'POST', cuerpo: {} }); ok(r.status === 200 && vaciadas === 1, 'vaciar la memoria de accesos: el administrador sí');
+  r = await SV.pedir('/api/admin/accesos/vaciar', { metodo: 'POST', cuerpo: {} }); ok(r.status === 401, 'vaciar la memoria de accesos: sin sesión → 401');
+  for (const z of [S401, S5, S5v, SV]) await z.cerrar();
 
   console.log('8. inicio de sesión con Google (de mentira) y modo prueba');
   const g = { habilitado: true, urlDeEntrada: (st) => 'https://accounts.google.test/auth?state=' + st, identificar: async (codigo) => { if (codigo === 'malo') throw new Error('Solo pueden entrar cuentas de empresa.test.'); return { email: 'solo-alfa@empresa.test', nombre: 'Solo Alfa' }; } };
@@ -278,6 +333,35 @@ const datosDe = (texto) => { const f = path.join(tmp, 'v' + Math.random() + '.ht
   for (let i = 0; i < 100 && DR.corriendo(); i++) await new Promise((x) => setTimeout(x, 50));
   ok(DR.corriendo() === false && logsR.some((l) => l.includes('termino')), 'al terminar queda registrado');
   ok(typeof A.s.disparador.revisar === 'function' && A.s.disparador.activo === false, 'el servidor trae el disparador, apagado fuera de producción');
+
+  console.log('13. nombres viejos de campaña → oficial (tipos, comentarios y decisiones guardados)');
+  const AC = require('../alias-campanas');
+  const tabla = AC.construirAlias();
+  ok(AC.oficialDe(tabla, 'Gobierno de Santa Fe', 'Inauguración') === 'Inauguración Cárcel de Recreo', 'tabla real: "Inauguración" en Santa Fe pasa a su nombre oficial');
+  ok(AC.oficialDe(tabla, 'Gobierno de Santa Fe', 'Algo que no está') === 'Algo que no está', 'un nombre sin par queda como está');
+  // la función de la página (app/logica.js) se prueba tal cual está escrita ahí
+  const src = fs.readFileSync(path.join(__dirname, '..', 'logica.js'), 'utf8');
+  const bloque = src.slice(src.indexOf('// <alias-campanas>'), src.indexOf('// </alias-campanas>'));
+  const DATAp = { proyectos: [{ id: 'santa-fe', cliente: 'Gobierno de Santa Fe' }, { id: 'chaco', cliente: 'Gobierno del Chaco' }], aliasCampanas: { 'Gobierno de Santa Fe': { inauguracion: 'Inauguración Cárcel de Recreo' } } };
+  const { tipoGuardado } = new Function('DATA', bloque + '\nreturn { tipoGuardado, oficialCamp };')(DATAp);
+  const guardados = { 'santa-fe|Oficial|Inauguración': 'constante', 'santa-fe|Informativo|derribo de bunkers del narcotráfico': 'constante', 'chaco|Oficial|Obras': 'larga' };
+  ok(tipoGuardado(guardados, 'santa-fe|Oficial|Inauguración') === 'constante', 'lo guardado con la clave exacta se sigue encontrando');
+  ok(tipoGuardado(guardados, 'santa-fe|Oficial|Inauguración Cárcel de Recreo') === 'constante', 'lo guardado con el nombre viejo se encuentra por el nombre oficial');
+  ok(tipoGuardado(guardados, 'santa-fe|Informativo|Derribo de bunkers del narcotráfico') === 'constante', 'lo guardado se encuentra por el nombre normalizado (mayúsculas y tildes)');
+  ok(tipoGuardado(guardados, 'chaco|Oficial|Inauguración Cárcel de Recreo') === undefined, 'no se mezcla con otro proyecto');
+  ok(tipoGuardado(guardados, 'santa-fe|Informativo|Inauguración Cárcel de Recreo') === undefined, 'no se mezcla con otro canal');
+  ok(tipoGuardado({ 'santa-fe|Oficial|Inauguración': 'puntual', 'santa-fe|Oficial|Inauguración Cárcel de Recreo': 'estacional' }, 'santa-fe|Oficial|Inauguración Cárcel de Recreo') === 'estacional', 'si está guardado con el nombre oficial, gana ese');
+  // en el servidor: el recorte deja la tabla solo de los clientes de la persona, y /api/respuestas trae campana_oficial
+  const ALIAS = { 'Gobierno de Alfa': { vieja: 'Campaña Alfa Nueva' }, 'Gobierno de Beta': { otra: 'Campaña Beta Nueva' } };
+  const dAlias = { ...DATA, aliasCampanas: ALIAS };
+  const { recortar, alcanceDe } = require('../../servidor/vista');
+  const recA = recortar(dAlias, alcanceDe(dAlias, { ok: true, global: false, proyectos: [{ proyecto: 'Alfa', canales: [] }] }));
+  ok(Object.keys(recA.aliasCampanas).join() === 'Gobierno de Alfa', 'el recorte deja la tabla de nombres solo del cliente de la persona (no se filtran campañas ajenas)');
+  const AL = await levantar({ aliasCampanas: ALIAS });
+  await AL.pedir('/api/respuesta', { cookie: sa, metodo: 'POST', cuerpo: { clase: 'tipo_campana', campana: 'vieja', canal: 'Oficial', proyecto: 'Alfa', tipo: 'constante' } });
+  r = await AL.pedir('/api/respuestas', { cookie: sa }); const reg = JSON.parse(r.texto).find((x) => x.clase === 'tipo_campana');
+  ok(reg && reg.campana === 'vieja' && reg.campana_oficial === 'Campaña Alfa Nueva', '/api/respuestas agrega campana_oficial sin tocar lo guardado');
+  await AL.cerrar();
 
   console.log('9. HTML armado de verdad (si existe)');
   const real = path.join(__dirname, '..', 'Seguimiento y Optimizacion.html');

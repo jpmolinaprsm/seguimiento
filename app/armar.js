@@ -883,7 +883,7 @@ const LOOKERS = {
   'cordoba|Informativo': LK('217dcca9-5c4e-47ea-b912-a9d2af51a694'),
   // tableros que todavía no son proyectos de la app: 'turismo-chubut|Oficial' f6e58c56-aa28-429a-beae-a1dc1874b578 · 'argentinos-x-israel|Oficial' 904f71c1-8685-41bb-a63d-76e502eb2a1c
 };
-const APP = { cuartiles: MARCAS.tablas(), nombres: NOMBRE_COD, logos: LOGOS, lookers: LOOKERS, datosHasta, mes: MES, mesTxt: MESES_TXT[MES.slice(5)], periodos: PERIODOS.map(({ id, label, txt, mes }) => ({ id, label, txt, mes: !!mes })), proyectos, generales: GEN,
+const APP = { aliasCampanas: require('./alias-campanas.js').construirAlias(), cuartiles: MARCAS.tablas(), nombres: NOMBRE_COD, logos: LOGOS, lookers: LOOKERS, datosHasta, mes: MES, mesTxt: MESES_TXT[MES.slice(5)], periodos: PERIODOS.map(({ id, label, txt, mes }) => ({ id, label, txt, mes: !!mes })), proyectos, generales: GEN,
   bandasPlat: Object.fromEntries(Object.entries(bandasPlat.G).map(([k, v]) => [k, v.map((x) => r2(x))])), umbralesLlegada: DATA.umbralesLlegada, reglas: REGLAS,
   // pedidoCargado = false: la planilla de presupuestos no tiene pedidos del mes → "Sin pedido cargado" en gris, sin restante ni alerta
   pedidoCargado: DATA.pedidoCargado !== false,

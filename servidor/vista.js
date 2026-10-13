@@ -79,7 +79,10 @@ function recortar(DATA, alcance) {
     ? { ...DATA.cuartiles, ...(DATA.cuartiles.pl ? { pl: sinProhibidos(DATA.cuartiles.pl) } : {}), ...(DATA.cuartiles.ob ? { ob: sinProhibidos(DATA.cuartiles.ob) } : {}) }
     : DATA.cuartiles;
   const lookers = Object.fromEntries(Object.entries(DATA.lookers || {}).filter(([k]) => { const [pid, canal] = k.split('|'); return permitido(pid, canal); }));
-  return { ...DATA, proyectos, cuartiles, lookers, todos: {} };
+  // tabla de nombres viejos → oficial: solo la de los clientes de sus proyectos (no se filtran nombres de campañas ajenas)
+  const clientes = new Set(proyectos.flatMap((p) => [p.cliente, `${p.cliente} Oficial`]));
+  const aliasCampanas = Object.fromEntries(Object.entries(DATA.aliasCampanas || {}).filter(([k]) => clientes.has(k)));
+  return { ...DATA, proyectos, cuartiles, lookers, aliasCampanas, todos: {} };
 }
 
 function crearVistas({ ruta, maxEntradas = 24 }) {

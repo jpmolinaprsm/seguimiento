@@ -38,6 +38,9 @@ const INFLACION_MES = { Alcance: 0, Interacción: 0.02, Tráfico: 0.02 }; // tan
 
 // SEGUIMIENTO_PROYECTOS: ruta de otro archivo de datos (lo usa actualizar.js para armar la versión nueva antes de cambiarla). Sin la variable, igual que siempre.
 const fuente = require(process.env.SEGUIMIENTO_PROYECTOS ? path.resolve(process.env.SEGUIMIENTO_PROYECTOS) : './_proyectos.json');
+// nombre oficial de cada campaña (pedido 033, 13/10): la comunicación de DataJunta pasa al nombre de la lista única de PAUTADOR
+// (datos-fijos/campanas-oficiales.json) acá, antes de todo, así todo se agrupa por ese nombre. Sin el archivo, todo queda como antes.
+const NOMBRES_OFICIALES = require('./nombres-oficiales.js').aplicar(fuente);
 const unidades = require('../presupuestos/_activos.json');
 const RES = path.join(__dirname, '../datos-fijos');
 const poblacion = require(path.join(RES, 'poblacion.json')).poblacion;
@@ -709,7 +712,7 @@ const GENERALES = [
 const DATA = { mes: MES, datosHasta, pedidoCargado, mesEnPlanilla, proyectos, generales: GENERALES, umbrales: UMBRAL, umbralesLlegada: UMBRAL_LLEGADA };
 
 // Reutilizable desde Seguimiento/app/armar.js (diseño curado): datos calculados + helpers.
-module.exports = { DATA, fuente, filas, BG, BP, valor, candG, candP, eficaciaPor, efi, colorCategoria, idxPrincipal, idxCostoReac, luz, UMBRAL, r2, percentil,
+module.exports = { DATA, fuente, NOMBRES_OFICIALES, filas, BG, BP, valor, candG, candP, eficaciaPor, efi, colorCategoria, idxPrincipal, idxCostoReac, luz, UMBRAL, r2, percentil,
   dias, suma, agrupar, dominante, minFecha, maxFecha, voz, formato, pgrp, nombreCont, objetivo, num, deMas, piezaDe, pz, linkDe, M, Mk, fmtCosto, vx, corto, hashId, dmy,
   MESES_TXT, RED_NOMBRE, OBJ_PLAT, AUTOMATIZADOS, TERMINAN, PROYECTOS, datosHasta, MES, poblacion, fechas, diariaCom, diariaVoz, plataformasPor, presupuestoPor, fechaDe, diasDelMes, INFLACION_MES };
 

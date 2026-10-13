@@ -1,11 +1,15 @@
 // Nexo con PAUTADOR (lado Seguimiento) · PLAN B de la consulta de accesos: lista provisoria exportada de PAUTADOR.
-// Solo se usa si la consulta real (nexo/accesos.js) no está prendida. Se descarta al conectarla.
+// Se usa cuando la consulta real (nexo/accesos.js) está apagada o PAUTADOR no contesta (timeout, error 5xx, demasiadas consultas), y
+// SOLO si la lista tiene "generada_el" de hace 7 días o menos (servidor/accesos.js lo controla). Si PAUTADOR rechaza la clave
+// (401/403) NO se usa la lista: nadie entra. Una baja explícita de PAUTADOR tampoco se pisa con la lista.
 //
 // De dónde sale la lista (en este orden):
 //   1. NEXO_ACCESOS_JSON: el contenido de la lista como variable (Railway). 2. NEXO_ACCESOS_ARCHIVO: ruta a un archivo JSON
 //   (por defecto datos-fijos/accesos-provisorios.json, NO versionado: está en .gitignore). Tiene mails: nunca va a git ni a un chat.
-// Formato: un arreglo de lo mismo que devuelve PAUTADOR en /api/servicio/accesos (consulta-accesos.md):
-//   [ { email, nombre, habilitado, rol, administradorGlobal, superadministrador, accesos: [ { proyecto, activo, rol, canales } ] } ]
+// Formato (desde el 13/10): { "generada_el": "AAAA-MM-DD" (o fecha ISO), "accesos": [ ... ] }, donde cada elemento es lo mismo que
+// devuelve PAUTADOR en /api/servicio/accesos (consulta-accesos.md):
+//   { email, nombre, habilitado, rol, administradorGlobal, superadministrador, accesos: [ { proyecto, activo, rol, canales } ] }
+// También se acepta el arreglo pelado de antes, pero sin fecha: queda como vencida (no entra nadie por la lista).
 // Un mail que no está en la lista = "no ve nada" (habilitado: false, accesos []), igual que PAUTADOR con un mail desconocido.
 const fs = require('fs');
 const path = require('path');
@@ -22,8 +26,12 @@ function cargarLista({ env = process.env, leerArchivo = (p) => fs.readFileSync(p
   }
   let lista;
   try { lista = JSON.parse(texto); } catch (e) { throw new Error('la lista provisoria de accesos no es un JSON válido'); }
-  if (!Array.isArray(lista)) throw new Error('la lista provisoria de accesos tiene que ser un arreglo');
-  return lista.filter((p) => p && typeof p === 'object' && limpio(p.email));
+  let generada = null;
+  if (lista && typeof lista === 'object' && !Array.isArray(lista)) { generada = limpio(lista.generada_el) || null; lista = lista.accesos; }
+  if (!Array.isArray(lista)) throw new Error('la lista provisoria de accesos tiene que ser un arreglo (o { generada_el, accesos })');
+  const filtrada = lista.filter((p) => p && typeof p === 'object' && limpio(p.email));
+  Object.defineProperty(filtrada, 'generada_el', { value: generada, enumerable: false });
+  return filtrada;
 }
 
 // → función async (mail) → respuesta con la forma de PAUTADOR, o null si no hay lista cargada.
@@ -44,6 +52,7 @@ function crearAccesosDeLista(opciones = {}) {
   accesosDe.vaciar = () => {};
   accesosDe.tamano = () => porMail.size;
   accesosDe.modo = 'lista_provisoria';
+  accesosDe.generada_el = lista.generada_el;   // null si la lista no trae fecha
   return accesosDe;
 }
 

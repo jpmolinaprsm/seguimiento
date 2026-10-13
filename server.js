@@ -11,6 +11,7 @@ const { crearAccesosDe, permisosDe } = require('./servidor/accesos');
 const { crearVistas, esProyecto } = require('./servidor/vista');
 const { crearNexo } = require('./nexo/cliente');
 const { crearAlmacen } = require('./base/almacen');
+const { construirAlias, oficialDe } = require('./app/alias-campanas');
 const { crearDisparador, crearAviso } = require('./servidor/actualizacion');
 
 const MAX_RESPUESTA = 20 * 1024, MAX_NEXO = 50 * 1024;
@@ -33,6 +34,7 @@ function crearServidor(opciones = {}) {
   // Lo del equipo: base de Seguimiento (Supabase) si están SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY; si no, archivos en la carpeta de datos (local).
   const almacen = opciones.almacen || crearAlmacen({ carpeta: cfg.datosDir });
   const nexo = opciones.nexo || crearNexo({ accesos: accesosDe, repositorio: almacen.nexo });   // el registro de pedidos va al mismo almacen: base en Railway, archivo en local
+  const aliasCamp = opciones.aliasCampanas || construirAlias();   // nombres viejos de campaña → oficial (borrador/nombres-oficiales.js)
   const avisoDeHoy = opciones.aviso || crearAviso({ rutaEstado: cfg.estadoActualizacion });
   const disparador = opciones.disparador || crearDisparador({ rutaEstado: cfg.estadoActualizacion, log });
   if (cfg.usuarioPrueba) log('ATENCIÓN: modo prueba con usuario falso (solo vale fuera de producción)');
@@ -76,7 +78,7 @@ function crearServidor(opciones = {}) {
     const api = ruta.startsWith('/api/');
 
     // ---- públicas ----
-    if (req.method === 'GET' && ruta === '/salud') return json(res, 200, { ok: true });
+    if (req.method === 'GET' && ruta === '/salud') return json(res, 200, { ok: true, accesos: accesosDe.salud && accesosDe.salud().degradado ? 'degradado' : 'ok' });   // sin datos sensibles
     if (req.method === 'GET' && ruta === '/entrar') return pantallaEntrar(res, 200, url.searchParams.get('error') ? 'No se pudo entrar. Probá de nuevo con tu cuenta de la empresa.' : '');
     if (req.method === 'GET' && ruta === '/auth/google') {
       if (!google.habilitado) return pagina(res, 503, 'Inicio de sesión no disponible', '<p>El inicio de sesión con Google no está configurado.</p>');
@@ -128,6 +130,13 @@ function crearServidor(opciones = {}) {
       const extra = { ETag: vista.etag, Vary: 'Cookie, Accept-Encoding', ...(acepta ? { 'Content-Encoding': 'gzip' } : {}) };
       return enviar(res, 200, 'text/html; charset=utf-8', acepta ? vista.buf : zlib.gunzipSync(vista.buf), extra);
     }
+    // vaciar la memoria de 5 minutos de accesos (cuando cambian permisos en PAUTADOR y no se quiere esperar): solo administrador global
+    if (req.method === 'POST' && ruta === '/api/admin/accesos/vaciar') {
+      if (!(permisos.global && permisos.rol === 'administrador')) return json(res, 403, { error: 'Solo un administrador' });
+      if (accesosDe.vaciar) accesosDe.vaciar();
+      log('memoria de accesos vaciada por un administrador');
+      return json(res, 200, { ok: true });
+    }
     if (req.method === 'GET' && ruta === '/api/aviso') return json(res, 200, { aviso: avisoDeHoy() });
     if (req.method === 'GET' && ruta === '/api/yo') return json(res, 200, { email: permisos.email, nombre: permisos.nombre, rol: permisos.rol, global: permisos.global, proyectos: alcance.proyectos });
 
@@ -139,7 +148,9 @@ function crearServidor(opciones = {}) {
       return g && g.ok === false ? json(res, 400, { error: g.error || 'No se pudo guardar' }) : json(res, 200, { ok: true });
     }
     if (req.method === 'GET' && ruta === '/api/respuestas') {
-      return json(res, 200, (await almacen.leerRespuestas({})).filter((x) => x.proyecto == null || x.proyecto === '' || puedeVer(alcance, x.proyecto, x.canal)));
+      // cada registro de campaña trae también campana_oficial (misma tabla de nombres-oficiales.js): se encuentra lo guardado con el nombre viejo
+      return json(res, 200, (await almacen.leerRespuestas({})).filter((x) => x.proyecto == null || x.proyecto === '' || puedeVer(alcance, x.proyecto, x.canal))
+        .map((x) => { if (typeof x.campana !== 'string' || !x.campana) return x; const p = vistas.datos().proyectos.find((q) => esProyecto(q, x.proyecto)); return p ? { ...x, campana_oficial: oficialDe(aliasCamp, p.cliente, x.campana) } : x; }));
     }
     if (req.method === 'POST' && ruta === '/api/nexo/solicitud') {
       const b = await jsonDe(req, res, MAX_NEXO); if (!b) return;
