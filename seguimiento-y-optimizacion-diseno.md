@@ -214,11 +214,25 @@ Tabla anidada de cuatro niveles: **eje, campaña, pieza y anuncio**. Los anuncio
   - Campaña (con logos de plataforma, la etiqueta del tipo, objetivo, eje, fechas y "pagó $X más que lo habitual");
   - Estado ("Termina esta semana" con punto amarillo, "Sin entrega" con punto rojo, "Terminó" en gris);
   - Gasto (o "Gasto del período" si no es el mes en curso);
-  - KPI principal;
-  - tres puntos General · Proyecto · Propia con sus números (en las estacionales confirmadas, Propia pasa a ser Temporada anterior);
+  - Impresiones y Reacciones del período (01/10), en números cortos ("1,2 M", "45 mil"), sin comparaciones ni colores; en las
+    campañas solo de Stories, Reacciones dice "no aplica (Stories)";
+  - una sola columna de KPI (decisiones del 01/10, reemplaza "KPI principal" y "Contra lo normal"), con un selector arriba:
+    **Según objetivo** (por defecto; cada fila muestra el KPI de su objetivo y lo nombra: Interacción Costo por reacción, Alcance CPM,
+    Reproducciones Costo por reproducción, Tráfico y Conversión CTR) · Costo por reacción · CPM · CTR · ETR Videos · ETR Imágenes ·
+    CPM de Alcance · Costo por reproducción (todas
+    las filas, ese KPI; el título de la columna es su nombre). El selector se recuerda mientras la página está abierta. En la celda:
+    el nombre del KPI y el valor del período en la misma línea y con el mismo peso ("CPM: $352", "CTR: 1,87 %"), con cualquier
+    opción del selector, y dos renglones de una línea, cada uno con su referencia entre paréntesis: "vs. Santa Fe ($240): +8 %" y
+    "vs. semanas anteriores ($84): −34 % ▼ mejor" (o "vs. temporada pasada" en las estacionales confirmadas). Color solo con una
+    diferencia grande (corte del motor), con ▲/▼ y "peor"/"mejor". Todo con Meta (lo que tiene referencias); ETR = engagement ÷
+    impresiones × 100, separado en videos e imágenes (placas y carruseles), cada uno contra su formato. CPM de Alcance solo con
+    lectura de Meta de hoy y sin referencias todavía. Costo por reproducción = gasto ÷ reproducciones, la excepción: todas las
+    plataformas con reproducciones (YouTube, TikTok, videos de Meta), comparado plataforma por plataforma (lo normal del proyecto:
+    mediana del costo por reproducción de cada pieza en la misma plataforma y objetivo, últimos seis meses, 12 casos o más). Debajo de la tabla, una línea que explica las comparaciones y los colores.
+    Scroll horizontal propio con el nombre fijo a la izquierda;
   - eficacia;
   - contador de acciones, que abre la bandeja filtrada por esa campaña.
-- Orden: de peor a mejor según su KPI principal contra lo normal.
+- Orden: por gasto en el período.
 
 ### 4.6 Proyecto · Audiencias
 Tabla anidada de tres niveles: **audiencia, campaña y pieza**. Muestra qué se le comunicó a cada audiencia y cómo respondió.

@@ -11,13 +11,13 @@ const fs = require('fs');
 const path = require('path');
 
 const SHEET_ID = '1kPv5TDe4TLPRq4nVZioQyVio0y8NmSNRr26evwuLPWM';
-const PAUTADOR = path.resolve(__dirname, '..', '..', 'pautador');
 
+// Clave: SHEETS_CREDENTIALS_JSON o, en local, el archivo de siempre (datos/credenciales.js). Desde el 2/10/2026 ya no lee
+// el .env ni los paquetes de PAUTADOR.
 async function leerPlanilla() {
-  require(path.join(PAUTADOR, 'node_modules', 'dotenv')).config({ path: path.join(PAUTADOR, '.env'), quiet: true });
-  const { google } = require(path.join(PAUTADOR, 'node_modules', 'googleapis'));
-  const keyFile = path.resolve(PAUTADOR, process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH);
-  const auth = new google.auth.GoogleAuth({ keyFile, scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'] });
+  const { google } = require('googleapis');
+  const { opcionesAuth } = require('../datos/credenciales');
+  const auth = new google.auth.GoogleAuth(opcionesAuth('sheets', ['https://www.googleapis.com/auth/spreadsheets.readonly']));
   const sheets = google.sheets({ version: 'v4', auth });
   const v = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "'Hoja 1'!A1:U", valueRenderOption: 'FORMATTED_VALUE' });
   const [cab, ...filas] = v.data.values;

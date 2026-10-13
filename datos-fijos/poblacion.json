@@ -1,0 +1,12 @@
+{
+  "fuente": "Censo 2022 (INDEC). Catamarca Ciudad aproximada al departamento Capital. Se usa para la regla de presion por habitante (impresiones del cliente / poblacion, por mes).",
+  "poblacion": {
+    "Gobierno de Santa Fe": 3556522,
+    "Gobierno del Chaco": 1142963,
+    "Gobierno de Corrientes": 1197553,
+    "Gobierno del Chubut": 603120,
+    "Catamarca Provincia": 429556,
+    "Catamarca Ciudad": 230000,
+    "Tierra del Fuego": 185732
+  }
+}

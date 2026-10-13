@@ -2,8 +2,11 @@
 // Fuentes locales (ya extraídas, no consulta BigQuery):
 //   _proyectos.json                                          → Meta: cruce y diaria de 180 días + semanal de 400 días (_extraer.js)
 //   ../presupuestos/_activos.json                            → pedido / gastado por cuenta publicitaria (planilla de pedidos + DataJunta)
-//   ../../analisis-datajunta/resultados/t6_bandas_general.csv  → referencias generales de cada métrica (todos los gobiernos, 365 días)
-//   ../../analisis-datajunta/resultados/t6_bandas_proyecto.csv → referencias de cada proyecto × canal (365 días)
+//   ../datos-fijos/t6_bandas_general.csv                     → referencias generales de cada métrica (todos los gobiernos, 365 días)
+//   ../datos-fijos/t6_bandas_proyecto.csv                    → referencias de cada proyecto × canal (365 días)
+//   ../datos-fijos/t6_bandas_juntas.csv                      → lo mismo juntando canales ("General") y los siete proyectos ("Todos")
+//   ../datos-fijos/poblacion.json                            → población por proyecto (presión por habitante)
+//   datos-fijos/ es una copia fija de analisis-datajunta/ que Referencias actualiza a mano una vez por mes (ver su LEEME.md)
 // Tres luces: General · Proyecto · Propia (campañas de 30+ días contra su propia historia; estacionales contra la temporada anterior).
 // Uso: node armar.js
 const fs = require('fs');
@@ -35,8 +38,8 @@ const INFLACION_MES = { Alcance: 0, Interacción: 0.02, Tráfico: 0.02 }; // tan
 
 const fuente = require('./_proyectos.json');
 const unidades = require('../presupuestos/_activos.json');
-const poblacion = require('../../analisis-datajunta/data/poblacion.json').poblacion;
-const RES = path.join(__dirname, '../../analisis-datajunta/resultados');
+const RES = path.join(__dirname, '../datos-fijos');
+const poblacion = require(path.join(RES, 'poblacion.json')).poblacion;
 
 const num = (x) => Number(x) || 0;
 const OBJ = { OUTCOME_TRAFFIC: 'Tráfico', OUTCOME_ENGAGEMENT: 'Interacción', OUTCOME_AWARENESS: 'Alcance' };
@@ -60,6 +63,10 @@ function banda(b) {
 const BG = {}, BP = {};
 for (const b of leerCsv(path.join(RES, 't6_bandas_general.csv'))) BG[[b.objetivo, b.formato, b.pgrp].filter(Boolean).join('|')] = banda(b);
 for (const b of leerCsv(path.join(RES, 't6_bandas_proyecto.csv'))) BP[[b.cliente, b.canal, b.objetivo, b.formato].filter(Boolean).join('|')] = banda(b);
+// vistas que juntan de la app (01/10, mismo criterio): canal "General" = el proyecto con los dos canales; cliente "Todos" = los siete proyectos
+// obligatorio: sin este archivo la vista General y los paneles de todos los proyectos se quedan sin referencias
+if (!fs.existsSync(path.join(RES, 't6_bandas_juntas.csv'))) throw new Error('Falta datos-fijos/t6_bandas_juntas.csv (ver datos-fijos/LEEME.md)');
+for (const b of leerCsv(path.join(RES, 't6_bandas_juntas.csv'))) BP[[b.cliente, b.canal, b.objetivo, b.formato].filter(Boolean).join('|')] = banda(b);
 // busca la métrica en el nivel más fino que la tenga
 const valor = (cands, met, q = 1) => { for (const b of cands) if (b && b[met]) return b[met][q]; return null; };
 const candG = (obj, fmt, pl) => [BG[`${obj}|${fmt}|${pl}`], BG[`${obj}|${fmt}`], BG[obj]];
@@ -140,6 +147,9 @@ const MES = datosHasta.slice(0, 7);
 // mes). Mes que no está en _activos.json o sin pedidos cargados en la planilla → "sin pedido cargado": no se muestra pedido ni restante.
 const mesPlanilla = (u) => (u.meses || {})[MES] || null;
 const pedidoCargado = unidades.some((u) => { const m = mesPlanilla(u); return !!(m && m.pedidoCargado); });
+// el mes de la app está en la planilla (alguna cuenta lo tiene). Si no está, el gastado de cada activo sale de DataJunta (gasto del
+// mes del activo en todas las plataformas), no 0 (decisión de Juan Pablo 1/10, D-d). Cada activo dice de dónde salió (gastadoFuente).
+const mesEnPlanilla = unidades.some((u) => !!mesPlanilla(u));
 // parte de la cuenta que le toca a un proyecto. Si la cuenta sirve a más de un proyecto de la app (Informe Norte: Chaco y
 // Corrientes), solo lo pedido y gastado de ese cliente (pedidoPorCliente / gastoPorCliente); la proyección, en proporción a su
 // gasto. Mismo criterio que presupuestos/resumen-activos.js (una sola verdad entre la app y el resumen para Activos).
@@ -221,6 +231,13 @@ function ratioSem(o, obj) {
   if (obj === 'Tráfico') return o.xc ? o.c / o.xc : null;
   return o.xg && o.g ? o.xg / o.g : null;
 }
+// valor crudo del mismo KPI que compara la luz propia, para que la app muestre la referencia en plata o en clicks cada 100
+// (pedido de Interfaz del 01/10): Interacción costo por reacción, Tráfico CTR (%), el resto CPM
+function valorSem(o, obj) {
+  if (obj === 'Interacción') return o.r ? r2(o.g / o.r) : null;
+  if (obj === 'Tráfico') return o.i ? r2(o.c / o.i * 100) : null;
+  return o.i ? r2(o.g / o.i * 1000) : null;
+}
 const semanaCompleta = (s) => new Date(s).getTime() + 6 * 864e5 <= new Date(datosHasta).getTime();
 function propia(clave, obj, pob, nombre) {
   const todas = (semanal[clave] || []).filter((w) => w.obj === obj);
@@ -250,7 +267,7 @@ function propia(clave, obj, pob, nombre) {
         const meses = desfase * 7 / 30.4;
         const rPrev = ratioSem(sumaSem(alineadas, Math.pow(1 + (INFLACION_MES[obj] || 0), meses)), obj);
         const rCur = ratioSem(sumaSem(compl), obj);
-        if (rPrev && rCur) temporada = { desde: T[0].s, hasta: T[T.length - 1].s, semanasComparadas: alineadas.length, g: Math.round(sumaSem(alineadas).g), idx: r2(rCur / rPrev) };
+        if (rPrev && rCur) temporada = { desde: T[0].s, hasta: T[T.length - 1].s, semanasComparadas: alineadas.length, g: Math.round(sumaSem(alineadas).g), idx: r2(rCur / rPrev), valorAct: valorSem(sumaSem(compl), obj) };
       }
     }
   }
@@ -270,6 +287,7 @@ function propia(clave, obj, pob, nombre) {
     const p25 = percentil(refR, 0.25), p50 = percentil(refR, 0.5), p75 = percentil(refR, 0.75);
     out.ref = { p25: r2(p25), p50: r2(p50), p75: r2(p75), semanas: refR.length };
     out.idxPropio = r2(rAct / p50);
+    out.valorAct = valorSem(sumaSem(ult2), obj);
     const u2 = ult2.map((w) => ratioSem(w, obj));
     out.debajo = refR.length >= 3 && u2.length === 2 && u2.every((x) => x != null && x < p25);
     out.arriba = refR.length >= 3 && u2.length === 2 && u2.every((x) => x != null && x > p75);
@@ -303,9 +321,14 @@ function agruparSemanas(ws) {
 // fecha de fin (Fin de DataJunta; casi siempre fin de mes, porque PAUTADOR parte las pautas por mes). Solo Meta.
 // Período: el tramo del mes en curso (desde el día 1 del mes o desde que arrancó, si arrancó después).
 // "Fin" es exclusivo: el último día con gasto es el anterior (en el 65 % de las filas la pauta termina el día antes del Fin).
-// Umbrales PROVISORIOS (±20 % vigente, A6), los decide Juan Pablo: llega = 100 % o más de lo esperado; en riesgo = dentro del 20 %
-// por debajo (83 %–100 %); no llega = 20 % o más por debajo (igual que la luz roja).
+// Umbrales (decididos por Juan Pablo 1/10, P1): llega = 100 % o más de lo esperado; en riesgo = dentro del 20 % por debajo
+// (83 %–100 %); no llega = 20 % o más por debajo (igual que la luz roja).
+// Lo normal se mide SOLO contra el proyecto (decisión 1/10, P2 / L-4): sin referencia del proyecto (Córdoba Oficial, por ejemplo)
+// queda "sin referencia en <proyecto>", sin etiqueta ni comparación. Ya no se usa la General de todos los gobiernos.
 const UMBRAL_LLEGADA = { llega: 1, riesgo: 1 / 1.2 };
+// Antes del día 5 del mes (según datosHasta, el último día completo; no el reloj) no se proyecta (decisión 2/10; día 5 desde el 05/10): pocos días
+// para un ritmo confiable. Se devuelve sinDato con el motivo y lo que lleva la campaña (sin proyección, etiqueta ni comparación).
+const DIA_MINIMO_LLEGADA = 5;
 const METRICA_LLEGADA = { Alcance: ['i', 'impresiones'], Interacción: ['r', 'reacciones'], Tráfico: ['c', 'clicks'], Conversión: ['c', 'clicks'] };
 const metaDia = {};
 for (const r of fuente.todas || []) {
@@ -315,7 +338,7 @@ for (const r of fuente.todas || []) {
   o.g += num(r.gasto); o.i += num(r.imp); o.r += num(r.rea); o.c += num(r.clk);
 }
 const masDias = (f, n) => new Date(new Date(f).getTime() + n * 864e5).toISOString().slice(0, 10);
-function llegada(c, clave) {
+function llegada(c, clave, proyecto) {
   const [campo, metrica] = METRICA_LLEGADA[c.obj] || [];
   if (!campo) return { sinDato: `objetivo ${c.obj}: no tiene métrica de volumen definida` };
   const inicio = [c.desde, datosHasta.slice(0, 8) + '01'].sort()[1];
@@ -323,17 +346,20 @@ function llegada(c, clave) {
   const tramo = (a, b) => Object.entries(dia).filter(([f]) => f >= a && f <= b).reduce((o, [, x]) => { o.g += x.g; o.i += x.i; o.r += x.r; o.c += x.c; return o; }, { g: 0, i: 0, r: 0, c: 0 });
   const hecho = tramo(inicio, datosHasta);
   if (!hecho.g) return { sinDato: 'sin gasto en Meta en el mes' };
+  if (Number(datosHasta.slice(8, 10)) < DIA_MINIMO_LLEGADA) return { sinDato: `Todavía pocos días del mes para proyectar: se calcula desde el ${DIA_MINIMO_LLEGADA}/${Number(datosHasta.slice(5, 7))}`,
+    pocosDias: true, metrica, desde: inicio, datosHasta, gastado: Math.round(hecho.g), lleva: Math.round(hecho[campo]) };
   const desde7 = [inicio, masDias(datosHasta, -6)].sort()[1], d7 = dias(desde7, datosHasta) + 1, u7 = tramo(desde7, datosHasta);
   const diasRestantes = c.fin ? Math.max(0, dias(datosHasta, c.fin) - 1) : null;
   if (diasRestantes == null) return { sinDato: 'sin fecha de fin en DataJunta' };
-  // lo normal: resultado por peso con la mediana de la referencia (misma cuenta que las luces), sobre la mezcla de formatos y placements del mes
+  // lo normal: resultado por peso con la mediana de la referencia del PROYECTO (misma cuenta que las luces), sobre la mezcla de
+  // formatos y placements del mes. Sin referencia del proyecto no se compara (ni contra la General).
   const m = c.mMes && c.mMes.g ? c.mMes : c.m;
   const porPeso = (pre) => { const den = m[pre + 'g'], nu = campo === 'i' ? m.i : m[pre + campo]; return den > 0 && nu > 0 ? nu / den : null; };
-  const [referencia, normalPorPeso] = porPeso('p') ? ['Proyecto', porPeso('p')] : porPeso('x') ? ['General', porPeso('x')] : [null, null];
+  const [referencia, normalPorPeso] = porPeso('p') ? ['Proyecto', porPeso('p')] : [null, null];
   const out = { metrica, desde: inicio, datosHasta, fin: c.fin, diasRestantes, gastado: Math.round(hecho.g), gastoDiario: Math.round(u7.g / d7),
     plataEstimada: Math.round(hecho.g + u7.g / d7 * diasRestantes), plataFuente: 'gastado más el ritmo de gasto de los últimos 7 días hasta la fecha de fin',
     logrado: Math.round(hecho[campo]), ritmoDiario: Math.round(u7[campo] / d7), proyeccion: Math.round(hecho[campo] + u7[campo] / d7 * diasRestantes) };
-  if (!normalPorPeso) return { ...out, sinDato: 'sin referencia de Proyecto ni General' };
+  if (!normalPorPeso) return { ...out, sinReferencia: true, sinDato: `sin referencia en ${proyecto}` };
   out.referencia = referencia;
   out.costoNormal = r2(campo === 'i' ? 1000 / normalPorPeso : 1 / normalPorPeso); // CPM en Alcance; costo por reacción o por click en el resto
   out.esperado = Math.round(out.plataEstimada * normalPorPeso);
@@ -385,6 +411,11 @@ const OBJ_PLAT = { Views: 'Reproducciones', FIXED_CPM: 'Alcance', 'Maximize clic
 const RED_NOMBRE = { facebook: 'Facebook', instagram: 'Instagram', threads: 'Threads', whatsapp: 'WhatsApp', 'Tik Tok': 'TikTok', DV360: 'DV360', YouTube: 'YouTube',
   'Display Network': 'Google Display', 'Search Network': 'Google Search', Gmail: 'Gmail', Discover: 'Google Discover', SMS: 'SMS' };
 const plataformasPor = {}, presupuestoPor = {};
+// plataformas que cuenta la planilla de presupuestos (Meta, Google Ads, DV360, TikTok), con el nombre de DataJunta: el gastado
+// desde DataJunta de los activos solo suma estas (SMS y el resto quedan afuera, Orquestador 1/10). La lista es la de
+// presupuestos/activos.js (PLAT_DJ); si ese archivo la exporta se toma de ahí, si no, esta copia (hay que mantenerlas iguales).
+const PLAT_DJ_PLANILLA = new Set(Object.values(require('../presupuestos/activos').PLAT_DJ ||
+  { Meta: 'META', Google: 'Google Ads', DV360: 'Google Display & Video 360', TikTok: 'TikTok Ads' }));
 for (const r of fuente.plataformas || []) {
   const k = `${r.canal}|${r.cliente}`;
   (plataformasPor[k] = plataformasPor[k] || []).push({ proy: r.proyecto, plat: r.plataforma, red: RED_NOMBRE[r.red] || r.red, obj: OBJ_PLAT[r.objetivo] || r.objetivo,
@@ -500,7 +531,7 @@ function bloque(P, canal) {
       g7: Math.round(ult7.reduce((s, f) => s + (serie[f] || 0), 0)),
       idxG: gP, idxP: pP, luzG: luz(gP, c.obj), luzP: luz(pP, c.obj), deMas: deMas(m, c.obj), efi: efi(eCom[c.k]),
       voces: agrupar(rs, (r) => r.voz).map((v) => ({ k: v.k, g: Math.round(v.g), auto: auto(v.k) })) };
-    if (['Activa', 'Por vencer'].includes(estado)) out.llegada = llegada(out, `${canal}|${P.cliente}|${c.k}`);
+    if (['Activa', 'Por vencer'].includes(estado)) out.llegada = llegada(out, `${canal}|${P.cliente}|${c.k}`, P.nombre);
     // marca "solapan público" (solo marca, sin recomendación; decisión de Juan Pablo del 30/09). La detección es de Meta (reglas/meta.js)
     if (['Activa', 'Por vencer'].includes(estado)) {
       const sol = solapamientoAudiencias(conjuntosPor[`${canal}|${P.cliente}|${c.k}`] || [], { cliente: P.cliente, datosHasta });
@@ -527,19 +558,27 @@ function bloque(P, canal) {
     (voces[v] = voces[v] || { cuentas: [] }).cuentas.push({ cuenta: u.nombre, plataforma: u.plataforma, pedido: p.pedido, gastado: p.gastado, proy: p.proy, compartida: p.compartida });
   }
   for (const r of rows) voces[r.voz] = voces[r.voz] || { cuentas: [] };
+  // gasto del mes de cada activo en DataJunta (solo las plataformas de la planilla, hasta el último día completo): el gastado cuando el mes no está en la planilla
+  const gastoDJ = {};
+  for (const r of plataformasPor[`${canal}|${P.cliente}`] || []) if (PLAT_DJ_PLANILLA.has(r.plat) && r.f.startsWith(MES) && r.f <= datosHasta) gastoDJ[r.voz] = (gastoDJ[r.voz] || 0) + r.g;
+  // también un activo sin cuenta en la planilla en un mes que sí está cargado (Orquestador 1/10, mismo criterio D-d: nunca 0 si hay gasto real)
+  for (const v of Object.keys(gastoDJ)) voces[v] = voces[v] || { cuentas: [] };
   const activos = Object.entries(voces).map(([nombre, v]) => {
     const rs = rowsMes.filter((r) => r.voz === nombre);
-    const pedido = v.cuentas.reduce((s, c) => s + c.pedido, 0), gastado = v.cuentas.reduce((s, c) => s + c.gastado, 0), proy = v.cuentas.reduce((s, c) => s + c.proy, 0);
+    const dePlanilla = mesEnPlanilla && v.cuentas.length > 0;
+    const pedido = dePlanilla ? v.cuentas.reduce((s, c) => s + c.pedido, 0) : mesEnPlanilla ? null : 0, proy = v.cuentas.reduce((s, c) => s + c.proy, 0);
+    const gastado = dePlanilla ? v.cuentas.reduce((s, c) => s + c.gastado, 0) : Math.round(gastoDJ[nombre] || 0);
     const serie = diariaVoz[`${canal}|${P.cliente}|${nombre}`] || {};
     const vivas = campanas.filter((c) => ['Activa', 'Por vencer'].includes(c.estado) && c.voces.some((x) => x.k === nombre));
     const m = suma(rs);
     const obj = dominante(rs, 'obj');
-    return { nombre, auto: auto(nombre), cuentas: v.cuentas, pedido, gastado, restante: pedidoCargado ? pedido - gastado : null, proy, pedidoCargado,
+    return { nombre, auto: auto(nombre), cuentas: v.cuentas, pedido, gastado, gastadoFuente: dePlanilla ? 'planilla' : 'DataJunta',
+      restante: pedidoCargado && pedido != null ? pedido - gastado : null, proy, pedidoCargado,
       g7: Math.round(ult7.reduce((s, f) => s + (serie[f] || 0), 0)),
       vivas: vivas.map((c) => c.nombre), pico: pp ? pp.vozPicos[nombre] || null : null, m, obj, idxG: r2(idxPrincipal(m, obj, 'x')), idxP: r2(idxPrincipal(m, obj, 'p')) };
   }).filter((a) => a.pedido || a.gastado || a.m.g || a.vivas.length).sort((a, b) => b.vivas.length - a.vivas.length || b.gastado - a.gastado);
 
-  const gastado = cuentas.reduce((s, u) => s + parteDe(u, P.cliente).gastado, 0);
+  const gastado = activos.reduce((s, a) => s + a.gastado, 0); // planilla por cuenta + DataJunta de los activos sin cuenta (o todos, si el mes no está)
   const proy = cuentas.reduce((s, u) => s + parteDe(u, P.cliente).proy, 0);
   const pedido = pedidoCargado ? cuentas.reduce((s, u) => s + parteDe(u, P.cliente).pedido, 0) : null;
 
@@ -559,7 +598,9 @@ function bloque(P, canal) {
   // ---------- acciones ----------
   const vivas = campanas.filter((c) => ['Activa', 'Por vencer'].includes(c.estado) && !deJuegos(c));
   // recomendaciones: las arma recomendaciones.js con las reglas de cada plataforma (reglas/)
-  const acciones = recomendaciones.generar({ P, canal, vivas, campanas, pp, deJuegos, bandaVideo, datosHasta, dias, luz, pz, corto, vx, Mk, dmy, pctTxt, hashId, fmtCosto, MESES_TXT, TERMINAN, COM_GENERICA });
+  // rows, fuenteSemanal y objetivo: para "Peor que la temporada anterior", que usa temporada() de app/marcas.js (02/10)
+  const acciones = recomendaciones.generar({ P, canal, vivas, campanas, pp, deJuegos, bandaVideo, datosHasta, dias, luz, pz, corto, vx, Mk, dmy, pctTxt, hashId, fmtCosto, MESES_TXT, TERMINAN, COM_GENERICA,
+    rows, fuenteSemanal: fuente.semanal, objetivo });
 
   // ---------- insights ----------
   const insights = { proyecto: [], cruces: [], estacionales: [] };
@@ -664,12 +705,12 @@ const GENERALES = [
   { titulo: 'Qué mide el ETR', texto: 'Engagement ÷ impresiones. En video el 98 % del engagement son reproducciones; en placas, el 86 % son clicks: se compara dentro del mismo formato.', fuente: 'Composición del engagement, 365 días' },
 ];
 
-const DATA = { mes: MES, datosHasta, pedidoCargado, proyectos, generales: GENERALES, umbrales: UMBRAL, umbralesLlegada: UMBRAL_LLEGADA };
+const DATA = { mes: MES, datosHasta, pedidoCargado, mesEnPlanilla, proyectos, generales: GENERALES, umbrales: UMBRAL, umbralesLlegada: UMBRAL_LLEGADA };
 
 // Reutilizable desde Seguimiento/app/armar.js (diseño curado): datos calculados + helpers.
 module.exports = { DATA, fuente, filas, BG, BP, valor, candG, candP, eficaciaPor, efi, colorCategoria, idxPrincipal, idxCostoReac, luz, UMBRAL, r2, percentil,
   dias, suma, agrupar, dominante, minFecha, maxFecha, voz, formato, pgrp, nombreCont, objetivo, num, deMas, piezaDe, pz, linkDe, M, Mk, fmtCosto, vx, corto, hashId, dmy,
-  MESES_TXT, RED_NOMBRE, OBJ_PLAT, AUTOMATIZADOS, TERMINAN, PROYECTOS, datosHasta, MES, poblacion, fechas, diariaCom, diariaVoz, plataformasPor, presupuestoPor, fechaDe, diasDelMes };
+  MESES_TXT, RED_NOMBRE, OBJ_PLAT, AUTOMATIZADOS, TERMINAN, PROYECTOS, datosHasta, MES, poblacion, fechas, diariaCom, diariaVoz, plataformasPor, presupuestoPor, fechaDe, diasDelMes, INFLACION_MES };
 
 if (require.main === module) {
 const plantilla = fs.readFileSync(path.join(__dirname, 'plantilla.html'), 'utf8');

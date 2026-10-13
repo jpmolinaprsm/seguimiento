@@ -1,0 +1,13 @@
+{
+  "name": "seguimiento-y-optimizacion",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Seguimiento y Optimización: extracción de BigQuery, presupuestos y app de recomendaciones.",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.117.2",
+    "googleapis": "140.0.1"
+  }
+}

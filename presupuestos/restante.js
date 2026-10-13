@@ -8,15 +8,9 @@ const { leerPlanilla, normalizar, vigentes, mesDeAyer } = require('./pedidos');
 const PLATAFORMA_DJ = { Meta: 'META', Google: 'Google Ads', DV360: 'Google Display & Video 360', TikTok: 'TikTok Ads', Twitter: 'Twitter', Illumin: 'Illumin' };
 const PLATAFORMA_PLANILLA = Object.fromEntries(Object.entries(PLATAFORMA_DJ).map(([k, v]) => [v, k]));
 
-function bq() {
-  const PAUTADOR = path.resolve(__dirname, '..', '..', 'pautador');
-  process.env.BQ_SERVICE_ACCOUNT_KEY_PATH = process.env.BQ_SERVICE_ACCOUNT_KEY_PATH || path.resolve(__dirname, '..', '..', 'GCP', 'prsm-bq-media-6a154f90fdb5.json');
-  const cwd = process.cwd();
-  process.chdir(PAUTADOR);
-  const m = require(path.join(PAUTADOR, 'src', 'services', 'bqDatajunta.js'));
-  process.chdir(cwd);
-  return m;
-}
+// Cliente de BigQuery propio de Seguimiento (datos/bq.js: dry run, corte a 1 GB y todas las páginas). Hasta el 2/10/2026
+// se cargaba el de PAUTADOR.
+const bq = () => require('../datos/bq');
 
 // Gasto mensual por canal × plataforma × código de proyecto, desde enero del año del primer pedido.
 async function gastos(desde) {

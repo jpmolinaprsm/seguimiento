@@ -10,6 +10,11 @@
 // Desde el 30/9 cada conjunto de la tarjeta puede traer, como los baja Datos en `conjuntos`, `ads` (ids de anuncio) y `conjuntoId`
 // (id del conjunto de Meta, o varios separados por coma si hubo conjuntos distintos con el mismo nombre en el mes).
 //   { tipo: 'bloqueada', control, motivo }  encaja, pero un control de seguridad (reglas v0.3, sección D) no deja mandarla
+// Desde el 1/10 (decisión N7 de Juan Pablo): si un nombre de conjunto tiene varios ids, se manda al único id que gastó en los últimos
+// 2 días, con los ids de anuncio de ESE id (ctx.conjuntosPorId, la tabla que baja Extracción). Si gastaron ninguno o varios, o falta
+// el dato, ese conjunto queda a mano.
+// Textos de tarea manual y de bloqueo: los que propuso Recomendaciones el 30/9 (decisión N5, 1/10): empiezan con "Se hace a mano:",
+// sin jerga, y las fechas van en día y mes.
 // No manda nada: el envío es de nexo/cliente.js.
 //
 // También tiene el control de quién pide (revisarPermiso): desde el 30/9 el pedido del implementador del proyecto cuenta como la
@@ -24,34 +29,65 @@ const PLATAFORMAS = ['Meta'];                                     // el nexo es 
 // Controles de seguridad de la sección D de Seguimiento/documentos/reglas-recomendador-v0.3.md que se ven desde Seguimiento.
 // El resto (mínimo diario de Meta, presupuesto mensual, estado real del conjunto) lo valida PAUTADOR, que tiene la última palabra.
 const TOPE_PCT = 20;             // D1: máximo ±20 % del presupuesto diario por cambio
-const DIAS_ENTRE_CAMBIOS = 3;    // D2: un cambio por conjunto cada 3 días
-const DIAS_FINALES = 2;          // D3: nada en los últimos 2 días (se mira la fecha de fin de la campaña, si viene)
+const DIAS_ENTRE_CAMBIOS = 3;    // D2: un cambio por conjunto cada 3 días. Desde el 1/10 (N3) solo para Cambiar presupuesto: pausar
+                                 //     siempre se puede, porque es la acción que corta el daño
+const DIAS_FINALES = 2;          // D3: nada en los últimos 2 días (se mira la fecha de fin de la campaña, si viene). Desde el 1/10
+                                 //     solo para Cambiar presupuesto: pausar se puede igual, porque corta el daño (misma idea que N3)
+const DIAS_GASTO_RECIENTE = 2;   // N7: con varios ids para un nombre, vale el único que gastó en los últimos 2 días
 
 // Recomendaciones (reglas C de la v0.3) que encajan en el catálogo, y qué parte de la campaña tocan.
 //   'pausar'   → solo los conjuntos que la tarjeta marca para pausar (C1: la pieza de peor costo por reacción)
 //   'todos'    → todos los conjuntos de la campaña que trae la tarjeta
+// nota: lo que PAUTADOR no hace y queda para hacer a mano (N4, 1/10: no hay Reactivar; volver a prender se hace a mano).
+const NOTA_PAUSA_UNA_SEMANA = 'PAUTADOR pausa los conjuntos; volver a prenderlos en una semana se hace a mano.';
 const ENCAJAN = {
-  'Rinde por debajo': { regla: 'C1', accion: ACCION.PAUSAR, conjuntos: 'pausar' },
-  'Se desgastó': { regla: 'C3', accion: ACCION.PAUSAR, conjuntos: 'todos',
-    nota: 'La recomendación dice pausar una semana: reactivar no está en el catálogo, se hace a mano.' },
-  'Presión acumulada alta': { regla: 'C7', accion: ACCION.PAUSAR, conjuntos: 'todos',
-    nota: 'La recomendación dice pausar una semana: reactivar no está en el catálogo, se hace a mano.' },
+  'Rinde por debajo': { regla: 'C1', accion: ACCION.PAUSAR, conjuntos: 'pausar',
+    nota: 'PAUTADOR pausa los conjuntos de la peor pieza; pasar ese presupuesto a la mejor se pide aparte.' },
+  'Se desgastó': { regla: 'C3', accion: ACCION.PAUSAR, conjuntos: 'todos', nota: NOTA_PAUSA_UNA_SEMANA },
+  'Presión acumulada alta': { regla: 'C7', accion: ACCION.PAUSAR, conjuntos: 'todos', nota: NOTA_PAUSA_UNA_SEMANA },
   'Mejor momento': { regla: 'C6', accion: ACCION.PRESUPUESTO, cambioPct: 20, conjuntos: 'todos' },
   'Se comparte': { regla: 'C10', accion: ACCION.PRESUPUESTO, cambioPct: 20, conjuntos: 'todos' },
 };
 
-// Por qué las demás no se mandan (texto para la tarea manual).
+// Por qué las demás no se mandan (texto para la tarea manual). Redacción de Recomendaciones aprobada el 1/10 (N5), tal cual.
+const A_MANO = 'Se hace a mano: ';
 const NO_ENCAJAN = {
-  'Peor que la temporada anterior': 'Retomar piezas y audiencias no es una acción del catálogo (Pausar o Cambiar presupuesto): va por un pedido normal.',
-  'Sin entrega': 'Es una revisión (rechazos, revisión o presupuesto), no un cambio: se hace a mano.',
-  'Apagón': 'Es una revisión de las cuentas del activo, no un cambio: se hace a mano.',
-  'Pico': 'Es una confirmación de que el gasto sea intencional, no un cambio: se hace a mano.',
-  'Placements débiles': 'Excluir placements cambia la segmentación y no está en el catálogo: se pide a mano.',
-  'Sumar Facebook Reels': 'Habilitar un placement cambia la segmentación y no está en el catálogo: se pide a mano.',
-  'Genera conversación': 'Leer y moderar comentarios siempre se hace a mano.',
-  'Costo por objetivo': 'Es una revisión de pieza, audiencia y puja, no un cambio: se hace a mano.',
-  'Se abandona temprano': 'Es una revisión de la pieza, no un cambio: se hace a mano.',
-  'Rotar contenidos': 'Pedir piezas nuevas va por un pedido normal de PAUTADOR (reglas v0.3, D6).',
+  'Peor que la temporada anterior': A_MANO + 'volver a usar las piezas y audiencias de la temporada pasada se pide en PAUTADOR como un pedido nuevo.',
+  'Sin entrega': A_MANO + 'hay que revisar en el administrador de anuncios si hay rechazos, anuncios en revisión o falta presupuesto.',
+  'Apagón': A_MANO + 'hay que revisar las cuentas del activo (anuncios pausados, rechazados o sin presupuesto).',
+  'Pico': A_MANO + 'hay que confirmar que el aumento de gasto sea intencional.',
+  'Placements débiles': A_MANO + 'sacar placements cambia la segmentación, y desde el Tablero de optimización solo se puede pausar o cambiar el presupuesto.',
+  'Sumar Facebook Reels': A_MANO + 'sumar un placement cambia la segmentación, y desde el Tablero de optimización solo se puede pausar o cambiar el presupuesto.',
+  'Genera conversación': A_MANO + 'los comentarios se leen y se moderan desde la página.',
+  'Costo por objetivo': A_MANO + 'hay que revisar la pieza, la audiencia y la puja de esa red.',
+  'Se abandona temprano': A_MANO + 'hay que revisar el comienzo del video (los primeros segundos).',
+  'Rotar contenidos': A_MANO + 'las piezas nuevas se piden en PAUTADOR como un pedido nuevo.',
+};
+
+// Los demás textos de tarea manual y de bloqueo. Los marcados N5 son los propuestos por Recomendaciones, tal cual; los demás se
+// escribieron con el mismo criterio y Juan Pablo los aprobó el 1/10.
+const diaAR = (d) => new Date(d.getTime() - 3 * 3600e3).toISOString().slice(0, 10);   // Argentina: UTC−3, sin horario de verano
+const fechaCorta = (x) => {   // 'AAAA-MM-DD' o fecha y hora → 'dd/mm' (con hora: el día en Argentina)
+  const t = String(x || '');
+  const dia = /^\d{4}-\d{2}-\d{2}$/.test(t) ? t : diaAR(new Date(t));
+  return dia.slice(8, 10) + '/' + dia.slice(5, 7);
+};
+const TEXTO = {
+  otraPlataforma: (p) => A_MANO + `desde el Tablero de optimización los cambios son solo para Meta; en ${p} se hacen en la plataforma.`,                // N5
+  sinPiezaPeor: A_MANO + 'no hay una pieza claramente peor para pausar; revisar la pieza y la audiencia, y pausar si en 2 días no mejora.', // N5
+  sinIdsAnuncio: A_MANO + 'no encontramos estos conjuntos en Meta (faltan los ids de sus anuncios).',                                  // N5
+  fueraDelCatalogo: A_MANO + 'desde el Tablero de optimización solo se puede pausar o cambiar el presupuesto.',
+  sinConjuntos: A_MANO + 'la recomendación no dice qué conjuntos tocar.',
+  // N7: un nombre con varios conjuntos en Meta
+  variosSinDato: (n) => A_MANO + `hay ${n} conjuntos con este nombre en Meta y no tenemos cuándo gastó cada uno, así que no sabemos a cuál aplicar el cambio.`,
+  variosNinguno: (n) => A_MANO + `hay ${n} conjuntos con este nombre en Meta y ninguno gastó en los últimos ${DIAS_GASTO_RECIENTE} días, así que no sabemos a cuál aplicar el cambio.`,
+  variosVarios: (n, m) => A_MANO + `hay ${n} conjuntos con este nombre en Meta y ${m} gastaron en los últimos ${DIAS_GASTO_RECIENTE} días, así que no sabemos a cuál aplicar el cambio.`,
+  variosTodos: A_MANO + 'cada uno de estos conjuntos tiene más de un conjunto con el mismo nombre en Meta y no se pudo saber cuál está andando.',
+  // Bloqueos (N5, con la fecha en día y mes)
+  d1: (pct) => `No se puede pedir: el cambio es de ${pct} %, y el máximo es ${TOPE_PCT} % por vez.`,
+  d1Cero: 'No se puede pedir: el cambio de presupuesto tiene que ser un porcentaje distinto de cero.',
+  d2: (fecha) => `Todavía no: este conjunto ya tuvo un cambio el ${fechaCorta(fecha)}; se permite uno cada ${DIAS_ENTRE_CAMBIOS} días.`,
+  d3: (fin) => `No se puede pedir: la campaña termina el ${fechaCorta(fin)} y en sus últimos ${DIAS_FINALES} días no se cambia el presupuesto.`,
 };
 
 // 'rechazada_persona' ya no la produce el simulador (no hay segundo paso de aprobación), pero el contrato la sigue nombrando: si algún
@@ -90,11 +126,46 @@ function conjuntosDe(rec) {
     conjuntoIds: listaIds(k.conjuntoId != null ? k.conjuntoId : k.conjunto_id),
   }));
 }
-const MOTIVO_VARIOS_CONJUNTOS = (k) => `Hay más de un conjunto con este nombre en Meta (${k.conjuntoIds.length}: ${k.conjuntoIds.join(', ')}): no se sabe a cuál aplicar el cambio, se hace a mano.`;
+
+// ---------- N7: un nombre de conjunto con varios ids de Meta ----------
+// conjuntosPorId: las filas que baja Extracción (borrador/_extraer.js, `conjuntosPorId`), una por id de conjunto de Meta en 180 días:
+//   { canal, cliente, conjuntoId, nombre, activo, primerGasto, ultimoGasto: 'AAAA-MM-DD', gasto, g14, ads: 'id,id,…' }
+// Se usan solo conjuntoId, ultimoGasto y ads. Si un id aparece en varias filas, vale la fecha más nueva y se juntan los anuncios.
+// También acepta un Map ya armado (id → { ultimoGasto, anuncios }).
+function indicePorId(conjuntosPorId) {
+  if (conjuntosPorId instanceof Map) return conjuntosPorId;
+  const ix = new Map();
+  for (const f of Array.isArray(conjuntosPorId) ? conjuntosPorId : []) {
+    if (!f || typeof f !== 'object') continue;
+    const id = listaIds(f.conjuntoId != null ? f.conjuntoId : f.conjunto_id);
+    if (id.length !== 1) continue;   // una fila por id: si trae varios, no es una fila de esta tabla
+    const ug = /^\d{4}-\d{2}-\d{2}/.test(String(f.ultimoGasto || '')) ? String(f.ultimoGasto).slice(0, 10) : null;
+    const prev = ix.get(id[0]) || { ultimoGasto: null, anuncios: [] };
+    ix.set(id[0], { ultimoGasto: [prev.ultimoGasto, ug].filter(Boolean).sort().pop() || null,
+      anuncios: [...new Set([...prev.anuncios, ...listaIds(f.anuncios != null ? f.anuncios : f.ads)])] });
+  }
+  return ix;
+}
+// Gastó en los últimos 2 días = su último día con gasto es anteayer o después, en hora argentina (DataJunta llega hasta ayer).
+const gastoReciente = (ultimoGasto, ahora) => !!ultimoGasto && ultimoGasto >= diaAR(new Date(ahora.getTime() - DIAS_GASTO_RECIENTE * DIA));
+// k: conjunto con más de un id → { ok: true, conjunto (con el id elegido y SUS anuncios) } | { ok: false, manual }
+function elegirConjunto(k, indice, ahora) {
+  const n = k.conjuntoIds.length;
+  const base = { conjunto: k.nombre, conjunto_ids: k.conjuntoIds };
+  const datos = k.conjuntoIds.map((id) => ({ id, d: indice.get(id) }));
+  if (datos.some((x) => !x.d)) return { ok: false, manual: { ...base, caso: 'sin_dato', motivo: TEXTO.variosSinDato(n) } };
+  const recientes = datos.filter((x) => gastoReciente(x.d.ultimoGasto, ahora));
+  if (!recientes.length) return { ok: false, manual: { ...base, caso: 'ninguno_gasto', motivo: TEXTO.variosNinguno(n) } };
+  if (recientes.length > 1) return { ok: false, manual: { ...base, caso: 'varios_gastaron', conjunto_ids_con_gasto: recientes.map((x) => x.id), motivo: TEXTO.variosVarios(n, recientes.length) } };
+  const el = recientes[0];
+  return { ok: true, conjunto: { ...k, conjuntoIds: [el.id], anuncios: el.d.anuncios,
+    elegido: { conjunto_id: el.id, ultimo_gasto: el.d.ultimoGasto, descartados: k.conjuntoIds.filter((id) => id !== el.id) } } };
+}
 
 // rec: la recomendación aceptada. ctx: { pedidaPor, proyecto, canal, ahora?, historial?, cambioPct? }
 //   historial: lo que devuelve repositorio.historial() — solicitudes ya mandadas con su último estado (para el control D2).
 //   cambioPct: si la persona ajustó el porcentaje antes de mandar (si no, el de la regla).
+//   conjuntosPorId: filas de Extracción por id de conjunto (N7). Sin ellas, un nombre con varios ids queda a mano.
 function aSolicitud(rec, ctx = {}) {
   if (!rec || !rec.id || !rec.tipo) throw new Error('nexo: la recomendación necesita id y tipo');
   if (!esMail(ctx.pedidaPor)) throw new Error('nexo: falta el mail de quien acepta la recomendación');
@@ -102,50 +173,60 @@ function aSolicitud(rec, ctx = {}) {
   const ahora = ctx.ahora ? new Date(ctx.ahora) : new Date();
 
   const def = ENCAJAN[rec.tipo];
-  if (!def) return { tipo: 'manual', motivo: NO_ENCAJAN[rec.tipo] || 'No es una acción del catálogo (Pausar o Cambiar presupuesto): se hace a mano.' };
+  if (!def) return { tipo: 'manual', motivo: NO_ENCAJAN[rec.tipo] || TEXTO.fueraDelCatalogo };
   const plataforma = rec.plataforma || 'Meta';   // las reglas que encajan son todas de Meta (reglas/meta.js)
-  if (!PLATAFORMAS.includes(plataforma)) return { tipo: 'manual', motivo: `El nexo con PAUTADOR es solo para Meta; en ${plataforma} se hace a mano.` };
+  if (!PLATAFORMAS.includes(plataforma)) return { tipo: 'manual', motivo: TEXTO.otraPlataforma(plataforma) };
 
   let conj = conjuntosDe(rec);
   if (def.conjuntos === 'pausar') {
     conj = conj.filter((k) => k.rol === 'pausar');
-    if (!conj.length) return { tipo: 'manual', motivo: 'No hay una pieza peor identificada para pausar: la recomendación es revisar la pieza y la audiencia.' };
+    if (!conj.length) return { tipo: 'manual', motivo: TEXTO.sinPiezaPeor };
   } else conj = conj.filter((k) => k.rol !== 'reforzar');
-  if (!conj.length) return { tipo: 'manual', motivo: 'La recomendación no trae conjuntos de anuncios para tocar.' };
-  // Un nombre de conjunto con varios ids de Meta en el mes: no se elige a ciegas, ese conjunto queda como tarea manual.
-  const manuales = conj.filter((k) => k.conjuntoIds.length > 1).map((k) => ({ conjunto: k.nombre, conjunto_ids: k.conjuntoIds, motivo: MOTIVO_VARIOS_CONJUNTOS(k) }));
-  const unicos = conj.filter((k) => k.conjuntoIds.length <= 1);
-  if (!unicos.length) return { tipo: 'manual', motivo: manuales.length === 1 ? manuales[0].motivo : 'Hay más de un conjunto con el mismo nombre en Meta para cada uno de estos conjuntos: no se sabe a cuál aplicar el cambio, se hace a mano.', manuales };
+  if (!conj.length) return { tipo: 'manual', motivo: TEXTO.sinConjuntos };
+  // Un nombre de conjunto con varios ids de Meta (N7): se manda al único que gastó en los últimos 2 días, con los anuncios de ese id.
+  // Si gastaron ninguno o varios, o falta el dato, ese conjunto queda como tarea manual.
+  const indice = indicePorId(ctx.conjuntosPorId);
+  const manuales = [];
+  const unicos = [];
+  for (const k of conj) {
+    if (k.conjuntoIds.length <= 1) { unicos.push(k); continue; }
+    const e = elegirConjunto(k, indice, ahora);
+    if (e.ok) unicos.push(e.conjunto); else manuales.push(e.manual);
+  }
+  if (!unicos.length) return { tipo: 'manual', motivo: manuales.length === 1 ? manuales[0].motivo : TEXTO.variosTodos, manuales };
   const conIds = unicos.filter((k) => k.anuncios.length);
-  if (!conIds.length) return { tipo: 'manual', motivo: 'Faltan los ids de anuncio de Meta de estos conjuntos: sin ellos PAUTADOR no puede encontrarlos.', manuales };
+  if (!conIds.length) return { tipo: 'manual', motivo: TEXTO.sinIdsAnuncio, manuales };
 
   // D1: tope de ±20 %
   let cambioPct = null;
   if (def.accion === ACCION.PRESUPUESTO) {
     cambioPct = ctx.cambioPct != null ? Number(ctx.cambioPct) : def.cambioPct;
-    if (!Number.isFinite(cambioPct) || cambioPct === 0) return { tipo: 'bloqueada', control: 'D1', motivo: 'El cambio de presupuesto tiene que ser un porcentaje distinto de cero.' };
-    if (Math.abs(cambioPct) > TOPE_PCT) return { tipo: 'bloqueada', control: 'D1', motivo: `El cambio es de ${cambioPct} %: el máximo por cambio es ${TOPE_PCT} % (más reinicia el aprendizaje del conjunto).` };
+    if (!Number.isFinite(cambioPct) || cambioPct === 0) return { tipo: 'bloqueada', control: 'D1', motivo: TEXTO.d1Cero };
+    if (Math.abs(cambioPct) > TOPE_PCT) return { tipo: 'bloqueada', control: 'D1', motivo: TEXTO.d1(cambioPct) };
   }
-  // D3: nada en los últimos 2 días (si la tarjeta trae la fecha de fin de la campaña)
-  if (rec.fin) {
+  // D3: nada en los últimos 2 días (si la tarjeta trae la fecha de fin de la campaña). Solo para Cambiar presupuesto: pausar se
+  // puede hasta el final, porque corta el daño (Juan Pablo, 1/10).
+  if (def.accion === ACCION.PRESUPUESTO && rec.fin) {
     const faltan = Math.floor((new Date(diaDe(rec.fin) + 'T00:00:00Z') - new Date(diaDe(ahora.toISOString()) + 'T00:00:00Z')) / DIA);
-    if (faltan <= DIAS_FINALES) return { tipo: 'bloqueada', control: 'D3', motivo: `La campaña termina el ${diaDe(rec.fin)}: en los últimos ${DIAS_FINALES} días no se hacen cambios.` };
+    if (faltan <= DIAS_FINALES) return { tipo: 'bloqueada', control: 'D3', motivo: TEXTO.d3(diaDe(rec.fin)) };
   }
 
   const dia = diaDe(ahora.toISOString());
   const id = idSolicitud(rec.id, def.accion, dia);
-  // D2: un cambio por conjunto cada 3 días (según lo que Seguimiento ya mandó; PAUTADOR lo vuelve a mirar con los cambios reales)
+  // D2: un cambio de presupuesto por conjunto cada 3 días (según lo que Seguimiento ya mandó; PAUTADOR lo vuelve a mirar con los
+  // cambios reales). Desde el 1/10 (N3) vale solo para Cambiar presupuesto y cuenta solo los cambios de presupuesto anteriores:
+  // pausar siempre se puede, y una pausa anterior no frena un cambio de presupuesto.
   const anuncios = new Set(conIds.flatMap((k) => k.anuncios.map(String)));
   const nombres = new Set(conIds.map((k) => k.nombre));
   const idsConjunto = new Set(conIds.flatMap((k) => k.conjuntoIds));
-  for (const h of ctx.historial || []) {
+  for (const h of def.accion === ACCION.PRESUPUESTO ? ctx.historial || [] : []) {
     const s = h.solicitud;
-    if (!s || s.id === id) continue;
+    if (!s || s.id === id || s.accion !== ACCION.PRESUPUESTO) continue;
     if (h.ultimo && ESTADOS_FINALES_SIN_CAMBIO.includes(h.ultimo.estado)) continue;
     if ((ahora - new Date(s.creada)) / DIA >= DIAS_ENTRE_CAMBIOS) continue;
     const pisa = (s.objetivos || []).some((o) => nombres.has(o.conjunto) || (o.conjunto_id && idsConjunto.has(String(o.conjunto_id)))
       || (o.anuncios || []).some((a) => anuncios.has(String(a))));
-    if (pisa) return { tipo: 'bloqueada', control: 'D2', motivo: `Uno de estos conjuntos ya tuvo un pedido de cambio el ${diaDe(s.creada)}: se permite un cambio por conjunto cada ${DIAS_ENTRE_CAMBIOS} días.` };
+    if (pisa) return { tipo: 'bloqueada', control: 'D2', motivo: TEXTO.d2(s.creada) };
   }
 
   const solicitud = {
@@ -162,8 +243,8 @@ function aSolicitud(rec, ctx = {}) {
     accion: def.accion,
     nivel: 'conjunto',
     // cuenta y campaña de Meta los resuelve PAUTADOR a partir de los ids de anuncio y los códigos. conjunto_id: el id del conjunto de
-    // Meta cuando DataJunta trae uno solo para ese nombre (null si no vino); PAUTADOR lo puede usar para confirmar que los anuncios
-    // son de ese conjunto. Con varios ids el conjunto no llega hasta acá (queda en `manuales`).
+    // Meta cuando DataJunta trae uno solo para ese nombre, o el único que gastó en los últimos 2 días si trae varios (N7); null si no
+    // vino. PAUTADOR lo puede usar para confirmar que los anuncios son de ese conjunto. Si no se pudo elegir, queda en `manuales`.
     objetivos: conIds.map((k) => ({ conjunto: k.nombre, conjunto_id: k.conjuntoIds[0] || null, codigo: codigoDeNombre(k.nombre), codigo_contenido: k.cod || null, anuncios: k.anuncios })),
     cambio_pct: cambioPct,
     valores: null,   // antes y después: los completa PAUTADOR con el dato real de Meta
@@ -172,8 +253,10 @@ function aSolicitud(rec, ctx = {}) {
     sin_ids: unicos.length - conIds.length,   // conjuntos que quedaron afuera por no tener id de anuncio
     creada: ahora.toISOString(),
   };
-  // manuales: conjuntos que quedaron afuera porque su nombre tiene varios ids en Meta; se muestran como tarea manual con su motivo.
-  return { tipo: 'solicitud', solicitud, manuales };
+  // manuales: conjuntos que quedaron afuera porque su nombre tiene varios ids en Meta y no se pudo elegir; se muestran como tarea
+  // manual con su motivo. elegidos: los que tenían varios ids y se mandaron al único que gastó (para mostrarlo o revisarlo; no viaja).
+  const elegidos = conIds.filter((k) => k.elegido).map((k) => ({ conjunto: k.nombre, ...k.elegido }));
+  return { tipo: 'solicitud', solicitud, manuales, elegidos };
 }
 
 // Revisión de forma, la misma que usa el simulador para "rechazada por validación". PAUTADOR hace la suya.
@@ -214,7 +297,8 @@ function validarForma(s) {
 //   - Si el canal del cambio no se sabe (hoy Valle 24, El Norte Ahora y Noticia Franca no tienen canal cargado en PAUTADOR),
 //     no se controla por canal, pero se devuelve un aviso.
 //   - Sin respuesta, respuesta con otro formato o de otro mail: no sale.
-// Hasta que exista la consulta real no hay función por defecto: sin función de accesos, no se manda nada.
+// La función real (consulta a PAUTADOR con memoria de 5 minutos) está en nexo/accesos.js y crearNexo la usa por defecto en modo
+// real. Sin función de accesos, no se manda nada.
 const ROLES = ['pm_cuentas', 'implementador', 'administrador'];
 const ROLES_QUE_PIDEN = ['implementador', 'administrador'];
 const ESPERA_ACCESOS_MS = 5000;
@@ -285,4 +369,4 @@ function accesosDeLista(lista) {
   return async (mail) => { const u = copia.find((x) => normal(x.email) === normal(mail)); return u ? JSON.parse(JSON.stringify(u)) : null; };
 }
 
-module.exports = { aSolicitud, validarForma, revisarPermiso, accesosDeLista, ROLES_QUE_PIDEN, idSolicitud, codigoDeNombre, ACCION, CATALOGO_ACCIONES, ENCAJAN, NO_ENCAJAN, TOPE_PCT, DIAS_ENTRE_CAMBIOS, DIAS_FINALES };
+module.exports = { aSolicitud, validarForma, revisarPermiso, accesosDeLista, ROLES_QUE_PIDEN, idSolicitud, codigoDeNombre, indicePorId, ACCION, CATALOGO_ACCIONES, ENCAJAN, NO_ENCAJAN, TEXTO, TOPE_PCT, DIAS_ENTRE_CAMBIOS, DIAS_FINALES, DIAS_GASTO_RECIENTE };

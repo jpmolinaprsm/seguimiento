@@ -5,9 +5,12 @@
 //   imp, vw, rea, gasto, ef:{c,short}, salud:{hay,ritmo,dot,bg,restante,w,hayBarra,titulo}, hasPieza, onPieza }
 
 // entra en el ancho de la página (1440 px máx.) sin scroll horizontal: el nombre se recorta, los números son compactos
-const COLS = { ef: 'minmax(0,1fr) 92px 96px 84px 84px 62px', salud: 'minmax(0,1fr) 74px 80px 92px 96px 84px 84px 190px' };
+const COLS = { ef: 'minmax(0,1fr) 92px 96px 84px 84px 62px', salud: 'minmax(0,1fr) 98px 106px 106px 106px 106px 106px 190px' };
+// Activos (01/10): debajo de cada número, en chico, qué parte del total representa ("34 % de la campaña", "28 % del proyecto")
+// La columna Campañas no lleva % (decisión de Juan Pablo del 01/10): una campaña corre en varios activos y los % podían sumar más de 100
+const num = (a, campo, peso, color) => `<span style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:1px;min-width:0"><span style="font-weight:${peso}${color ? ';color:' + color : ''}">{{ ${a}.${campo === 'camp' ? 'nCamp' : campo === 'cont' ? 'nCont' : campo} }}</span>${campo === 'camp' ? '' : `<sc-if value="{{ ${a}.pc.${campo} }}"><span style="font-size:10.5px;line-height:1.3;color:#A6AAA9;font-weight:400">{{ ${a}.pc.${campo} }}</span></sc-if>`}</span>`;
 
-const eficacia = (a) => `<span style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:#808080" title="Eficacia: % del gasto en anuncios rojos"><span style="width:9px;height:9px;border-radius:2px;background:{{ ${a}.ef.c }}"></span>{{ ${a}.ef.short }}</span>`;
+const eficacia = (a) => `<span style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:#808080" title="Eficacia: qué parte del gasto fue a anuncios flojos, los que rinden peor que lo normal"><span style="width:9px;height:9px;border-radius:2px;background:{{ ${a}.ef.c }}"></span>{{ ${a}.ef.short }}</span>`;
 
 // salud del activo: ritmo de gasto (normal / pico / apagón) y presupuesto restante del pedido; solo en el primer nivel
 const salud = (a) => `<span style="display:flex;flex-direction:column;gap:4px;min-width:0" title="{{ ${a}.salud.titulo }}"><sc-if value="{{ ${a}.salud.hay }}">
@@ -23,16 +26,17 @@ const fila = (a, nivel, modo) => `
       <sc-if value="{{ ${a}.sinKids }}"><span style="width:14px"></span></sc-if>
       <span style="font-weight:${nivel <= 2 ? '600' : '500'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:${nivel === 1 ? '440px' : '520px'}" title="{{ ${a}.name }}">{{ ${a}.name }}</span>
       <span style="display:inline-flex;gap:2px;align-items:center"><sc-for list="{{ ${a}.plats }}" as="pl" hint-placeholder-count="2"><img src="{{ pl.icon }}" alt="{{ pl.name }}" title="{{ pl.name }}" style="width:13px;height:13px;display:inline-block"></sc-for></span>
+      <sc-if value="{{ ${a}.hasMarca }}"><span title="{{ ${a}.marca.title }}" style="display:inline-flex;align-items:center;gap:5px;padding:1px 8px 1px 6px;border-radius:9999px;background:{{ ${a}.marca.bg }};font-size:11px;font-weight:600;white-space:nowrap"><span style="width:7px;height:7px;border-radius:9999px;background:{{ ${a}.marca.dot }}"></span>{{ ${a}.marca.txt }}</span></sc-if>
       <sc-if value="{{ ${a}.hasN }}"><span style="font-size:11px;color:#A6AAA9">{{ ${a}.n }}</span></sc-if>
       <sc-if value="{{ ${a}.hasLink }}"><button sc-camel-on-click="{{ ${a}.onLink }}" style="border:1px solid #E4E4E4;background:#FFFFFF;border-radius:9999px;padding:1px 9px;font-size:10.5px;cursor:pointer;color:#3C3C3C" style-hover="border-color:#A6AAA9">ver campaña ↗</button></sc-if>
       <sc-if value="{{ ${a}.hasPieza }}"><button sc-camel-on-click="{{ ${a}.onPieza }}" style="border:none;background:none;padding:0;font-size:11px;text-decoration:underline;text-underline-offset:2px;cursor:pointer;color:#808080">ver pieza ▸</button></sc-if>
       <sc-if value="{{ ${a}.sub }}"><span style="font-size:11px;color:#A6AAA9">{{ ${a}.sub }}</span></sc-if>
     </div>
-    ${modo === 'salud' ? `<span style="text-align:right;font-weight:${nivel === 1 ? '600' : '400'}">{{ ${a}.nCamp }}</span><span style="text-align:right;font-weight:${nivel === 1 ? '600' : '400'}">{{ ${a}.nCont }}</span>` : ''}
+    ${modo === 'salud' ? [['camp', nivel === 1 ? 600 : 400], ['cont', nivel === 1 ? 600 : 400], ['imp', nivel === 1 ? 600 : 400], ['vw', 400, '#5C5C5C'], ['rea', 400, '#5C5C5C'], ['gasto', 400, '#5C5C5C']].map(([k, w, col]) => num(a, k, w, col)).join('') : `
     <span style="text-align:right;font-weight:${nivel === 1 ? '600' : '400'}">{{ ${a}.imp }}</span>
     <span style="text-align:right;color:#5C5C5C">{{ ${a}.vw }}</span>
     <span style="text-align:right;color:#5C5C5C">{{ ${a}.rea }}</span>
-    <span style="text-align:right;color:#5C5C5C">{{ ${a}.gasto }}</span>
+    <span style="text-align:right;color:#5C5C5C">{{ ${a}.gasto }}</span>`}
     ${modo === 'salud' ? salud(a) : eficacia(a)}
   </div>`;
 
@@ -70,8 +74,8 @@ const cabecera = (titulo, helpKey, texto, ayuda) => `
       <p style="margin:4px 0 0;font-size:13px;color:#808080;text-wrap:pretty">${texto}</p>
       <sc-if value="{{ h.${helpKey}.open }}"><div style="margin-top:10px;padding:12px 14px;background:#F5F5F5;border-radius:10px;font-size:12.5px;line-height:1.6">${ayuda}</div></sc-if>`;
 
-const AYUDA = 'Impresiones, reproducciones, reacciones y gasto del período elegido, todas las plataformas. <b>Eficacia</b>: % del gasto en anuncios rojos según la regla de Looker (cada anuncio de Meta contra los de su mismo objetivo y placement del proyecto, en su misma época). En Ejes, los anuncios (último nivel) son los conjuntos de Meta del mes en curso.';
-const AYUDA_SALUD = '<b>Campañas</b> y <b>Contenidos</b>: cuántas campañas y cuántas piezas distintas tuvo el activo en el período (en cada campaña, sus piezas en ese activo). Impresiones, reproducciones, reacciones y gasto del período elegido, todas las plataformas. <b>Salud</b> (solo en cada activo): <b>ritmo</b> = gasto de los últimos 2 días completos contra su día típico del mes anterior; apagón si gasta menos de la mitad, pico si gasta más del doble. <b>Restante</b> = pedido del mes menos lo gastado, según la planilla de pedidos (en revisión). <b>Automatizado</b>: PAUTADOR puede crear anuncios en ese activo.';
+const AYUDA = 'Impresiones, reproducciones, reacciones y gasto del período elegido, todas las plataformas. <b>Eficacia</b>: qué parte del gasto fue a anuncios flojos, los que rinden peor que lo normal: su costo por reacción está entre el 25 % más caro de los anuncios de Meta de su mismo objetivo y placement en el proyecto, en su misma época (la regla de Looker). En Ejes, los anuncios (último nivel) son los conjuntos de Meta del mes en curso.';
+const AYUDA_SALUD = '<b>Campañas</b> y <b>Contenidos</b>: cuántas campañas y cuántas piezas distintas tuvo el activo en el período (en cada campaña, sus piezas en ese activo). Impresiones, reproducciones, reacciones y gasto del período elegido, todas las plataformas. <b>Salud</b> (solo en cada activo): <b>ritmo</b> = gasto de los últimos 2 días completos contra su día típico del mes anterior; apagón si gasta menos de la mitad, pico si gasta más del doble. <b>Restante</b> = pedido del mes menos lo gastado, según la planilla de pedidos (en revisión). <b>Automatizado</b>: PAUTADOR puede crear anuncios en ese activo.<br><b>Debajo de cada número</b> (salvo Campañas), en chico: en cada activo, qué parte del total del proyecto (en el canal y período elegidos; en Todos los proyectos, del total del canal) hizo ese activo (“28 % del proyecto”); en cada campaña, qué parte de toda la campaña, sumando todos sus activos, se hizo en ese activo (“34 % de la campaña”). Campañas no lleva %: una campaña corre en varios activos y los % podían sumar más de 100.<br><b>Oficial e Informativo juntos (General)</b>: un activo con el mismo nombre en los dos canales va una vez, con el pedido y lo gastado sumados; al lado del nombre dice de qué canal es. <b>Todos los proyectos</b>: al lado de cada activo, su proyecto.';
 
 module.exports = {
   ejes: `<sc-if value="{{ isEjes }}">
@@ -86,8 +90,8 @@ module.exports = {
     </main></sc-if>`,
   activos: `<sc-if value="{{ isActivos }}">
     <main data-screen-label="Proyecto · Activos" style="max-width:{{ L.max }};margin:0 auto;padding:36px 28px 120px">
-      ${cabecera('Activos', 'activos', 'Activo → campaña. En cada activo, su salud: ritmo de gasto y presupuesto restante del pedido.', AYUDA_SALUD)}
-      ${arbol('arbolActivos', 'Activo / campaña', 'salud')}
+      ${cabecera('Activos', 'activos', 'Activo → campaña → contenido / conjunto. Dentro de cada activo, solo las piezas y los conjuntos que corrieron en ese activo. En cada activo, su salud: ritmo de gasto y presupuesto restante del pedido.', AYUDA_SALUD)}
+      ${arbol('arbolActivos', 'Activo / campaña / contenido / conjunto', 'salud')}
     </main></sc-if>`,
   COLS,
 };

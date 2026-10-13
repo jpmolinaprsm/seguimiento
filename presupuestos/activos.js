@@ -17,20 +17,20 @@ const MAPA = path.join(__dirname, '_mapa_cuentas.json');
 // { "Google|553-945-7456": "Gaceta Santafesina * (INF)" } — el nombre es el ActivoLargo de DataJunta.
 const MANUAL = path.join(__dirname, 'cuentas_manual.json');
 const DIA = 86400000;
+// Clientes que se suman a mano a un activo aunque no lleguen al 15 % de su plata (decisión X5 de Juan Pablo, 1/10/2026):
+// Informe Norte gastó también en Catamarca Provincia y Catamarca Ciudad, así la app y el resumen por activo lo muestran ahí.
+// Clave = nombre del activo en DataJunta (ActivoLargo, como queda en `activos` de la unidad).
+const CLIENTES_EXTRA = {
+  'Informe Norte * (INF)': ['Catamarca Provincia', 'Catamarca Ciudad'],
+};
 const digitos = (s) => String(s || '').replace(/\D/g, '');
 const limpio = (s) => String(s || '').replace(/ /g, ' ').replace(/\s+/g, ' ').trim();
 const grupoDe = (nombre) => ((String(nombre).match(/\(([A-Z&]{2,4})\)\s*(?:\(SUSPENDED\))?\s*$/) || [])[1] || '');
 const codigoDe = (nombre) => ((String(nombre).match(/^([A-Z0-9]{5,6})[\s ]/) || [])[1] || '');
 
-function bq() {
-  const PAUTADOR = path.resolve(__dirname, '..', '..', 'pautador');
-  process.env.BQ_SERVICE_ACCOUNT_KEY_PATH = process.env.BQ_SERVICE_ACCOUNT_KEY_PATH || path.resolve(__dirname, '..', '..', 'GCP', 'prsm-bq-media-6a154f90fdb5.json');
-  const cwd = process.cwd();
-  process.chdir(PAUTADOR);
-  const m = require(path.join(PAUTADOR, 'src', 'services', 'bqDatajunta.js'));
-  process.chdir(cwd);
-  return m;
-}
+// Cliente de BigQuery propio de Seguimiento (datos/bq.js: dry run, corte a 1 GB y todas las páginas). Hasta el 2/10/2026
+// se cargaba el de PAUTADOR.
+const bq = () => require('../datos/bq');
 
 const TABLAS = { Oficial: 'prsm-bq-media.prsm_media_tableros', Informativo: 'bq-project-450514.informativo' };
 
@@ -203,6 +203,7 @@ async function calcular({ hasta } = {}) {
     for (const h of historial) for (const o of [h.pedidoPorCliente, h.gastoPorCliente]) for (const [cli, v] of Object.entries(o)) peso[cli] = (peso[cli] || 0) + v;
     const totPeso = Object.values(peso).reduce((t, v) => t + v, 0);
     const clientesPeso = Object.keys(peso).filter((cli) => cli !== '(sin cliente)' && totPeso && peso[cli] / totPeso >= 0.15);
+    for (const nm of nombres) for (const cli of CLIENTES_EXTRA[nm] || []) if (!clientesPeso.includes(cli)) clientesPeso.push(cli);
     const union = [...new Set(ctas.map((c) => c.union))];
     return {
       id: `${plataforma}|${(nombres[0] || numeros[0])}`, plataforma, canal,

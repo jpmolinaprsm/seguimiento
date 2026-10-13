@@ -8,6 +8,22 @@ const PLACEMENTS_DEBILES = ['Facebook Instream Video', 'Threads Feed', 'Instagra
 const FATIGA_DIAS = { Video: 15, 'Placa Fija': 12, Carrusel: 12 };
 const PRESION_CAMPANA = 20;        // impresiones por habitante por mes de UNA campaña (provisorio: un tercio del umbral de saturación del cliente)
 
+// "Peor que la temporada anterior" (C2): el mismo cálculo que la tarjeta "Esta temporada" del panel Rendimiento (decisión del 02/10).
+// temporada() vive en app/marcas.js (Referencias): toda esta temporada contra la misma cantidad de semanas desde el inicio de la
+// temporada pasada, objetivo por objetivo y formato por formato (si no cubre el 80 %, objetivo por objetivo; si tampoco, sin
+// comparación), con la plata de la pasada llevada a hoy. Dispara si el KPI del objetivo queda en rojo (20 % o más peor).
+const { temporada, semanasDe } = require('../../app/marcas');
+function temporadaDe(c, { P, canal, rows, fuenteSemanal, objetivo, datosHasta }) {
+  const pr = c.propia;
+  if (!pr || pr.tipo !== 'temporada' || !pr.inicio || !pr.previa || !rows || !fuenteSemanal) return null;
+  const actual = rows.filter((r) => r.com === c.id && r.mes >= pr.inicio.slice(0, 7));
+  const pasada = semanasDe(fuenteSemanal, { canal, cliente: P.cliente, comunic: c.id }, objetivo);
+  return temporada({ actual, pasada, inicio: pr.inicio, previa: pr.previa, datosHasta, objetivo: c.obj });
+}
+const fPesos = (v) => '$' + Math.round(v).toLocaleString('es-AR');
+const fPct = (v) => v.toLocaleString('es-AR', { maximumFractionDigits: 2 }) + ' %';
+const KPI_TXT = { cr: ['Costo por reacción', fPesos], cpm: ['CPM', fPesos], ctr: ['CTR', fPct], treac: ['Tasa de reacción', fPct], tcomp: ['Tasa de compartido', fPct] };
+
 function reglasMeta(ctx) {
   const { acciones, nuevo, vivas, campanas, deJuegos, bandaVideo, datosHasta, dias, luz, pz, corto, vx, Mk, dmy, pctTxt, hashId, COM_GENERICA, P, canal } = ctx;
   const fatigas = [];
@@ -28,9 +44,15 @@ function reglasMeta(ctx) {
     }
     // luz propia: recomendaciones propias de campañas largas
     if (pr && pr.estado === 'ok') {
-      if (pr.tipo === 'temporada' && pr.luz === 'rojo') nuevo(c, { tipo: 'Peor que la temporada anterior', prioridad: 2.5,
-        titulo: `${c.nombre} rinde peor que en la temporada anterior`, que: `KPI principal ${vx(pr.idx)} lo que dio en las mismas ${pr.previa.semanasComparadas} semanas de la temporada que arrancó el ${dmy(pr.previa.desde)}/${pr.previa.desde.slice(0, 4)} (costos ajustados por inflación).`,
-        hacer: 'Comparar piezas y audiencias con las de la temporada pasada y retomar lo que funcionó', porque: 'Las campañas estacionales se comparan contra su propia temporada anterior, no contra el promedio.' });
+      const tp = pr.tipo === 'temporada' ? temporadaDe(c, ctx) : null;
+      if (tp && tp.peor) {
+        const k = tp.kpis[tp.kpi], [nom, f] = KPI_TXT[tp.kpi], costo = ['cr', 'cpm'].includes(tp.kpi);
+        nuevo(c, { tipo: 'Peor que la temporada anterior', prioridad: 2.5,
+          temp: { kpi: tp.kpi, valor: k.valor, ref: k.ref, idx: tp.idx, dif: k.dif, nivel: k.nivel, semanas: tp.semanas, desde: tp.desde, toda: tp.toda },
+          titulo: `${c.nombre} rinde peor que en la temporada anterior`,
+          que: `${nom} ${f(k.valor)} en toda esta temporada, contra ${f(k.ref)} en ${tp.toda ? 'toda la temporada pasada' : 'las mismas semanas desde el inicio de la temporada pasada'} (${tp.semanas} ${tp.semanas === 1 ? 'semana' : 'semanas'} desde el ${dmy(tp.desde)}/${tp.desde.slice(0, 4)}): ${Math.abs(k.dif)} % ${costo ? 'más caro' : 'menos'}${costo ? ', con la plata de entonces llevada a hoy' : ''}.`,
+          hacer: 'Comparar piezas y audiencias con las de la temporada pasada y retomar lo que funcionó', porque: 'Las campañas estacionales se comparan contra su propia temporada anterior, no contra el promedio.' });
+      }
       if (pr.debajo && pr.idxPropio != null && luz(pr.idxPropio, c.obj) === 'rojo') nuevo(c, { tipo: 'Se desgastó', prioridad: 2.5,
         titulo: `${c.nombre} se desgastó`, que: `Las últimas 2 semanas quedaron debajo de su propio rango normal (KPI principal ${vx(pr.idxPropio)} su mediana, después de ${Math.round(pr.span / 7)} semanas al aire).`,
         hacer: 'Renovar las piezas o pausar una semana', porque: 'Contra su propia historia: dos semanas seguidas por debajo de su cuartil más bajo. La fatiga de contenido llega entre el día 12 y el 15.' });

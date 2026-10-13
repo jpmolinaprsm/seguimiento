@@ -21,11 +21,21 @@
 // Lo único agregado para poder correr en vivo (en la v0.2 todo era retrospectivo): el día 5 de una pieza se compara contra el
 // día 5 de las piezas del mismo canal × objetivo × formato que cumplieron su día 5 en los 60 días anteriores (8 o más; si no,
 // canal × objetivo). En la v0.2 se comparaba contra las del mismo mes de inicio, que en vivo todavía no existen.
+//
+// Decisiones de Juan Pablo del 01/10/2026 (v0.3, sección F):
+//   L1. Se da por comprobada con 50 piezas reales (en vivo) juzgadas que estaban en el peor cuartil al día 5, si el 75 % o más
+//       terminó en el peor cuartil y el 5 % o menos se recuperó (terminó arriba de la mediana).
+//   L2. Para el registro solo cuentan las piezas que al día 5 llevan $20.000 o más de gasto, o 5.000 impresiones o más. Las que no
+//       llegan igual se anotan (y las ya anotadas no se borran), pero quedan marcadas "fuera por el mínimo" y no entran en el acierto.
+//   L3. El resultado se juzga cuando la pieza lleva 3 días sin gasto (como ya estaba).
 const fs = require('fs');
 const path = require('path');
 
 const DIA_LECTURA = 5;
-const DIAS_CIERRE = 3;        // v0.2: terminada = sin gasto hace 3 días o más
+const DIAS_CIERRE = 3;        // v0.2 y L3 (01/10): terminada = sin gasto hace 3 días o más
+const MIN_GASTO_DIA5 = 20000; // L2 (01/10): al día 5, $20.000 o más de gasto...
+const MIN_IMP_DIA5 = 5000;    // ...o 5.000 impresiones o más
+const COMPROBADA = { piezas: 50, peorEnPeorPct: 75, recuperaPct: 5 }; // L1 (01/10)
 const MIN_DIAS_FINAL = 8;     // v0.2: campañas de 8+ días
 const MIN_IMP_FINAL = 10000;  // v0.2: MIN_IMPRESIONES
 const MAX_DIAS = 120;         // v0.2: las permanentes (120+ días) no entran
@@ -48,6 +58,23 @@ const masDias = (f, n) => new Date(new Date(f).getTime() + n * DIA).toISOString(
 const idDe = (s) => { let h = 0; for (const ch of String(s)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return 'lt-' + h.toString(36); };
 const r4 = (x) => (x == null ? null : Math.round(x * 10000) / 10000);
 const pct = (a, b) => (b ? Math.round((a / b) * 1000) / 10 : null);
+// L2: ¿la pieza llega al mínimo al día 5? Sirve para una pieza (s5) o para una predicción ya registrada (gasto_dia5, impresiones_dia5).
+const cumpleMinimo = (gasto, imp) => (Number(gasto) || 0) >= MIN_GASTO_DIA5 || (Number(imp) || 0) >= MIN_IMP_DIA5;
+const plata = (n) => '$' + Math.round(n).toLocaleString('es-AR');
+
+// L1: estado de la comprobación con las piezas en vivo que cuentan (acierto() sobre los pares que cumplen el mínimo).
+function comprobacion(a) {
+  const n = a.peor_cuartil_al_dia5 || 0, falta = Math.max(0, COMPROBADA.piezas - n);
+  const peor = a.peor_termina_en_peor_cuartil_pct, recupera = a.peor_termina_arriba_de_la_mediana_pct;
+  const cumpleAcierto = peor != null && peor >= COMPROBADA.peorEnPeorPct && recupera != null && recupera <= COMPROBADA.recuperaPct;
+  const comprobada = falta === 0 && cumpleAcierto;
+  const hoy = n ? `De ${n} en el peor cuartil al día 5, el ${String(peor).replace('.', ',')} % terminó en el peor y el ${String(recupera).replace('.', ',')} % se recuperó (terminó arriba de la mediana).` : 'Todavía no terminó ninguna pieza que estuviera en el peor cuartil al día 5.';
+  const texto = comprobada ? `Comprobada: ${hoy}`
+    : falta > 0 ? `Faltan ${falta} piezas juzgadas en el peor cuartil para darla por comprobada (hay ${n} de ${COMPROBADA.piezas}). ${hoy}`
+      : `No se da por comprobada: ya hay ${n} piezas juzgadas, pero hace falta que el ${COMPROBADA.peorEnPeorPct} % o más termine en el peor cuartil y el ${COMPROBADA.recuperaPct} % o menos se recupere. ${hoy}`;
+  return { criterio: `${COMPROBADA.piezas} piezas en vivo juzgadas en el peor cuartil al día 5; ${COMPROBADA.peorEnPeorPct} % o más terminan en el peor cuartil y ${COMPROBADA.recuperaPct} % o menos terminan arriba de la mediana`,
+    piezas_peor_juzgadas: n, faltan: falta, peor_termina_en_peor_cuartil_pct: peor, se_recupera_pct: recupera, comprobada, texto };
+}
 
 // ---------- piezas de Meta con su serie diaria ----------
 function armarPiezas(B) {
@@ -160,16 +187,19 @@ function retrospectiva(piezas, G, primerDato) {
     for (const p of cc) igual.push({ obj: p.obj, q5: percentilDe(p.malo5, cc.map((y) => y.malo5)), qF: percentilDe(p.maloF, cc.map((y) => y.maloF)) });
   }
   // b) como corre en vivo: día 5 contra la ventana de 60 días; final como en a)
-  const vivo = [];
+  const vivo = [], vivoMin = [];
   for (const p of validas) {
     if (p.malo5 == null) continue;
     const l = lecturaDia5(p, piezas), f = finalDe(p, G);
     if (l.q == null || f.estado !== 'juzgada') continue;
     vivo.push({ obj: p.obj, q5: l.q, qF: f.q });
+    if (cumpleMinimo(p.s5.g, p.s5.i)) vivoMin.push({ obj: p.obj, q5: l.q, qF: f.q });
   }
   return {
     como_la_v02: { total: acierto(igual), por_objetivo: porObjetivo(igual) },
     como_corre_en_vivo: { total: acierto(vivo), por_objetivo: porObjetivo(vivo) },
+    // c) como b), solo con las piezas que llegan al mínimo de L2 al día 5 (lo que cuenta para el registro desde el 01/10)
+    como_corre_en_vivo_con_minimo: { total: acierto(vivoMin), por_objetivo: porObjetivo(vivoMin) },
   };
 }
 
@@ -193,16 +223,24 @@ function observar(B, dir) {
     const l = lecturaDia5(p, piezas);
     nuevas.push({ id, registrado: new Date().toISOString(), datos_al: datosHasta, dia5: p.dia5, canal: p.canal, cliente: p.cliente, campana: p.comunicacion,
       cod: p.cod, contenido: p.contenido, objetivo: p.obj, formato: p.fmt, desde: p.desde, metrica: p.met.nombre, valor_dia5: r4(p.v5),
-      gasto_dia5: Math.round(p.s5.g), impresiones_dia5: p.s5.i, percentil_dia5: r4(l.q), cuartil_dia5: cuartilDe(l.q), comparables: l.n, referencia: l.nivel });
+      gasto_dia5: Math.round(p.s5.g), impresiones_dia5: p.s5.i, percentil_dia5: r4(l.q), cuartil_dia5: cuartilDe(l.q), comparables: l.n, referencia: l.nivel,
+      cuenta_para_registro: cumpleMinimo(p.s5.g, p.s5.i) });
   }
   if (nuevas.length) fs.appendFileSync(ARCH, nuevas.map((x) => JSON.stringify(x)).join('\n') + '\n');
 
   // 2. verificación de las predicciones registradas (se recalcula entera cada vez)
   const porId = new Map(piezas.map((p) => [idDe([p.canal, p.cliente, p.comunicacion, p.cod, p.desde].join('|')), p]));
   const todas = [...previas, ...nuevas];
+  // L2: las predicciones que no llegan al mínimo al día 5 no se borran; quedan marcadas y fuera del acierto. Se recalcula desde
+  // gasto_dia5 e impresiones_dia5 (las anotadas antes del 01/10 no traen la marca y el archivo no se reescribe).
   const estado = { 'sigue al aire': 0, 'no se juzga': 0, juzgada: 0, 'fuera de los datos': 0 };
+  const fueraMin = { predicciones: 0, peor: 0, medio: 0, mejor: 0, ids: [] };
   const pares = [], detalle = [];
   for (const x of todas) {
+    if (!cumpleMinimo(x.gasto_dia5, x.impresiones_dia5)) {
+      fueraMin.predicciones++; const cq = x.cuartil_dia5 || 'sin cuartil'; fueraMin[cq] = (fueraMin[cq] || 0) + 1; fueraMin.ids.push(x.id);
+      continue;
+    }
     const p = porId.get(x.id);
     const f = p ? finalDe(p, G) : { estado: 'fuera de los datos' };
     estado[f.estado]++;
@@ -216,18 +254,22 @@ function observar(B, dir) {
     regla: 'Lectura temprana al día 5 · en observación (no genera recomendaciones)',
     datos_al: datosHasta, generado: new Date().toISOString(),
     criterios: { dia_lectura: DIA_LECTURA, peor_cuartil: 'percentil > 75 %', mejor_cuartil: 'percentil ≤ 25 %', terminada: `${DIAS_CIERRE} días o más sin gasto`,
+      minimo_dia5: `para el registro solo cuentan las piezas que al día 5 llevan ${plata(MIN_GASTO_DIA5)} o más de gasto, o ${MIN_IMP_DIA5.toLocaleString('es-AR')} impresiones o más`,
+      comprobada_si: comprobacion({}).criterio,
       se_juzga_si: `duró ${MIN_DIAS_FINAL} días o más, menos de ${MAX_DIAS}, y tuvo ${MIN_IMP_FINAL} impresiones o más`,
       comparable_final: `canal × objetivo × formato × mes de inicio, ${MIN_COMPARABLES} o más terminadas`,
       comparable_dia5: `canal × objetivo × formato, día 5 en los ${VENTANA_REF} días anteriores, ${MIN_COMPARABLES} o más (si no, canal × objetivo)`,
       metrica: Object.fromEntries(Object.entries(METRICA).map(([o, m]) => [o, m.nombre])),
       evidencia_v02: 'Campañas de 8+ días, 2.791 casos: el 82 % de las que están en el peor cuartil al día 5 terminan en el peor; el 3 % termina arriba de la mediana; el 79 % de las del mejor cuartil terminan en el mejor.' },
-    en_vivo: { predicciones: todas.length, nuevas_hoy: nuevas.length, estado, acierto: acierto(pares), por_objetivo: porObjetivo(pares), casos: detalle },
+    en_vivo: { predicciones: todas.length, cuentan: todas.length - fueraMin.predicciones, fuera_por_minimo: fueraMin, nuevas_hoy: nuevas.length, estado,
+      acierto: acierto(pares), por_objetivo: porObjetivo(pares), casos: detalle },
+    comprobacion: comprobacion(acierto(pares)),
     retrospectiva: retrospectiva(piezas, G, primerDato),
   };
   fs.writeFileSync(path.join(dir, 'resumen.json'), JSON.stringify(resumen, null, 1));
   const a = resumen.en_vivo.acierto, rv = resumen.retrospectiva.como_corre_en_vivo.total;
-  console.log(`lectura temprana (observación): ${nuevas.length} predicciones nuevas, ${todas.length} registradas, ${a.piezas} ya juzgadas · hacia atrás: peor→peor ${rv.peor_termina_en_peor_cuartil_pct} % de ${rv.peor_cuartil_al_dia5}`);
+  console.log(`lectura temprana (observación): ${nuevas.length} predicciones nuevas, ${todas.length} registradas (${fueraMin.predicciones} fuera por el mínimo), ${a.piezas} ya juzgadas · faltan ${resumen.comprobacion.faltan} del peor cuartil para comprobarla · hacia atrás: peor→peor ${rv.peor_termina_en_peor_cuartil_pct} % de ${rv.peor_cuartil_al_dia5}`);
   return resumen;
 }
 
-module.exports = { observar, armarPiezas, lecturaDia5, gruposFinales, finalDe, retrospectiva, METRICA };
+module.exports = { observar, armarPiezas, lecturaDia5, gruposFinales, finalDe, retrospectiva, comprobacion, cumpleMinimo, METRICA, COMPROBADA, MIN_GASTO_DIA5, MIN_IMP_DIA5 };

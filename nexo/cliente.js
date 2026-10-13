@@ -17,6 +17,7 @@
 const { aSolicitud, revisarPermiso } = require('./solicitud');
 const { crearSimulador } = require('./simulador');
 const { crearRepositorioArchivo } = require('./repositorio');
+const { crearClienteAccesos } = require('./accesos');
 
 // Estados que agrega Seguimiento (no vienen de PAUTADOR): 'por_enviar' (guardada, todavía sin respuesta) y 'sin_respuesta' (se
 // intentó mandar y no contestó). Con cualquiera de los dos se puede reintentar.
@@ -36,11 +37,16 @@ function transporteRealPendiente() {
   return { modo: 'real', recibir: no, consultar: no };
 }
 
-// opciones: { env, repositorio, transporte, reloj, accesos }. En pruebas se pasan repositorio, transporte y accesos; si no, los de
-// siempre. accesos: función async (mail) → accesos de esa persona según PAUTADOR (ver revisarPermiso en nexo/solicitud.js). Hasta que
-// exista la consulta real no hay una por defecto, así que sin accesos no sale ninguna solicitud.
-function crearNexo({ env = process.env, repositorio, transporte, reloj = () => new Date(), accesos = null } = {}) {
+// opciones: { env, repositorio, transporte, reloj, accesos, conjuntosPorId }. En pruebas se pasan repositorio, transporte y accesos;
+// si no, los de siempre. accesos: función async (mail) → accesos de esa persona según PAUTADOR (ver revisarPermiso en
+// nexo/solicitud.js). Por defecto (1/10): en modo real con NEXO_CLAVE, la consulta a PAUTADOR con memoria de 5 minutos
+// (nexo/accesos.js; fetch se puede pasar para las pruebas). En simulado no hay una por defecto: se pasa la lista de mentira
+// (accesosDeLista) y, sin ella, no sale ninguna solicitud. El nexo devuelve la función en .accesos (con .vaciar() si es la real).
+// conjuntosPorId (N7, 1/10): las filas por id de conjunto que baja Extracción, o una función que las devuelve. Sirven para elegir el
+// conjunto cuando un nombre tiene varios ids; sin ellas, ese conjunto queda a mano. Si aceptar() recibe ctx.conjuntosPorId, vale ese.
+function crearNexo({ env = process.env, repositorio, transporte, reloj = () => new Date(), accesos = null, conjuntosPorId = null, fetch = undefined } = {}) {
   const modo = modoEfectivo(env);
+  if (accesos == null && modo === 'real') accesos = crearClienteAccesos({ env, ...(fetch ? { fetch } : {}) });
   const repo = repositorio || crearRepositorioArchivo({ reloj });
   const t = transporte || (modo === 'real' ? transporteRealPendiente() : crearSimulador({ reloj, accesos }));
   if (modo === 'simulado' && t.modo !== 'simulado') throw new Error('nexo: en modo simulado solo se acepta el simulador');
@@ -88,12 +94,13 @@ function crearNexo({ env = process.env, repositorio, transporte, reloj = () => n
   async function aceptar(rec, ctx = {}) {
     const permiso = await revisarPermiso(accesos, ctx.pedidaPor, ctx.proyecto, ctx.canal);
     if (!permiso.ok) return { tipo: 'sin_permiso', codigo: permiso.codigo, motivo: permiso.motivo };
-    const r = aSolicitud(rec, { ...ctx, ahora: ctx.ahora || reloj(), historial: repo.historial() });
+    const porId = ctx.conjuntosPorId != null ? ctx.conjuntosPorId : (typeof conjuntosPorId === 'function' ? conjuntosPorId() : conjuntosPorId);
+    const r = aSolicitud(rec, { ...ctx, ahora: ctx.ahora || reloj(), historial: repo.historial(), conjuntosPorId: porId });
     if (r.tipo !== 'solicitud') return r;
-    return { tipo: 'solicitud', solicitud: r.solicitud, manuales: r.manuales || [], envio: await enviar(r.solicitud, permiso) };
+    return { tipo: 'solicitud', solicitud: r.solicitud, manuales: r.manuales || [], elegidos: r.elegidos || [], envio: await enviar(r.solicitud, permiso) };
   }
 
-  return { modo, transporte: t, repositorio: repo, enviar, consultar, aceptar };
+  return { modo, transporte: t, repositorio: repo, accesos, enviar, consultar, aceptar };
 }
 
 module.exports = { crearNexo, modoEfectivo, ESTADOS_LOCALES, ESTADOS_SIN_USO };

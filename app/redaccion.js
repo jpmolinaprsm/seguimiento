@@ -5,20 +5,82 @@
 const fs = require('fs');
 const path = require('path');
 
+// "Cómo lo detectamos". Decisión de Juan Pablo del 01/10: en pantalla se compara solo contra lo normal del proyecto y contra la
+// misma campaña; la comparación con todos los gobiernos ya no es una luz, pero la regla Rinde por debajo la sigue usando y se
+// dice en simple. "en el proyecto" se cambia por el nombre del proyecto en cada tarjeta (reglaDe).
 const REGLA = {
-  'Rinde por debajo': 'KPI principal al menos 20 % peor que la referencia General y la del Proyecto, y que pagó $100 mil o más (o 5 % de su gasto) por encima de lo habitual del proyecto.',
-  'Se desgastó': 'Campaña de 30 días o más con 2 semanas seguidas bajo su propio cuartil bajo y el KPI principal 20 % o más abajo de su mediana.',
-  'Mejor momento': 'Campaña de 30 días o más con 2 semanas seguidas sobre su propio cuartil alto.',
-  'Presión acumulada alta': 'Más de 20 impresiones por habitante en el último mes de la campaña y KPI principal en baja (últimas 4 semanas contra las 8 anteriores).',
-  'Peor que la temporada anterior': 'Campaña estacional 20 % o más peor que la temporada anterior en las mismas semanas, costos ajustados por inflación.',
+  'Rinde por debajo': 'El resultado principal (lo que cuesta cada reacción, lo que cuesta mostrar el anuncio mil veces o cuántos hacen click, según el objetivo) está 20 % o más peor que lo normal en el proyecto y que lo normal en todos los gobiernos, y la campaña pagó $100 mil o más (o 5 % de su gasto) por encima de lo habitual en el proyecto.',
+  'Se desgastó': 'Campaña de 30 días o más cuyas 2 últimas semanas quedaron por debajo de su cuarto peor de semanas, con el resultado principal 20 % o más peor que lo normal en las semanas anteriores de esta campaña.',
+  'Mejor momento': 'Campaña de 30 días o más cuyas 2 últimas semanas quedaron por encima de su cuarto mejor de semanas.',
+  'Presión acumulada alta': 'Más de 20 impresiones por habitante en el último mes de la campaña y el resultado principal en baja (las últimas 4 semanas contra las 8 anteriores de esta campaña).',
+  'Peor que la temporada anterior': 'Campaña estacional cuyo resultado principal, en toda esta temporada, está 20 % o más peor que en la misma cantidad de semanas desde el inicio de la temporada pasada (o toda la pasada, si fue más corta), comparando objetivo por objetivo y formato por formato, con la plata de entonces llevada a valores de hoy. Es el mismo cálculo que la tarjeta "Esta temporada".',
   'Se comparte': '10 o más compartidas cada 100 reacciones (el 10 % más compartido del último año).', 'Genera conversación': '13 o más comentarios cada 100 reacciones (el 10 % más comentado del último año).',
   'Se abandona temprano': 'Video con 20 mil o más reproducciones cuya retención al 25 % está 20 % por debajo del cuartil bajo de su objetivo.',
   'Sumar Facebook Reels': 'Campaña de Alcance con menos de 5 % del gasto en Facebook Reels.', 'Placements débiles': 'Campaña de Interacción con 5 % o más del gasto en Instream, Threads o Explore.',
   'Rotar contenidos': 'Piezas activas que pasaron 15 días (video) o 12 (placa o carrusel).', 'Sin entrega': 'Campaña vigente sin gasto hace más de 2 días.',
 };
-function tituloDe(a, d, kpiL) {
+// ---- cómo se dice cada métrica (mismo vocabulario que las luces de app/logica.js, decisión del 01/10) ----
+// El índice x que calcula Referencias vale 1 si es igual a la referencia y más de 1 si es mejor. Costo: la referencia = propio × x.
+// Clicks cada 100 (tasa): la referencia = propio ÷ x.
+const fCosto = (v) => (v >= 10 ? '$' + Math.round(v).toLocaleString('es-AR') : '$' + v.toLocaleString('es-AR', { maximumFractionDigits: 2 }));
+const fCada100 = (v) => v.toLocaleString('es-AR', { minimumFractionDigits: v < 10 ? 1 : 0, maximumFractionDigits: v < 10 ? 2 : 0 });
+const METRICA = {
+  cr: { dice: (v) => `cada reacción costó ${fCosto(v)}`, cuesta: 'cada reacción cuesta', fem: true, ref: fCosto },
+  cpm: { dice: (v) => `mostrar el anuncio mil veces costó ${fCosto(v)}`, cuesta: 'mostrar el anuncio mil veces cuesta', fem: false, ref: fCosto },
+  ctr: { dice: (v) => `de cada 100 que lo vieron, ${fCada100(v)} hicieron click`, cuesta: 'hacen click', tasa: true, ref: (v) => `${fCada100(v)} de cada 100` },
+};
+// la métrica que comparan las reglas de campaña: Interacción costo por reacción, Tráfico clicks cada 100, el resto costo de mil impresiones
+const metDe = (obj) => (obj === 'Interacción' ? 'cr' : obj === 'Tráfico' ? 'ctr' : 'cpm');
+const valorDe = (met, m) => (!m ? null : met === 'cr' ? (m.r ? m.g / m.r : null) : met === 'ctr' ? (m.i ? m.c / m.i * 100 : null) : (m.i ? m.g / m.i * 1000 : null));
+const may = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+const pctDe = (met, x) => Math.round(Math.abs(METRICA[met].tasa ? x - 1 : 1 / x - 1) * 100);
+// "10 % más cara que lo normal en Santa Fe ($35)"; sin valor propio, sin el paréntesis
+function contra(met, x, v, que, ajuste = '') {
+  if (x == null || !isFinite(x) || x <= 0) return null;
+  const M = METRICA[met], a = M.fem ? 'a' : 'o', p = pctDe(met, x), mejor = x >= 1;
+  const ref = v != null && isFinite(v) && v > 0 ? (M.tasa ? v / x : v * x) : null;
+  const refT = ref != null ? ` (${M.ref(ref)}${ajuste})` : '';
+  if (p === 0) return `igual que ${que}${refT}`;
+  return `${p} % ${M.tasa ? (mejor ? 'más' : 'menos') : mejor ? `más barat${a}` : `más car${a}`} que ${que}${refT}`;
+}
+// "cada reacción cuesta 10 % más que lo normal en Santa Fe" (títulos y tendencias, sin valores)
+const cuestaMas = (met, x, que) => `${METRICA[met].cuesta} ${pctDe(met, x)} % ${METRICA[met].tasa ? (x >= 1 ? 'más' : 'menos') : x >= 1 ? 'menos' : 'más'} que ${que}`;
+// nombre del proyecto de la campaña ("Santa Fe"), para decir "lo normal en Santa Fe"
+function proyDe(d) {
+  const id = d && d.uid ? String(d.uid).split('|')[0] : null;
+  const P = id ? (require('../borrador/armar.js').PROYECTOS || []).find((x) => x.id === id) : null;
+  return P ? P.nombre : 'el proyecto';
+}
+// Problema escrito con la métrica, los valores y contra qué se compara. Si falta un dato, queda el texto de la regla.
+function problemaDe(a, d, Mk) {
+  if (!d) return a.que;
+  const met = metDe(d.obj), M = METRICA[met], proy = proyDe(d), pr = d.propia;
+  if (a.tipo === 'Rinde por debajo') {
+    const v = valorDe(met, d.m), cP = contra(met, d.idxP, v, `lo normal en ${proy}`), cG = contra(met, d.idxG, v, 'lo normal en todos los gobiernos');
+    if (v == null || !cP || !cG) return a.que;
+    const efi = d.efi ? `; ${d.efi.pctGastoRojo} % del gasto fue a anuncios en rojo (${d.efi.rojos} de ${d.efi.n})` : '';
+    return `${may(M.dice(v))}: ${cP} y ${cG}.${d.deMas != null ? ` Pagó ${Mk(d.deMas)} más que lo habitual en ${proy}${efi}.` : ''}`;
+  }
+  if (!pr) return a.que;
+  if (a.tipo === 'Se desgastó' || a.tipo === 'Mejor momento') {
+    const c = contra(met, pr.idxPropio, pr.valorAct, 'en las semanas anteriores de esta campaña');
+    if (!c || pr.valorAct == null) return a.que;
+    return `En las últimas dos semanas, ${M.dice(pr.valorAct)}: ${c}${a.tipo === 'Se desgastó' ? `, después de ${Math.round(pr.span / 7)} semanas al aire` : ''}.`;
+  }
+  // desde el 02/10, con temporada() de app/marcas.js (el cálculo de la tarjeta "Esta temporada"): a.temp lo deja reglas/meta.js
+  if (a.tipo === 'Peor que la temporada anterior' && a.temp) {
+    const t = a.temp, mt = METRICA[t.kpi] ? t.kpi : met, c = contra(mt, t.idx, t.valor, 'en la temporada pasada de esta campaña', METRICA[mt].tasa ? '' : ', en plata de hoy');
+    if (!c || t.valor == null) return a.que;
+    const f = t.desde, sem = `${t.semanas} ${t.semanas === 1 ? 'semana' : 'semanas'}`;
+    return `En toda esta temporada, ${METRICA[mt].dice(t.valor)}: ${c}. Se compara con ${t.toda ? `toda la temporada pasada (${sem})` : `las primeras ${sem} de la temporada pasada`}, que arrancó el ${f.slice(8, 10)}/${f.slice(5, 7)}/${f.slice(0, 4)}.`;
+  }
+  if (a.tipo === 'Presión acumulada alta' && pr.presion != null && pr.tendencia != null)
+    return `${Math.round(pr.presion)} impresiones por habitante en el último mes, y en las últimas 4 semanas ${cuestaMas(met, pr.tendencia, 'en las 8 semanas anteriores de esta campaña')}.`;
+  return a.que;
+}
+function tituloDe(a, d) {
   const c = a.camp || '';
-  if (a.tipo === 'Rinde por debajo' && d) { const ix = Math.min(d.idxG || 1, d.idxP || 1); return `${c}: ${kpiL} ${Math.round((1 / ix - 1) * 100)} % más caro que lo normal`; }
+  if (a.tipo === 'Rinde por debajo' && d && d.idxP) return `${c}: ${cuestaMas(metDe(d.obj), d.idxP, `lo normal en ${proyDe(d)}`)}`;
   if (a.tipo === 'Se desgastó') return `${c}: viene cayendo hace 2 semanas`;
   if (a.tipo === 'Mejor momento') return `${c}: está en su mejor momento`;
   if (a.tipo === 'Peor que la temporada anterior') return `${c}: peor que la temporada pasada`;
@@ -59,7 +121,12 @@ function revisarDe(a, d, conj) {
   }
   return L;
 }
-const fuenteDe = (a) => (/temporada|propia|desgast|mejor momento/i.test(a.tipo) ? 'Propia · historia de la campaña' : /Apagón|Pico|Costo por objetivo/.test(a.tipo) ? 'Todas las plataformas · mes anterior' : 'Generales · DataJunta último año');
+// contra qué se compara cada regla, dicho en simple (sin las etiquetas General, Proyecto ni Propia; decisión del 01/10)
+const fuenteDe = (a, d) => (a.tipo === 'Rinde por debajo' ? `Lo normal en ${proyDe(d)} y en todos los gobiernos · último año`
+  : /temporada/i.test(a.tipo) ? 'Esta campaña · la temporada pasada'
+    : /desgast|mejor momento|presión/i.test(a.tipo) ? 'Esta campaña · sus semanas anteriores'
+      : /Apagón|Pico|Costo por objetivo/.test(a.tipo) ? 'Todas las plataformas · mes anterior' : 'Todos los gobiernos · último año de DataJunta');
+const reglaDe = (a, d) => (a.como || (REGLA[a.tipo] || '').replace(/en el proyecto/g, d ? `en ${proyDe(d)}` : 'en el proyecto'));
 
 // Convierte las acciones que generan las reglas (pend) en las tarjetas que muestra la app.
 function redactar(pend, ctx) {
@@ -81,7 +148,6 @@ function redactar(pend, ctx) {
       conj = [...peor.slice(0, 4).map((k) => ({ ...k, rol: 'pausar' })), ...mejor.slice(0, 2).map((k) => ({ ...k, rol: 'reforzar' }))];
     } else conj = a.camp ? conjDe(a.camp, piezasA.map((p) => p.cod).filter(Boolean)).slice(0, 6) : [];
     const contenidos = piezasA.map((p) => ({ nombre: p.nombreL, rol: p.rol, pieza: { fb: p.fb || null, ig: p.ig || null, otro: p.otro || null, nombre: p.nombreL } }));
-    const kpiL = d ? kpiDe(d.m, d.obj, []).kpiL : '';
     const R = revisarDe(a, d, conj);
     // por PAUTADOR o a mano: lo decide recomendaciones.js (viaDe) según el contrato. Ya no hay "parte a mano" por activos no
     // automatizados: si la cuenta no está habilitada en PAUTADOR, PAUTADOR rechaza el pedido.
@@ -89,8 +155,8 @@ function redactar(pend, ctx) {
     return { id: a.id, tipo: a.tipo, camp: a.camp ? a.camp : (a.tipo === 'Apagón' || a.tipo === 'Pico' ? 'Activo ' + a.titulo.split(' casi ')[0].split(' gasta ')[0] : a.titulo.split(':')[0]), campId: a.camp || null,
       via, blockNote: via === 'blocked' ? `${d.voces.filter((v) => !v.auto).map((v) => v.k).join(', ')} no está automatizado: esa parte se hace a mano.` : '',
       plata: a.impacto && (a.tipo === 'Rinde por debajo' || a.tipo === 'Costo por objetivo') ? Mk(a.impacto) : '—',
-      title: tituloDe(a, d, kpiL), problema: a.que, solucion: solucionDe(a, d, conj, piezasA), afectado: { campana: a.camp || (a.campanas ? a.campanas.join(', ') : ''), contenidos, conjuntos: conj.map((k) => ({ ...k, corto: (k.rol ? (k.rol === 'pausar' ? 'Pausar · ' : 'Reforzar · ') : '') + k.corto })) }, revisar: R,
-      porque: a.porque, fuente: fuenteDe(a), regla: a.como || REGLA[a.tipo] || '' };
+      title: tituloDe(a, d), problema: problemaDe(a, d, Mk), solucion: solucionDe(a, d, conj, piezasA), afectado: { campana: a.camp || (a.campanas ? a.campanas.join(', ') : ''), contenidos, conjuntos: conj.map((k) => ({ ...k, corto: (k.rol ? (k.rol === 'pausar' ? 'Pausar · ' : 'Reforzar · ') : '') + k.corto })) }, revisar: R,
+      porque: a.porque, fuente: fuenteDe(a, d), regla: reglaDe(a, d) };
   });
 }
 

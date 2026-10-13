@@ -1,10 +1,9 @@
 // Resumen de la tabla eficacia_anuncios por canal y cliente (solo lectura).
-const path = require('path');
-const { google } = require(path.join(__dirname, '..', '..', 'pautador', 'node_modules', 'googleapis'));
-const CLAVE = path.resolve(__dirname, '..', '..', 'GCP', 'prsm-bq-media-6a154f90fdb5.json');
+const { google } = require('googleapis');
+const { opcionesAuth } = require('../datos/credenciales'); // BQ_CREDENTIALS_JSON o, en local, el archivo de GCP/
 const T = [['prsm-bq-media', 'us-central1'], ['bq-project-450514', 'us']];
 (async () => {
-  const auth = new google.auth.GoogleAuth({ keyFile: CLAVE, scopes: ['https://www.googleapis.com/auth/bigquery'] });
+  const auth = new google.auth.GoogleAuth(opcionesAuth('bq', ['https://www.googleapis.com/auth/bigquery']));
   const bq = google.bigquery({ version: 'v2', auth: await auth.getClient() });
   for (const [p, loc] of T) {
     const q = `SELECT Cliente, COUNT(*) anuncios, COUNTIF(Es_Semaforo) semaforo,

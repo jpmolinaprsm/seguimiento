@@ -14,3 +14,10 @@ presupuestos/resumen-activos/
 GCP/
 node_modules/
 *.log
+# Copia estática para publicar en claude.ai (se rearma con node app/publicar.js)
+app/publicar/
+# Salidas para otros módulos (se rearman con node salidas/rendimiento-piezas.js)
+salidas/*.json
+# Serie diaria por pieza (pedido 058; se rearma con node salidas/serie-diaria-piezas.js)
+salidas/serie-diaria/
+salidas/*.csv

@@ -38,4 +38,4 @@ http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
     res.end(html);
   });
-}).listen(PUERTO, () => console.log(`Seguimiento y Optimización → http://localhost:${PUERTO}  (Ctrl+C para cortar)`));
+}).listen(PUERTO, () => console.log(`Tablero de optimización → http://localhost:${PUERTO}  (Ctrl+C para cortar)`));

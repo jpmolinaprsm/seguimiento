@@ -2,10 +2,8 @@
 // como consulta programada de BigQuery Data Transfer (copia del patrón de "Refresco datajunta_meta_90d", que NO se toca: la usa PAUTADOR).
 // Pedido del usuario 2026-09-28. Idempotente: si ya existe una con el mismo nombre, no crea otra.
 // Uso: node crear_180d.js [--correr]   (--correr dispara la primera corrida al crearlas)
-const path = require('path');
-const PAUTADOR = path.resolve(__dirname, '..', '..', 'pautador');
-const { google } = require(path.join(PAUTADOR, 'node_modules', 'googleapis'));
-const CLAVE = path.resolve(__dirname, '..', '..', 'GCP', 'prsm-bq-media-6a154f90fdb5.json');
+const { google } = require('googleapis');
+const { opcionesAuth } = require('../datos/credenciales'); // BQ_CREDENTIALS_JSON o, en local, el archivo de GCP/
 
 const CANALES = [
   { nombre: 'Oficial', loc: 'us-central1', origen: 'prsm-bq-media.prsm_media_tableros.DataJunta', dest: 'prsm-bq-media.automatizado.datajunta_meta_180d' },
@@ -18,7 +16,7 @@ AS SELECT * FROM \`${c.origen}\`
 WHERE Plataforma = 'META' AND Fecha >= DATE_SUB(CURRENT_DATE('America/Argentina/Buenos_Aires'), INTERVAL 180 DAY)`;
 
 (async () => {
-  const auth = new google.auth.GoogleAuth({ keyFile: CLAVE, scopes: ['https://www.googleapis.com/auth/cloud-platform'] });
+  const auth = new google.auth.GoogleAuth(opcionesAuth('bq', ['https://www.googleapis.com/auth/cloud-platform']));
   const cli = await auth.getClient();
   const dt = google.bigquerydatatransfer({ version: 'v1', auth: cli });
   const bq = google.bigquery({ version: 'v2', auth: cli });

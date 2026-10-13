@@ -22,7 +22,7 @@ const DIA = 864e5;
 const ESTADO = { recibida: 'recibida', rechazada_validacion: 'rechazada por validación', rechazada_persona: 'rechazada por una persona', pendiente_aprobacion: 'pendiente de aprobación', aprobada: 'aprobada', aplicada: 'aplicada', fallo: 'falló' };
 const estadoTxt = (e) => ESTADO[e] || String(e || 'sin estado').replace(/_/g, ' ');
 
-// Umbrales del informe (solo deciden qué se PROPONE en la sesión, no qué recomienda la app). Provisorios: los confirma Juan Pablo.
+// Umbrales del informe (solo deciden qué se PROPONE en la sesión, no qué recomienda la app). Definitivos desde el 01/10 (F3, v0.3 E7).
 const SILENCIAR_DESCARTES = 3;      // E4: 3 descartes "Decisión del cliente" de la misma regla en el mismo proyecto
 const MIN_DECISIONES = 5;           // mínimo de decisiones de una regla para sacar conclusiones
 const PROPORCION_ALERTA = 0.5;      // la mitad o más descartadas por "No aplica" / "El dato está mal", o "¿sirve? No"
@@ -179,11 +179,16 @@ function armarInforme({ repo, hasta }) {
   let secLt = vacio('Sin datos de la lectura temprana.');
   if (lt && lt.en_vivo) {
     const a = lt.en_vivo.acierto || {}, rv = lt.retrospectiva && lt.retrospectiva.como_corre_en_vivo && lt.retrospectiva.como_corre_en_vivo.total;
-    datos.lectura_temprana = { datos_al: lt.datos_al, en_vivo: lt.en_vivo.estado, acierto: a, retrospectiva: rv || null };
-    secLt = `Datos al ${dmy(lt.datos_al)}. Piezas registradas al día 5: ${lt.en_vivo.predicciones} (sigue al aire ${lt.en_vivo.estado['sigue al aire'] || 0}, ya juzgadas ${lt.en_vivo.estado.juzgada || 0}, no se juzgan ${lt.en_vivo.estado['no se juzga'] || 0}).\n\n` +
+    const fm = lt.en_vivo.fuera_por_minimo, comp = lt.comprobacion;
+    datos.lectura_temprana = { datos_al: lt.datos_al, en_vivo: lt.en_vivo.estado, fuera_por_minimo: fm ? fm.predicciones : null, acierto: a, comprobacion: comp || null, retrospectiva: rv || null };
+    secLt = `Datos al ${dmy(lt.datos_al)}. Piezas registradas al día 5: ${lt.en_vivo.predicciones}` +
+      (fm ? `; ${fm.predicciones} quedan afuera porque al día 5 no llegaban a $20.000 de gasto ni a 5.000 impresiones. De las que cuentan, ` : ' (') +
+      `sigue al aire ${lt.en_vivo.estado['sigue al aire'] || 0}, ya juzgadas ${lt.en_vivo.estado.juzgada || 0}, no se juzgan ${lt.en_vivo.estado['no se juzga'] || 0}${fm ? '.' : ').'}\n\n` +
+      (comp ? `- **Para darla por comprobada:** ${comp.texto}\n` : '') +
       `- En vivo, entre las piezas que ya terminaron: ${a.peor_termina_en_peor_cuartil_pct == null ? 'de las que estaban en el peor cuartil al día 5 todavía no terminó ninguna' : `de ${a.peor_cuartil_al_dia5} en el peor cuartil al día 5, el ${dec(a.peor_termina_en_peor_cuartil_pct)} % terminó en el peor`}; ${a.mejor_termina_en_mejor_cuartil_pct == null ? 'de las del mejor cuartil todavía no terminó ninguna' : `de ${a.mejor_cuartil_al_dia5} en el mejor cuartil, el ${dec(a.mejor_termina_en_mejor_cuartil_pct)} % terminó en el mejor (todavía son pocas para sacar conclusiones)`}.\n` +
       (rv ? `- Hacia atrás (180 días, como corre en vivo): ${dec(rv.peor_termina_en_peor_cuartil_pct)} % de acierto en el peor cuartil (${rv.peor_cuartil_al_dia5.toLocaleString('es-AR')} piezas) y ${dec(rv.mejor_termina_en_mejor_cuartil_pct)} % en el mejor (${rv.mejor_cuartil_al_dia5.toLocaleString('es-AR')}).\n` : '') +
-      `- Sigue en observación: no genera recomendaciones. Falta decidir con qué acierto se da por comprobada y si hace falta un gasto mínimo al día 5.`;
+      (comp && comp.comprobada ? `- Ya cumple lo que se pidió para darla por comprobada. Sigue en observación hasta que Juan Pablo decida en esta sesión si pasa a generar recomendaciones.`
+        : `- Sigue en observación: no genera recomendaciones.`);
   }
   S.push(`## 7. Lectura temprana al día 5 (en observación)\n\n${secLt}`);
 
