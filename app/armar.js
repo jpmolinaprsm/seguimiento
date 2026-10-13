@@ -19,7 +19,8 @@ const { DATA, fuente, BG, BP, valor, candG, candP, eficaciaPor, efi, luz, r2, pe
   hashId, dmy, MESES_TXT, RED_NOMBRE, OBJ_PLAT, AUTOMATIZADOS, TERMINAN, datosHasta, MES, plataformasPor, INFLACION_MES } = B;
 
 const DISENO = path.join(__dirname, '..', 'Seguimiento y Optimizacion.html');
-const SALIDA = path.join(__dirname, 'Seguimiento y Optimizacion.html');
+// SEGUIMIENTO_SALIDA: ruta donde escribir el HTML armado (lo usa actualizar.js para armar en un archivo aparte y cambiarlo de forma atómica).
+const SALIDA = process.env.SEGUIMIENTO_SALIDA ? path.resolve(process.env.SEGUIMIENTO_SALIDA) : path.join(__dirname, 'Seguimiento y Optimizacion.html');
 
 // ---------- plataformas ----------
 const CODIGO = { facebook: 'FB', instagram: 'IG', threads: 'TH', whatsapp: 'WA', 'Tik Tok': 'TT', DV360: 'DV', YouTube: 'YT', 'Display Network': 'GG', 'Search Network': 'GG', Gmail: 'GG', Discover: 'GG', SMS: 'SMS' };
@@ -921,7 +922,8 @@ for (const [desde, hasta] of parches) {
 const salida = html.replace(m[0], () => `<script type="__bundler/template">${JSON.stringify(template).replace(/<\//g, '<\\/')}</script>`).replace('<title>Bundled Page</title>', '<title>Tablero de optimización</title>');
 fs.writeFileSync(SALIDA, salida);
 // repositorio de recomendaciones (lo guarda redaccion.js)
-redaccion.guardarRepositorio(proyectos, datosHasta);
+// en Railway guarda en la base (devuelve una promesa); en local, en archivos. Si falla, el armado termina con error.
+Promise.resolve(redaccion.guardarRepositorio(proyectos, datosHasta)).catch((e) => { console.error('repositorio: no se pudo guardar:', e.message); process.exitCode = 1; });
 for (const p of proyectos) for (const [c, b] of Object.entries(p.canales)) console.log(`${p.nombre.padEnd(20)} ${c.padEnd(11)} campañas ${Object.keys(b.campanas).length} · períodos ${Object.keys(b.periodos).length} · activos ${b.activos.length} · acciones ${b.acciones.length} (con conjuntos ${b.acciones.filter((a) => a.afectado.conjuntos.length).length})`);
 console.log(`reglas vigentes ${REGLAS.reglas.length} · en observación ${REGLAS.observacion.length} (${REGLAS.observacion.map((o) => o.nombre).join(', ')})`);
 console.log(`alcance de Meta (${ALCM.fecha}): ${ALCM.estado}${ALCM.motivo ? ' · ' + ALCM.motivo : ''} · filas válidas ${Object.values(ALCM.niveles || {}).reduce((s, x) => s + x.length, 0)} · descartadas ${(ALCM.descartadas || []).length}`);

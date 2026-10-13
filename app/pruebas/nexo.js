@@ -363,13 +363,14 @@ async function main() {
   ok(N.modoEfectivo({ NEXO_MODO: 'real' }) === 'simulado', 'NEXO_MODO=real sin NEXO_URL: simulado');
   ok(N.modoEfectivo({ NEXO_URL: 'https://pautador.ejemplo.invalid' }) === 'simulado', 'con NEXO_URL pero sin NEXO_MODO=real: simulado');
   ok(N.modoEfectivo({ NEXO_MODO: 'real', NEXO_URL: '   ' }) === 'simulado', 'NEXO_URL vacía: simulado');
+  ok(N.modoEfectivo({ NEXO_MODO: 'real', NEXO_URL: 'https://pautador.ejemplo.invalid', NEXO_CLAVE: 'x' }) === 'simulado', 'desde local, NEXO_MODO=real con URL y clave: sigue simulado');
   let tiroSim = false; try { N.crearNexo({ env: {}, repositorio: repoNuevo(), transporte: { modo: 'real', recibir: async () => ({}) } }); } catch (e) { tiroSim = true; }
   ok(tiroSim, 'en modo simulado no se acepta otro transporte que el simulador');
-  // aun con las dos variables, el envío real todavía no existe: se niega sin abrir conexiones
-  const nexoR = N.crearNexo({ env: { NEXO_MODO: 'real', NEXO_URL: 'https://pautador.ejemplo.invalid' }, repositorio: repoNuevo(), reloj: () => AHORA, accesos: ACCESOS });
-  ok(nexoR.modo === 'real', 'con NEXO_MODO=real y NEXO_URL el modo es real');
+  // desde local, aun con las variables, el nexo es simulado y no abre conexiones
+  const nexoR = N.crearNexo({ env: { NEXO_MODO: 'real', NEXO_URL: 'https://pautador.ejemplo.invalid', NEXO_CLAVE: 'x' }, repositorio: repoNuevo(), reloj: () => AHORA, accesos: ACCESOS });
+  ok(nexoR.modo === 'simulado' && nexoR.transporte.modo === 'simulado', 'desde local, con NEXO_MODO=real el modo sigue siendo simulado');
   const fr = await nexoR.enviar(s);
-  ok(fr.estado === 'sin_respuesta' && !fr.enviada && /todavía no está construido/.test(fr.error), 'el envío real se niega (todavía no existe)');
+  ok(fr.enviada === true && fr.estado !== 'sin_respuesta', 'desde local el pedido va al simulador');
   ok(conexiones === 0, `no se abrió ninguna conexión de red (se intentaron ${conexiones})`);
 
   // ---------- 7. Alcance: dato de hoy o "sin dato de hoy" (meta_alcance_diario + meta_alcance_corridas) ----------
@@ -1093,20 +1094,142 @@ async function main() {
 
     // conectado a crearNexo: en modo real es la función por defecto
     const fn = fetchFalso(deLista);
-    const nexoReal = N.crearNexo({ env: ENV_REAL, repositorio: repoNuevo(), reloj: () => AHORA, fetch: fn });
+    const ENV_RW = { ...ENV_REAL, RAILWAY_ENVIRONMENT: 'production', NODE_ENV: 'production', NEXO_ENVIO: '1' };
+    const fn2 = fetchFalso((url, init) => (url.endsWith('/api/servicio/accesos') ? deLista(url, init) : resp(200, { id: JSON.parse(init.body).id, estado: 'aplicada', valores: [] })));
+    const nexoReal = N.crearNexo({ env: ENV_RW, repositorio: repoNuevo(), reloj: () => AHORA, fetch: fn2 });
     ok(nexoReal.modo === 'real' && typeof nexoReal.accesos === 'function' && nexoReal.accesos.modo === 'real', 'nexo real: la consulta a PAUTADOR es la función de accesos por defecto');
     const rnPm = await nexoReal.aceptar(tarjeta('Se comparte', [conj(C_A, ['900000000000001'])], { id: 'acc-pm' }), { ...CTX, pedidaPor: 'pm@ejemplo.invalid' });
-    ok(rnPm.tipo === 'sin_permiso' && rnPm.codigo === 'rol_sin_permiso' && fn.llamadas.length === 1, 'nexo real: un PM no pide (lo dice la consulta)');
+    ok(rnPm.tipo === 'sin_permiso' && rnPm.codigo === 'rol_sin_permiso' && fn2.llamadas.length === 1, 'nexo real: un PM no pide (lo dice la consulta)');
     const rnOk = await nexoReal.aceptar(tarjeta('Se comparte', [conj(C_A, ['900000000000001'])], { id: 'acc-impl' }), CTX);
-    ok(rnOk.tipo === 'solicitud' && rnOk.envio.estado === 'sin_respuesta' && fn.llamadas.length === 2, 'nexo real: el implementador pasa el permiso (el envío real sigue sin construir)');
+    ok(rnOk.tipo === 'solicitud' && rnOk.envio.estado === 'aplicada' && fn2.llamadas.length === 3, 'nexo real: el implementador pasa el permiso y el pedido sale a PAUTADOR');
     await nexoReal.enviar(rnOk.solicitud);
-    ok(fn.llamadas.length === 2, 'nexo real: el reintento no vuelve a preguntar dentro de los 5 minutos');
-    ok(fn.llamadas.every((x) => x.url === 'https://pautador.ejemplo.invalid/api/servicio/accesos'), 'nexo real: solo llama a la ruta de accesos');
+    ok(fn2.llamadas.length === 3, 'nexo real: reenviar un pedido ya aplicado no vuelve a llamar a nadie');
+    ok(fn2.llamadas.every((x) => /\/api\/servicio\/(accesos|cambios)$/.test(x.url)), 'nexo real: solo llama a las rutas de accesos y de cambios');
     const nexoAcc = N.crearNexo({ env: ENV_REAL, repositorio: repoNuevo(), accesos: ACCESOS });
     ok(nexoAcc.accesos === ACCESOS, 'nexo real: si se pasa una función de accesos, se usa esa');
   } finally { soltar(); }
   ok(!salida.some((l) => l.includes(CLAVE)), 'la clave nunca aparece en lo que se escribe en pantalla');
   ok(conexiones === 0, `consulta de accesos: ninguna conexión de red (se intentaron ${conexiones})`);
+
+
+  // ---------- 7e. Transporte real de los pedidos de cambio: candados, idempotencia, reintento corto, apagado ----------
+  {
+    const CL = 'clave-de-prueba-' + require('crypto').randomBytes(12).toString('hex');
+    const BASE = { NEXO_MODO: 'real', NEXO_URL: 'https://pautador.ejemplo.invalid', NEXO_CLAVE: CL };
+    const RW = { ...BASE, RAILWAY_ENVIRONMENT: 'production', NODE_ENV: 'production' };
+    // candados: sacando cualquiera, simulado
+    ok(N.modoEfectivo(RW) === 'real', 'candados: con todos, real');
+    ok(N.modoEfectivo({ ...RW, NEXO_MODO: 'simulado' }) === 'simulado', 'candados: sin NEXO_MODO=real, simulado');
+    ok(N.modoEfectivo({ ...RW, NEXO_URL: '' }) === 'simulado', 'candados: sin NEXO_URL, simulado');
+    ok(N.modoEfectivo({ ...RW, NEXO_CLAVE: '' }) === 'simulado', 'candados: sin NEXO_CLAVE, simulado');
+    ok(N.modoEfectivo({ ...RW, RAILWAY_ENVIRONMENT: '' }) === 'simulado', 'candados: fuera de Railway, simulado');
+    ok(N.modoEfectivo({ ...RW, NODE_ENV: 'development' }) === 'simulado' && N.modoEfectivo({ ...RW, NODE_ENV: undefined }) === 'simulado', 'candados: sin NODE_ENV=production, simulado');
+    ok(N.modoEfectivo({ ...RW, RAILWAY_ENVIRONMENT: '', RAILWAY_ENVIRONMENT_NAME: 'production' }) === 'real', 'candados: también vale RAILWAY_ENVIRONMENT_NAME');
+    let tiro = null; try { N.crearTransporteReal({ env: { ...RW, RAILWAY_ENVIRONMENT: '' }, fetch: async () => { throw new Error('no debería llamarse'); } }); } catch (e) { tiro = e.message; }
+    ok(tiro && /correr en Railway/.test(tiro) && !tiro.includes(CL), 'el transporte real se niega fuera de Railway y no muestra la clave');
+    tiro = null; try { N.crearTransporteReal({ env: { ...RW, NEXO_URL: 'http://pautador.ejemplo.invalid' }, fetch: async () => ({}) }); } catch (e) { tiro = e.message; }
+    ok(tiro && /https/.test(tiro), 'el transporte real pide https');
+
+    const resp2 = (status, cuerpo) => ({ status, json: async () => cuerpo });
+    const SOL = { id: 'sol-reintento-1', recomendacion: 'r', pedida_por: 'impl@ejemplo.invalid', proyecto: 'Santa Fe', canal: 'Oficial', accion: 'Pausar', objetivos: [] };
+    const sinEsperar = async () => {};
+    // llamada bien armada, sin reintento si hubo respuesta
+    let llamadas = [];
+    let tr = N.crearTransporteReal({ env: RW, reintentosMs: [1, 1], dormir: sinEsperar, fetch: async (url, init) => { llamadas.push({ url, init }); return resp2(200, { id: SOL.id, estado: 'aplicada', etapa: 'terminada', valores: [{ campo: 'estado', antes: 'ACTIVE', despues: 'PAUSED' }] }); } });
+    const ra = await tr.recibir(SOL);
+    ok(ra.estado === 'aplicada' && ra.valores.length === 1 && llamadas.length === 1, 'recibir: 200 devuelve el estado con los valores');
+    ok(llamadas[0].url === 'https://pautador.ejemplo.invalid/api/servicio/cambios' && llamadas[0].init.method === 'POST' && llamadas[0].init.headers['x-pautador-servicio'] === CL && llamadas[0].init.redirect === 'error', 'recibir: POST a /cambios con la clave en el encabezado, sin seguir redirecciones');
+    ok(JSON.parse(llamadas[0].init.body).id === SOL.id && !llamadas[0].init.body.includes(CL), 'recibir: el cuerpo es la solicitud y no lleva la clave');
+    await tr.consultar(SOL.id);
+    ok(llamadas[1].url.endsWith('/api/servicio/cambios/estado') && JSON.parse(llamadas[1].init.body).id === SOL.id, 'consultar: POST a /cambios/estado con el id');
+    // 202, 404, códigos
+    tr = N.crearTransporteReal({ env: RW, reintentosMs: [1, 1], dormir: sinEsperar, fetch: async () => resp2(202, { id: SOL.id, estado: 'recibida', etapa: 'en_cola' }) });
+    ok((await tr.recibir(SOL)).estado === 'recibida', '202: queda recibida (se consulta después)');
+    tr = N.crearTransporteReal({ env: RW, reintentosMs: [1, 1], dormir: sinEsperar, fetch: async () => resp2(404, { id: SOL.id, estado: null, motivo: 'no hay' }) });
+    ok((await tr.consultar(SOL.id)).estado === null, '404: sin estado');
+    for (const st of [400, 401, 429, 503, 500]) {
+      let n = 0; tr = N.crearTransporteReal({ env: RW, reintentosMs: [1, 1], dormir: sinEsperar, fetch: async () => { n++; return resp2(st, {}); } });
+      let m = null; try { await tr.recibir(SOL); } catch (e) { m = e.message; }
+      ok(m && m.includes(String(st)) && n === 1 && !m.includes(CL), `${st}: error claro, una sola llamada (no se reintenta) y sin la clave`);
+    }
+    // reintento corto solo ante cortes de red: mismo id, dos reintentos, después se rinde
+    let intentos = 0; const cuerpos = [];
+    tr = N.crearTransporteReal({ env: RW, reintentosMs: [1, 1], dormir: sinEsperar, fetch: async (u, init) => { intentos++; cuerpos.push(init.body); if (intentos < 3) throw new Error('ECONNRESET'); return resp2(200, { id: SOL.id, estado: 'aplicada', valores: [] }); } });
+    ok((await tr.recibir(SOL)).estado === 'aplicada' && intentos === 3 && new Set(cuerpos).size === 1, 'corte de red: reintenta hasta 2 veces con el MISMO cuerpo e id');
+    intentos = 0; tr = N.crearTransporteReal({ env: RW, reintentosMs: [1, 1], dormir: sinEsperar, fetch: async () => { intentos++; throw new Error('ECONNRESET'); } });
+    let sm = null; try { await tr.recibir(SOL); } catch (e) { sm = e.message; }
+    ok(intentos === 3 && /no se pudo conectar/.test(sm), 'corte de red persistente: 3 intentos en total y se informa');
+    // respuesta con formato raro o de otro id
+    tr = N.crearTransporteReal({ env: RW, reintentosMs: [], fetch: async () => resp2(200, { id: 'otro', estado: 'aplicada' }) });
+    sm = null; try { await tr.recibir(SOL); } catch (e) { sm = e.message; }
+    ok(sm && /formato/.test(sm), 'respuesta de otro id: no se usa');
+
+    // en el nexo: idempotencia y registro
+    const hechas = [];
+    const fetchN = async (url, init) => {
+      const b = JSON.parse(init.body);
+      if (url.endsWith('/accesos')) return resp2(200, JSON.parse(JSON.stringify(LISTA.find((x) => x.email === b.email) || { email: b.email, nombre: '', habilitado: false, rol: null, administradorGlobal: false, superadministrador: false, accesos: [] })));
+      hechas.push(url.split('/api/servicio')[1] + ':' + b.id);
+      return resp2(200, { id: b.id, estado: 'aplicada', valores: [] });
+    };
+    const repoR = repoNuevo();
+    const nexoE = N.crearNexo({ env: { ...RW, NEXO_ENVIO: '1' }, repositorio: repoR, reloj: () => AHORA, fetch: fetchN });
+    ok(nexoE.modo === 'real' && nexoE.envioHabilitado === true, 'nexo en Railway con NEXO_ENVIO=1: real y con envío');
+    const e1 = await nexoE.aceptar(tarjeta('Se comparte', [conj(C_A, ['900000000000001'])], { id: 'real-1' }), CTX);
+    ok(e1.tipo === 'solicitud' && e1.envio.estado === 'aplicada' && repoR.leerSolicitud(e1.solicitud.id) && repoR.ultimoEstado(e1.solicitud.id).modo === 'real', 'pedido real: queda registrado con su estado y modo real');
+    await Promise.all([nexoE.enviar(e1.solicitud), nexoE.enviar(e1.solicitud)]);
+    ok(hechas.length === 1, 'idempotencia: el mismo pedido nunca se manda dos veces (aunque se toque dos veces)');
+    // dos toques simultáneos de un pedido nuevo: una sola llamada
+    const rec2 = tarjeta('Se comparte', [conj(C_A, ['900000000000002'])], { id: 'real-2' });
+    const sol2 = N.aSolicitud(rec2, { ...CTX, ahora: AHORA, historial: [] });
+    if (sol2.tipo === 'solicitud') {
+      const antes = hechas.length;
+      await Promise.all([nexoE.enviar(sol2.solicitud), nexoE.enviar(sol2.solicitud)]);
+      ok(hechas.length === antes + 1, 'dos toques simultáneos del mismo pedido: una sola llamada a PAUTADOR');
+    }
+    // corte: queda sin_respuesta y se reenvía con el mismo id
+    let cortar = true; const idsVistos = [];
+    const fetchC = async (url, init) => { if (url.endsWith('/accesos')) return fetchN(url, init); idsVistos.push(JSON.parse(init.body).id); if (cortar) throw new Error('ECONNRESET'); return resp2(200, { id: JSON.parse(init.body).id, estado: 'aplicada', valores: [] }); };
+    const nexoC2 = N.crearNexo({ env: { ...RW, NEXO_ENVIO: '1' }, repositorio: repoNuevo(), reloj: () => AHORA, fetch: fetchC, transporte: N.crearTransporteReal({ env: RW, fetch: fetchC, reintentosMs: [1], dormir: sinEsperar }) });
+    const c1 = await nexoC2.aceptar(tarjeta('Se comparte', [conj(C_A, ['900000000000001'])], { id: 'real-3' }), CTX);
+    ok(c1.envio.estado === 'sin_respuesta' && c1.envio.enviada === false, 'sin conexión: queda guardado como sin_respuesta');
+    cortar = false;
+    const c2 = await nexoC2.enviar(c1.solicitud);
+    ok(c2.estado === 'aplicada' && new Set(idsVistos).size === 1, 'al volver la conexión se reenvía con el mismo id');
+
+    // registro con promesas (como el de la base): el nexo anda igual y el id único frena al duplicado
+    const asincrono = (r) => Object.fromEntries(['guardarSolicitud', 'guardarEstado', 'leerSolicitud', 'leerEstados', 'ultimoEstado', 'historial', 'porRecomendacion'].map((m) => [m, async (...a) => { await new Promise((x) => setImmediate(x)); return r[m](...a); }]));
+    const repoAs = asincrono(repoNuevo());
+    const antesAs = hechas.length;
+    const nexoAs = N.crearNexo({ env: { ...RW, NEXO_ENVIO: '1' }, repositorio: repoAs, reloj: () => AHORA, fetch: fetchN });
+    const as1 = await nexoAs.aceptar(tarjeta('Se comparte', [conj(C_A, ['900000000000001'])], { id: 'real-as' }), CTX);
+    ok(as1.tipo === 'solicitud' && as1.envio.estado === 'aplicada' && (await repoAs.ultimoEstado(as1.solicitud.id)).estado === 'aplicada' && hechas.length === antesAs + 1, 'registro con promesas: el pedido se guarda y sale');
+    await nexoAs.enviar(as1.solicitud);
+    ok(hechas.length === antesAs + 1, 'registro con promesas: el mismo id no sale dos veces');
+    // otra copia del servidor guardó el mismo id un instante antes (guardarSolicitud → false): no se manda
+    const repoCarrera = asincrono(repoNuevo());
+    const solCarrera = N.aSolicitud(tarjeta('Se comparte', [conj(C_A, ['900000000000002'])], { id: 'real-carrera' }), { ...CTX, ahora: AHORA, historial: [] });
+    if (solCarrera.tipo === 'solicitud') {
+      const original = repoCarrera.leerSolicitud; let primera = true;
+      repoCarrera.leerSolicitud = async (id) => { if (primera) { primera = false; return null; } return original(id); };   // la ve vacía y justo la guarda la otra copia
+      await repoCarrera.guardarSolicitud(solCarrera.solicitud); await repoCarrera.guardarEstado(solCarrera.solicitud.id, { estado: 'aplicada', modo: 'real' });
+      const nexoCa = N.crearNexo({ env: { ...RW, NEXO_ENVIO: '1' }, repositorio: repoCarrera, reloj: () => AHORA, fetch: fetchN });
+      const antesCa = hechas.length;
+      const rca = await nexoCa.enviar(solCarrera.solicitud, { ok: true });
+      ok(rca.duplicada === true && rca.enviada === false && hechas.length === antesCa, 'id repetido en la base: no se manda de nuevo');
+    }
+    // envío apagado en Railway: solo ver, no sale nada y no se guarda
+    let salio = 0; const fetchA = async (url, init) => { if (url.endsWith('/accesos')) return fetchN(url, init); salio++; return resp2(200, { id: JSON.parse(init.body).id, estado: 'aplicada' }); };
+    const repoA = repoNuevo();
+    const nexoA = N.crearNexo({ env: RW, repositorio: repoA, reloj: () => AHORA, fetch: fetchA });
+    ok(nexoA.modo === 'real' && nexoA.envioHabilitado === false, 'en Railway sin NEXO_ENVIO=1: el envío está apagado');
+    const ap = await nexoA.aceptar(tarjeta('Se comparte', [conj(C_A, ['900000000000001'])], { id: 'real-4' }), CTX);
+    ok(ap.tipo === 'solicitud' && ap.envio.estado === 'no_enviada' && ap.envio.codigo === 'envio_apagado' && ap.envio.enviada === false && /solo para ver/.test(ap.envio.motivo), 'envío apagado: el pedido se arma pero no se envía y explica por qué');
+    ok(salio === 0 && !repoA.leerSolicitud(ap.solicitud.id), 'envío apagado: no sale nada a PAUTADOR ni se guarda como pendiente');
+    // en Railway con NEXO_MODO sin real (simulado) también queda apagado salvo NEXO_ENVIO=1
+    ok(N.crearNexo({ env: { RAILWAY_ENVIRONMENT: 'staging' }, repositorio: repoNuevo() }).envioHabilitado === false, 'en Railway simulado sin NEXO_ENVIO: apagado (no se muestran cambios de mentira al equipo)');
+    ok(N.crearNexo({ env: {}, repositorio: repoNuevo() }).envioHabilitado === true, 'local: el simulador siempre envía');
+  }
 
   // ---------- 8. Rutas para servir.js (sin levantar servidor) ----------
   const { manejar } = N.crearRutas({ nexo: N.crearNexo({ env: {}, repositorio: repoNuevo(), reloj: () => AHORA, accesos: ACCESOS }) });

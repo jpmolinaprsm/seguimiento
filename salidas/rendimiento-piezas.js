@@ -22,7 +22,9 @@ const ARG_ENTRADA = process.argv.find((a) => a.startsWith('--entrada='));
 const ENTRADA = ARG_ENTRADA ? ARG_ENTRADA.slice('--entrada='.length) : '_proyectos.json';
 if (!/^[\w.-]+\.json$/.test(ENTRADA)) throw new Error(`Entrada inválida: "${ENTRADA}" (solo un nombre de archivo .json de borrador/).`);
 const fuente = require(path.join(RAIZ, 'borrador', ENTRADA));
-const SALIDA = path.join(__dirname, 'rendimiento-piezas.json');
+// --salida=RUTA: escribir en otro archivo (actualizar.js arma ahí y después lo cambia de forma atómica).
+const ARG_SALIDA = process.argv.find((a) => a.startsWith('--salida='));
+const SALIDA = ARG_SALIDA ? path.resolve(ARG_SALIDA.slice('--salida='.length)) : path.join(__dirname, 'rendimiento-piezas.json');
 
 const num = (x) => Number(x) || 0;
 const r2 = (x) => (x == null || !isFinite(x) ? null : Math.round(x * 100) / 100);

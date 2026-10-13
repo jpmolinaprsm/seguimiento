@@ -162,21 +162,40 @@ function redactar(pend, ctx) {
 
 // Repositorio de recomendaciones: todas las que generó el agente con estos datos, una por línea, para cruzarlas con las
 // respuestas del equipo (repositorio/respuestas.jsonl, lo escribe servir.js) y ver qué reglas sirven.
-function guardarRepositorio(proyectos, datosHasta) {
-  const REPO = path.join(__dirname, 'repositorio', 'recomendaciones');
-  fs.mkdirSync(REPO, { recursive: true });
+// Dónde se guarda (13/10): si están SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY (Railway), en la base, vía base/almacen.js (migraciones 002 y
+// 004): el disco de Railway se borra en cada reinicio. Si no (local), en archivos de app/repositorio/, igual que siempre. Devuelve una
+// promesa (ya resuelta en local, donde se escribe en el momento). opciones.almacen / opciones.carpeta: para pruebas.
+function almacenDeEntorno() {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) return null;
+  return require('../base/almacen.js').crearAlmacen({ tipo: 'supabase' });
+}
+function guardarRepositorio(proyectos, datosHasta, opciones = {}) {
   const generado = new Date().toISOString();
-  const lineas = [];
-  for (const p of proyectos) for (const [canal, b] of Object.entries(p.canales)) for (const a of b.acciones) lineas.push(JSON.stringify({
+  const filas = [];
+  for (const p of proyectos) for (const [canal, b] of Object.entries(p.canales)) for (const a of b.acciones) filas.push({
     datos_al: datosHasta, generado, id: a.id, proyecto: p.nombre, canal, tipo: a.tipo, titulo: a.title, problema: a.problema, solucion: a.solucion,
     campana: a.afectado.campana || a.camp || null, contenidos: a.afectado.contenidos.map((c) => c.nombre), conjuntos: a.afectado.conjuntos.map((k) => k.nombre),
-    revisar: a.revisar, regla: a.regla || null, fuente: a.fuente || null, plata_en_juego: a.plata || null, via: a.via }));
-  fs.writeFileSync(path.join(REPO, `${datosHasta}.jsonl`), lineas.join('\n') + '\n');
-  console.log(`repositorio: ${lineas.length} recomendaciones → repositorio/recomendaciones/${datosHasta}.jsonl`);
+    revisar: a.revisar, regla: a.regla || null, fuente: a.fuente || null, plata_en_juego: a.plata || null, via: a.via });
+  const almacen = opciones.almacen !== undefined ? opciones.almacen : almacenDeEntorno();
+  if (almacen && almacen.tipo === 'supabase') {
+    return (async () => {
+      const r = await almacen.guardarRecomendaciones(datosHasta, filas);
+      console.log(`repositorio: ${filas.length} recomendaciones → ${r.donde}`);
+      // Lectura temprana al día 5, EN OBSERVACIÓN. Si falla, no corta el armado.
+      try { await require('../borrador/lectura-temprana.js').observarEnBase(opciones.armado || require('../borrador/armar.js'), almacen); }
+      catch (e) { console.error('lectura temprana (observación) falló:', e.message); }
+    })();
+  }
+  const carpeta = opciones.carpeta || path.join(__dirname, 'repositorio');
+  const REPO = path.join(carpeta, 'recomendaciones');
+  fs.mkdirSync(REPO, { recursive: true });
+  fs.writeFileSync(path.join(REPO, `${datosHasta}.jsonl`), filas.map((f) => JSON.stringify(f)).join('\n') + '\n');
+  console.log(`repositorio: ${filas.length} recomendaciones → repositorio/recomendaciones/${datosHasta}.jsonl`);
   // Lectura temprana al día 5, EN OBSERVACIÓN (decisión del 30/09/2026): registra predicciones y mide el acierto en
   // repositorio/lectura-temprana/. No genera recomendaciones ni tarjetas. Si falla, no corta el armado.
-  try { require('../borrador/lectura-temprana.js').observar(require('../borrador/armar.js'), path.join(__dirname, 'repositorio', 'lectura-temprana')); }
+  try { require('../borrador/lectura-temprana.js').observar(opciones.armado || require('../borrador/armar.js'), path.join(carpeta, 'lectura-temprana')); }
   catch (e) { console.error('lectura temprana (observación) falló:', e.message); }
+  return Promise.resolve();
 }
 
 module.exports = { redactar, guardarRepositorio, REGLA };

@@ -36,7 +36,8 @@ const CONSTANTE_SEMANAS_SIN_TEMPORADA = 16; // …o en 16 o más si no tiene una
 const LARGA_DIAS = 30;             // campaña larga (decisión del usuario 28/09)
 const INFLACION_MES = { Alcance: 0, Interacción: 0.02, Tráfico: 0.02 }; // tanda 5: CPM de Alcance plano, Interacción +2 % por mes
 
-const fuente = require('./_proyectos.json');
+// SEGUIMIENTO_PROYECTOS: ruta de otro archivo de datos (lo usa actualizar.js para armar la versión nueva antes de cambiarla). Sin la variable, igual que siempre.
+const fuente = require(process.env.SEGUIMIENTO_PROYECTOS ? path.resolve(process.env.SEGUIMIENTO_PROYECTOS) : './_proyectos.json');
 const unidades = require('../presupuestos/_activos.json');
 const RES = path.join(__dirname, '../datos-fijos');
 const poblacion = require(path.join(RES, 'poblacion.json')).poblacion;

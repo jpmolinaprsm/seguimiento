@@ -3,7 +3,8 @@
 // y verifica que renderVals() las resuelva en cada pantalla, pestaña, período y campaña (primer elemento de cada lista).
 const fs = require('fs');
 const path = require('path');
-const html = fs.readFileSync(path.join(__dirname, '..', 'Seguimiento y Optimizacion.html'), 'utf8');
+// SEGUIMIENTO_SALIDA: probar otro HTML (el armado de actualizar.js antes de cambiarlo). Sin la variable, el de siempre.
+const html = fs.readFileSync(process.env.SEGUIMIENTO_SALIDA ? path.resolve(process.env.SEGUIMIENTO_SALIDA) : path.join(__dirname, '..', 'Seguimiento y Optimizacion.html'), 'utf8');
 const template = JSON.parse(html.match(/<script type="__bundler\/template">([\s\S]*?)<\/script>/)[1]);
 const logic = template.match(/<script type="text\/x-dc"[^>]*>([\s\S]*?)<\/script>/)[1];
 const markup = template.replace(/<script[\s\S]*?<\/script>/g, '').replace(/<style[\s\S]*?<\/style>/g, '');
@@ -152,7 +153,7 @@ function revisarLuces(vals, etiqueta) {
     const conSem = (t.lineas || []).findIndex((l) => SEM_V.test(l.txt || ''));
     if (conSem >= 0) { semValor++; if (!SEM_C.test((t.lineas[conSem + 1] || {}).txt || '')) faltan.add(`tarjeta: "últ. 2 sem." sin la comparación debajo: ${t.label} (${etiqueta})`); }
     if ((t.lineas || []).some((l) => SEM_C.test(l.txt || '')) && conSem < 0) faltan.add(`tarjeta: "vs. sem. ant." sin el valor de las dos últimas semanas: ${t.label} (${etiqueta})`);
-    if (!Array.isArray(t.lineas) || t.lineas.length > (conSem >= 0 ? 3 : 2)) { faltan.add(`tarjeta con más de dos líneas: ${t.label} (${etiqueta})`); continue; }
+    if (!Array.isArray(t.lineas) || t.lineas.length > (t.label === 'CPM de Alcance' ? 1 + 8 : conSem >= 0 ? 3 : 2)) {   // CPM de Alcance: 'últimos 30 días' + una línea por cuenta (nunca sumadas); cada línea sigue pasando el control de largo faltan.add(`tarjeta con más de dos líneas: ${t.label} (${etiqueta})`); continue; }
     for (const l of t.lineas) { if (!CORTA.test(l.txt || '') || (l.txt || '').length > 45) faltan.add(`línea de tarjeta larga o mal escrita: ${t.label} "${l.txt}" (${etiqueta})`); if (!l.title) faltan.add(`línea de tarjeta sin la frase completa al pasar el mouse: ${t.label} (${etiqueta})`); if (/^vs\. /.test(l.txt)) lineasTile++; }
     if (/^vs\. /.test((t.lineas[0] || {}).txt || '') && /[▲▼]/.test(t.lineas[0].txt)) faltan.add(`línea de tarjeta con flecha: ${t.label}`);
   }

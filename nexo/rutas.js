@@ -32,7 +32,7 @@ function crearRutas(opciones = {}) {
     if (req.method === 'GET' && (ruta === '/api/nexo/estado' || ruta === '/api/nexo/recomendacion')) {
       const id = new URL(req.url, 'http://local').searchParams.get('id');
       if (!id) { json(res, 400, { error: 'Falta id' }); return true; }
-      if (ruta === '/api/nexo/recomendacion') { json(res, 200, { modo: nexo.modo, solicitudes: nexo.repositorio.porRecomendacion(id) }); return true; }
+      if (ruta === '/api/nexo/recomendacion') { Promise.resolve(nexo.repositorio.porRecomendacion(id)).then((sol) => json(res, 200, { modo: nexo.modo, solicitudes: sol }), (e) => json(res, 500, { error: e.message })); return true; }
       nexo.consultar(id).then((r) => json(res, r ? 200 : 404, r || { error: 'No existe esa solicitud' }), (e) => json(res, 500, { error: e.message }));
       return true;
     }

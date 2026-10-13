@@ -26,6 +26,11 @@ se probó contra esa base (37 de 37) y se hizo la carga inicial de `app/reposito
 | `almacen.js` | La interfaz que usa el código (ver abajo) y los controles comunes |
 | `almacen-archivo.js` | Implementación de hoy: los archivos de `app/repositorio/`, mismo formato |
 | `almacen-supabase.js` | Implementación en la base. Probada contra la base de prueba el 2/10 |
+| `verificar-base.js` | Solo lee: comprueba las siete migraciones y que la API vea las 14 tablas (13/10) |
+| `cargar-inicial.js` | Carga `app/repositorio/` (recomendaciones, tipos, comentarios, predicciones). Prueba en seco por defecto; escribe con `--escribir-en <código>` (13/10) |
+| `exportar-del-navegador.js` | Snippet para pegar en la consola del navegador: baja todas las claves `syo.*` a un .json (13/10) |
+| `cargar-navegador.js` | Carga ese .json a la base resolviendo lo que la base rechaza (13/10) |
+| `carga-comun.js` | Piezas comunes de las cargas |
 
 ### Las tablas
 
@@ -154,6 +159,8 @@ Con el mismo patrón que `pautador/src/services/bqRespaldo.js` (leído, no tocad
   escribir en `automatizado` lo autoriza Juan Pablo.
 
 ## Pendiente
+
+- **Pasos para la base real y para sacar lo del navegador: `Seguimiento/DESPLIEGUE.md`, sección "Base" (13/10).**
 
 - Hecho el 2/10 en la base de PRUEBA: migraciones, prueba del almacén y carga inicial (323 recomendaciones de dos días, las 17
   respuestas, que son todas cambios de tipo de campaña, como `carga_inicial` y "sin identificar", y 390 predicciones; todo igual

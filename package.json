@@ -6,6 +6,10 @@
   "engines": {
     "node": ">=20"
   },
+  "scripts": {
+    "start": "node server.js",
+    "test:servidor": "node app/pruebas/servidor.js"
+  },
   "dependencies": {
     "@supabase/supabase-js": "2.117.2",
     "googleapis": "140.0.1"

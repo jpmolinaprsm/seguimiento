@@ -203,17 +203,15 @@ function retrospectiva(piezas, G, primerDato) {
   };
 }
 
-// Punto de entrada: B = exports de borrador/armar.js; dir = app/repositorio/lectura-temprana
-function observar(B, dir) {
+// Cálculo de la observación (13/10): recibe las predicciones ya registradas y devuelve { nuevas, resumen }. No escribe nada: guardan
+// observar() (archivo, local) y observarEnBase() (base, Railway). Es el mismo cálculo que antes tenía observar().
+function calcular(B, previas) {
   const { datosHasta, fuente } = B;
-  fs.mkdirSync(dir, { recursive: true });
   const piezas = armarPiezas(B);
   const G = gruposFinales(piezas);
   const primerDato = fuente.todas.reduce((m, r) => (r.plataforma === 'META' && r.fecha < m ? r.fecha : m), '9999');
 
   // 1. predicciones nuevas: piezas que cumplieron el día 5 en la última semana y todavía no están registradas
-  const ARCH = path.join(dir, 'predicciones.jsonl');
-  const previas = fs.existsSync(ARCH) ? fs.readFileSync(ARCH, 'utf8').split('\n').filter(Boolean).map((l) => { try { return JSON.parse(l); } catch (e) { return null; } }).filter(Boolean) : [];
   const ya = new Set(previas.map((x) => x.id));
   const nuevas = [];
   for (const p of piezas) {
@@ -226,7 +224,6 @@ function observar(B, dir) {
       gasto_dia5: Math.round(p.s5.g), impresiones_dia5: p.s5.i, percentil_dia5: r4(l.q), cuartil_dia5: cuartilDe(l.q), comparables: l.n, referencia: l.nivel,
       cuenta_para_registro: cumpleMinimo(p.s5.g, p.s5.i) });
   }
-  if (nuevas.length) fs.appendFileSync(ARCH, nuevas.map((x) => JSON.stringify(x)).join('\n') + '\n');
 
   // 2. verificación de las predicciones registradas (se recalcula entera cada vez)
   const porId = new Map(piezas.map((p) => [idDe([p.canal, p.cliente, p.comunicacion, p.cod, p.desde].join('|')), p]));
@@ -266,10 +263,34 @@ function observar(B, dir) {
     comprobacion: comprobacion(acierto(pares)),
     retrospectiva: retrospectiva(piezas, G, primerDato),
   };
-  fs.writeFileSync(path.join(dir, 'resumen.json'), JSON.stringify(resumen, null, 1));
+  return { nuevas, resumen };
+}
+
+function avisar(nuevas, resumen) {
   const a = resumen.en_vivo.acierto, rv = resumen.retrospectiva.como_corre_en_vivo.total;
-  console.log(`lectura temprana (observación): ${nuevas.length} predicciones nuevas, ${todas.length} registradas (${fueraMin.predicciones} fuera por el mínimo), ${a.piezas} ya juzgadas · faltan ${resumen.comprobacion.faltan} del peor cuartil para comprobarla · hacia atrás: peor→peor ${rv.peor_termina_en_peor_cuartil_pct} % de ${rv.peor_cuartil_al_dia5}`);
+  console.log(`lectura temprana (observación): ${nuevas.length} predicciones nuevas, ${resumen.en_vivo.predicciones} registradas (${resumen.en_vivo.fuera_por_minimo.predicciones} fuera por el mínimo), ${a.piezas} ya juzgadas · faltan ${resumen.comprobacion.faltan} del peor cuartil para comprobarla · hacia atrás: peor→peor ${rv.peor_termina_en_peor_cuartil_pct} % de ${rv.peor_cuartil_al_dia5}`);
+}
+
+// Punto de entrada local: B = exports de borrador/armar.js; dir = app/repositorio/lectura-temprana (archivos)
+function observar(B, dir) {
+  fs.mkdirSync(dir, { recursive: true });
+  const ARCH = path.join(dir, 'predicciones.jsonl');
+  const previas = fs.existsSync(ARCH) ? fs.readFileSync(ARCH, 'utf8').split('\n').filter(Boolean).map((l) => { try { return JSON.parse(l); } catch (e) { return null; } }).filter(Boolean) : [];
+  const { nuevas, resumen } = calcular(B, previas);
+  if (nuevas.length) fs.appendFileSync(ARCH, nuevas.map((x) => JSON.stringify(x)).join('\n') + '\n');
+  fs.writeFileSync(path.join(dir, 'resumen.json'), JSON.stringify(resumen, null, 1));
+  avisar(nuevas, resumen);
   return resumen;
 }
 
-module.exports = { observar, armarPiezas, lecturaDia5, gruposFinales, finalDe, retrospectiva, comprobacion, cumpleMinimo, METRICA, COMPROBADA, MIN_GASTO_DIA5, MIN_IMP_DIA5 };
+// Punto de entrada en Railway: lee las predicciones de la base, agrega las nuevas y guarda el resumen (tablas de la migración 004).
+async function observarEnBase(B, almacen) {
+  const previas = await almacen.leerPredicciones();
+  const { nuevas, resumen } = calcular(B, previas);
+  if (nuevas.length) await almacen.agregarPredicciones(nuevas);
+  await almacen.guardarResumenLectura(resumen);
+  avisar(nuevas, resumen);
+  return resumen;
+}
+
+module.exports = { observar, observarEnBase, calcular, armarPiezas, lecturaDia5, gruposFinales, finalDe, retrospectiva, comprobacion, cumpleMinimo, METRICA, COMPROBADA, MIN_GASTO_DIA5, MIN_IMP_DIA5 };

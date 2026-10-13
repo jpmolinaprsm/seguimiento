@@ -795,8 +795,8 @@ class Component extends DCLogic {
     this.say(status === 'sent' ? 'Enviada a PAUTADOR' : status === 'manual' ? 'Marcada como hecha a mano · ' + reason : 'Descartada · ' + reason);
   }
   screenKey() { const s = this.state, p = this.proj(), vc = this.vistaCamp(); return s.screen === 'guia' ? 'Cómo leer' : s.screen === 'portada' ? 'Mis proyectos' : s.screen === 'campana' ? `${p.nombre} · ${s.canal} · Campaña · ${s.campId}${vc ? ` (${vc.p.nombre} · ${vc.canal})` : ''}` : `${p.nombre} · ${s.canal} · ${this.tabComentario()}`; }
-  // pestaña que nombra el comentario (06/10): en Estructura, la suya; en Detalle, Campañas (aunque haya quedado guardada otra)
-  tabComentario() { const s = this.state; return s.paso === 'estructura' ? tabEstDe(s.tab) : s.paso === 'explora' && s.tab !== 'insights' ? 'campañas' : s.tab; }
+  // pestaña que nombra el comentario (13/10): General = 'general'; Estructura, la suya (mapa, activos, ejes, audiencias); Detalle = 'campañas' o 'insights'; Looker = 'looker'
+  tabComentario() { const s = this.state; return s.paso === 'estructura' ? tabEstDe(s.tab) : s.paso === 'looker' ? 'looker' : s.paso === 'explora' ? (s.tab === 'insights' ? 'insights' : 'campañas') : 'general'; }
   irCampana(id, canal) {
     const s = this.state, abrir = { screen: 'campana', panel: false, panelCamp: null, campTab: 'Contenidos', paso: 'explora' }, sinDetalle = () => this.say('Esta campaña no tiene detalle: terminó hace más de 60 días');
     // Todos los proyectos: el id lleva el proyecto adelante; se abre el detalle de la campaña en su proyecto y canal (en General, el del

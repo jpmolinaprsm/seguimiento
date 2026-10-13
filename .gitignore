@@ -21,3 +21,8 @@ salidas/*.json
 # Serie diaria por pieza (pedido 058; se rearma con node salidas/serie-diaria-piezas.js)
 salidas/serie-diaria/
 salidas/*.csv
+
+# Plan B de accesos: lista exportada de PAUTADOR (tiene mails; nunca a git)
+datos-fijos/accesos-provisorios.json
+# Registro de la actualización diaria (actualizar.js)
+infra/registro/

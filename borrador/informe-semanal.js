@@ -69,6 +69,25 @@ function leerRepositorio(repo) {
   return { recs, porDia, respuestas, lt, nexo, reglas };
 }
 
+// Lo mismo, leído de la base (Railway): el disco no guarda nada. Misma forma que leerRepositorio. reglas-vigentes.json no se lee: las reglas
+// salen del documento en cada corrida (borrador/reglas-vigentes.js), igual que cuando el archivo no está.
+async function leerRepositorioDeBase(almacen) {
+  const recs = new Map(), porDia = {};
+  for (const r of await almacen.leerRecomendaciones({})) {
+    const dia = String(r.datos_al).slice(0, 10);
+    (porDia[dia] = porDia[dia] || []).push(r);
+    const v = recs.get(r.id);
+    recs.set(r.id, { ...r, primera: v ? v.primera : dia, ultima: dia });
+  }
+  const respuestas = await almacen.leerRespuestas({});
+  const lt = await almacen.leerResumenLectura();
+  let nexo = [];
+  try { nexo = await Promise.all((await almacen.nexo.historial()).map(async (h) => ({ ...h, estados: await almacen.nexo.leerEstados(h.solicitud.id) }))); }
+  catch (e) { nexo = { error: e.message }; }
+  let reglas; try { reglas = require('./reglas-vigentes.js').reglasVigentes(); } catch (e) { reglas = { reglas: [] }; }
+  return { recs, porDia, respuestas, lt, nexo, reglas };
+}
+
 // Última decisión de cada recomendación hasta el día "hasta" (el repositorio guarda una línea por cada cambio).
 function decisiones(respuestas, hasta) {
   const ult = new Map();
@@ -83,11 +102,11 @@ function decisiones(respuestas, hasta) {
 }
 
 // ---------- informe ----------
-function armarInforme({ repo, hasta }) {
+function armarInforme({ repo, hasta, datosRepo }) {
   const desde = sumar(hasta, -6);
   let lunes = sumar(hasta, 1); while (new Date(lunes + 'T12:00:00Z').getUTCDay() !== 1) lunes = sumar(lunes, 1); // próximo lunes
   const dentro = (d) => d >= desde && d <= hasta;
-  const { recs, porDia, respuestas, lt, nexo, reglas } = leerRepositorio(repo);
+  const { recs, porDia, respuestas, lt, nexo, reglas } = datosRepo || leerRepositorio(repo);
   const reglaDe = {}; for (const r of reglas.reglas || []) reglaDe[r.nombre] = r.id;
   const nomRegla = (tipo) => (reglaDe[tipo] ? `${reglaDe[tipo]} ${tipo}` : tipo || 'Sin regla');
   const recDe = (id) => recs.get(id) || {};
@@ -228,17 +247,22 @@ function armarInforme({ repo, hasta }) {
   return { md, datos, lunes };
 }
 
-module.exports = { armarInforme, decisiones };
+module.exports = { armarInforme, decisiones, leerRepositorioDeBase };
 
-if (require.main === module) {
+async function main() {
   const repo = path.resolve(arg('repo', path.join(RAIZ, 'app', 'repositorio')));
   const hasta = arg('hasta', sumar(diaArg(Date.now()), -1));
   if (!/^\d{4}-\d{2}-\d{2}$/.test(hasta)) { console.error('--hasta tiene que ser AAAA-MM-DD'); process.exit(1); }
+  // Con SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY (Railway) lee de la base; si no (o con --repo), de los archivos de app/repositorio/.
+  const enBase = !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) && !process.argv.includes('--repo');
+  const datosRepo = enBase ? await leerRepositorioDeBase(require('../base/almacen.js').crearAlmacen({ tipo: 'supabase' })) : undefined;
   const salida = path.resolve(arg('salida', path.join(repo, 'informes-lunes')));
-  const { md, datos, lunes } = armarInforme({ repo, hasta });
+  const { md, datos, lunes } = armarInforme({ repo, hasta, datosRepo });
   fs.mkdirSync(salida, { recursive: true });
   fs.writeFileSync(path.join(salida, `${lunes}.md`), md);
   fs.writeFileSync(path.join(salida, `${lunes}.json`), JSON.stringify(datos, null, 1) + '\n');
   console.log(`informe de la sesión del ${lunes} (semana ${datos.semana.desde} a ${datos.semana.hasta}) → ${path.join(salida, lunes + '.md')}`);
   console.log(`  recomendaciones ${datos.resumen.generadas} · decisiones ${datos.resumen.respondidas} · comentarios a reglas ${datos.resumen.comentarios_a_reglas} · propuestas ${datos.propuestas.length}`);
 }
+
+if (require.main === module) main().catch((e) => { console.error("ERROR:", e.message); process.exit(1); });
