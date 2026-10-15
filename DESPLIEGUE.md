@@ -9,7 +9,7 @@ Para Juan Pablo. Acá van solo **nombres** de variables y para qué sirven. Los 
 - El HTML armado (`app/Seguimiento y Optimizacion.html`) **no está en GitHub** (pesa ~48 MB). Lo deja en el volumen la actualización diaria (la arma Extracción). Hasta que exista, el servidor arranca y muestra "Sin datos todavía". Para la primera prueba hay que copiarlo al volumen a mano.
 
 ## Pasos en Railway
-1. En Railway (cuenta de la empresa): **New Project → Deploy from GitHub repo** → `jpmolinaprsm/seguimiento` (repo privado; Railway pide autorizar el acceso a ese repo).
+1. En Railway (cuenta de la empresa): **New Project → Deploy from GitHub repo** → `prosumia-op/optimizacion-pauta` (repo privado; Railway pide autorizar el acceso a ese repo).
 2. En el servicio: **Settings → Root Directory** = la raíz del repo (`Seguimiento/` es el repo; si en GitHub quedara dentro de una subcarpeta, poner esa subcarpeta). Build: automático (`npm ci`). Start: `npm start`.
 3. **Volumen:** Service → **Volumes → New Volume**, punto de montaje `/data`. Sirve para el HTML armado y, mientras no esté la base, para respuestas y pedidos. Cargar `DATOS_DIR=/data/repositorio` y `HTML_ARMADO=/data/armado/Seguimiento y Optimizacion.html`.
 4. **Variables:** cargar las de la tabla de abajo. Después **Apply changes / Deploy**.
