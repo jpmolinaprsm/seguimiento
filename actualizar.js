@@ -42,6 +42,8 @@ const RUTAS = {
   rendimiento: DATOS ? path.join(DATOS, 'rendimiento-piezas.json') : path.join(RAIZ, 'salidas', 'rendimiento-piezas.json'),
   registro: DATOS ? path.join(DATOS, 'actualizacion') : path.join(RAIZ, 'infra', 'registro'),
   activos: path.join(RAIZ, 'presupuestos', '_activos.json'),
+  // copia de _activos.json en el volumen: el de presupuestos/ vive en la carpeta del código y se borra con cada redeploy (15/10)
+  activosGuardado: DATOS ? path.join(DATOS, '_activos.json') : null,
 };
 const NUEVO = path.join(RUTAS.registro, 'nuevo'); // lo que se arma antes de cambiar de versión
 const NUEVO_PROYECTOS_NOMBRE = '_proyectos.nuevo.json'; // _extraer.js solo acepta un nombre dentro de borrador/
@@ -204,8 +206,21 @@ async function soloArmar() {
     fs.mkdirSync(NUEVO, { recursive: true });
     borrar(NUEVO_HTML);
 
+    // presupuestos por activo: se toman del volumen (la copia de presupuestos/ se pierde con cada redeploy); si no están, se
+    // recalculan (lee la planilla y una consulta chica a BigQuery) y se guardan
+    let r;
+    if (RUTAS.activosGuardado && fs.existsSync(RUTAS.activosGuardado)) {
+      fs.copyFileSync(RUTAS.activosGuardado, RUTAS.activos);
+    } else if (!fs.existsSync(RUTAS.activos)) {
+      log('0. Presupuestos (no estaban guardados)...');
+      r = await correr('presupuestos', path.join('presupuestos', 'activos.js'));
+      sumar(r);
+      if (r.codigo !== 0) throw Object.assign(new Error('Presupuestos falló: ' + r.salida.trim().split('\n').slice(-3).join(' | ')), { salida: r.salida });
+      if (RUTAS.activosGuardado) fs.copyFileSync(RUTAS.activos, RUTAS.activosGuardado);
+    }
+
     log('1. Armando la app...');
-    let r = await correr('armar', 'armar.js', [], { env: { SEGUIMIENTO_PROYECTOS: RUTAS.proyectos, SEGUIMIENTO_SALIDA: NUEVO_HTML }, cwd: path.join(RAIZ, 'app') });
+    r = await correr('armar', 'armar.js', [], { env: { SEGUIMIENTO_PROYECTOS: RUTAS.proyectos, SEGUIMIENTO_SALIDA: NUEVO_HTML }, cwd: path.join(RAIZ, 'app') });
     sumar(r);
     if (r.codigo !== 0) throw Object.assign(new Error('El armado falló: ' + r.salida.trim().split('\n').slice(-3).join(' | ')), { salida: r.salida });
     const armado = r.salida;
@@ -359,6 +374,7 @@ async function main() {
     promover(NUEVO_REND, RUTAS.rendimiento);
     version = `${datosHasta}@${ahoraISO().slice(0, 16)}`;
     promover(NUEVO_HTML, RUTAS.html);
+    if (RUTAS.activosGuardado) { try { fs.copyFileSync(RUTAS.activos, RUTAS.activosGuardado); } catch (e) { log('Aviso: no se pudo guardar _activos.json en el volumen: ' + e.message); } }
     resultado = 'ok';
     respaldoActivos = null; // quedó en uso: no se restituye
     log(`Versión nueva en servicio: datos al ${dmy(datosHasta)} (${version}).`);
