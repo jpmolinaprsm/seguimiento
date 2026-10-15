@@ -110,7 +110,7 @@ function crearDisparador({ rutaEstado, rutaHtml, rutaProyectos, codigo = () => c
       corriendo: !!hijo,
       ...(hijo ? { tipo: tipoHijo, desde: new Date(desde).toISOString() } : {}),
       ultima: { resultado: u ? (u.sin_dato_de_hoy === true ? 'sin_dato_de_hoy' : (u.resultado || null)) : null, termino: u ? u.termino || null : null, datos_hasta: e.datos_hasta || null },
-      rearmado: { decision: motivoRearmado, ultimo: e.ultimo_solo_armar ? { resultado: e.ultimo_solo_armar.resultado || null, termino: e.ultimo_solo_armar.termino || null } : null },
+      rearmado: { decision: motivoRearmado, ultimo: e.ultimo_solo_armar ? { resultado: e.ultimo_solo_armar.resultado || null, termino: e.ultimo_solo_armar.termino || null, error: e.ultimo_solo_armar.error ? String(e.ultimo_solo_armar.error).replace(/[A-Za-z0-9_\-]{32,}/g, '…').slice(0, 240) : null } : null },
     };
   }
 
