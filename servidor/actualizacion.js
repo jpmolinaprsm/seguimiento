@@ -51,7 +51,8 @@ function crearDisparador({ rutaEstado, raiz = path.join(__dirname, '..'), reloj 
     if (slot.reintento) {
       const u = estado && estado.ultima_corrida;
       const deHoy = u && u.termino && arDe(Date.parse(u.termino)).dia === dia;
-      if (!(deHoy && u.sin_dato_de_hoy === true)) { disparados.add(clave); return { lanzo: false, motivo: 'sin_reintento' }; }
+      // si hoy todavía no corrió nada (servidor prendido después de las 10:30), este horario hace de primera corrida
+      if (deHoy && u.sin_dato_de_hoy !== true) { disparados.add(clave); return { lanzo: false, motivo: 'sin_reintento' }; }
     }
     disparados.add(clave);
     let proc;
