@@ -82,7 +82,9 @@ function crearDisparador({ rutaEstado, rutaHtml, rutaProyectos, codigo = () => c
   // Rearmado al arrancar con código nuevo: hay HTML armado y datos guardados, y estado.json.codigo_version no es la del código actual.
   // Una vez por arranque. No si ya corre algo. No si el mismo código ya falló (se mira a mano; no se repite en cada reinicio).
   // → { lanzo, motivo }
-  function rearmarSiCambioElCodigo() {
+  let motivoRearmado = null;   // último motivo de la decisión de rearmar (para /salud)
+  function rearmarSiCambioElCodigo() { const r = decidirRearmado(); motivoRearmado = r.motivo; return r; }
+  function decidirRearmado() {
     if (rearmadoIntentado) return { lanzo: false, motivo: 'ya_intentado' };
     rearmadoIntentado = true;
     if (hijo) return { lanzo: false, motivo: 'ya_corre' };
@@ -108,6 +110,7 @@ function crearDisparador({ rutaEstado, rutaHtml, rutaProyectos, codigo = () => c
       corriendo: !!hijo,
       ...(hijo ? { tipo: tipoHijo, desde: new Date(desde).toISOString() } : {}),
       ultima: { resultado: u ? (u.sin_dato_de_hoy === true ? 'sin_dato_de_hoy' : (u.resultado || null)) : null, termino: u ? u.termino || null : null, datos_hasta: e.datos_hasta || null },
+      rearmado: { decision: motivoRearmado, ultimo: e.ultimo_solo_armar ? { resultado: e.ultimo_solo_armar.resultado || null, termino: e.ultimo_solo_armar.termino || null } : null },
     };
   }
 
