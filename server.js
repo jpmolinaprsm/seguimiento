@@ -3,6 +3,8 @@
 // Quién ve qué: ver servidor/vista.js (el servidor arma un HTML solo con los proyectos y canales de cada persona).
 // Configuración: solo variables de entorno (servidor/config.js). Esto no reemplaza a app/servir.js, que sigue siendo el servidor local.
 const http = require('http');
+const fs = require('fs');
+const path = require('path');
 const zlib = require('zlib');
 const { leerConfig, faltantes } = require('./servidor/config');
 const { crearSesiones } = require('./servidor/sesion');
@@ -17,7 +19,9 @@ const { crearDisparador, crearAviso, arDe } = require('./servidor/actualizacion'
 const MAX_RESPUESTA = 20 * 1024, MAX_NEXO = 50 * 1024;
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-const PAGINA = (titulo, cuerpo) => `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Optimización</title>`
+const ICONOS = { '/favicon.svg': { tipo: 'image/svg+xml' }, '/favicon-32.png': { tipo: 'image/png' }, '/apple-touch-icon.png': { tipo: 'image/png' }, '/favicon.ico': { tipo: 'image/png', archivo: 'favicon-32.png' } };
+
+const PAGINA = (titulo, cuerpo) => `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Optimización</title><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">`
   + `<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#faf9f5;color:#2b2b2b;font:16px/1.5 Poppins,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif}`
   + `main{max-width:420px;padding:32px;text-align:center}h1{font-size:22px;margin:0 0 12px}p{margin:8px 0;color:#555}a.b,button{display:inline-block;margin-top:16px;padding:10px 20px;border-radius:8px;border:1px solid #2b2b2b;background:#2b2b2b;color:#fff;font:inherit;text-decoration:none;cursor:pointer}`
   + `.err{color:#a1260d}</style></head><body><main><h1>${esc(titulo)}</h1>${cuerpo}</main></body></html>`;
@@ -80,6 +84,11 @@ function crearServidor(opciones = {}) {
     const api = ruta.startsWith('/api/');
 
     // ---- públicas ----
+    // íconos (pestaña y marcadores): públicos, sin sesión
+    if (req.method === 'GET' && ICONOS[ruta]) {
+      res.writeHead(200, { 'Content-Type': ICONOS[ruta].tipo, 'Cache-Control': 'public, max-age=86400' });
+      return res.end(fs.readFileSync(path.join(__dirname, 'servidor', 'publico', ICONOS[ruta].archivo || ruta.slice(1))));
+    }
     if (req.method === 'GET' && ruta === '/salud') return json(res, 200, { ok: true, accesos: accesosDe.salud && accesosDe.salud().degradado ? 'degradado' : 'ok', actualizacion: resumenActualizacion() });   // sin datos sensibles
     if (req.method === 'GET' && ruta === '/entrar') return pantallaEntrar(res, 200, url.searchParams.get('error') ? 'No se pudo entrar. Probá de nuevo con tu cuenta de la empresa.' : '');
     if (req.method === 'GET' && ruta === '/auth/google') {

@@ -12,6 +12,7 @@ const crypto = require('crypto');
 const { normal } = require('./accesos');
 
 // Franja de aviso arriba ("Sin dato de hoy: ..."): el navegador pregunta a /api/aviso y, si hay texto, lo muestra (con textContent).
+const ICONOS_HEAD = '<link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">';   // íconos de pestaña y marcadores (servidos por server.js)
 const AVISO_SCRIPT = '<script>(function(){function pedir(){fetch("/api/aviso",{credentials:"same-origin"}).then(function(r){return r.ok?r.json():null}).then(function(j){var d=document.getElementById("syo-aviso");'
   + 'if(!j||!j.aviso){if(d)d.remove();return}if(!document.querySelector("x-dc")||!document.body)return;if(!d){d=document.createElement("div");d.id="syo-aviso";'
   + 'd.style.cssText="position:relative;z-index:100000;background:#FFF4D6;color:#3C3C3C;border-bottom:1px solid #E8D9A8;font:500 12px/1.6 Poppins,-apple-system,BlinkMacSystemFont,sans-serif;text-align:center;padding:3px 12px";document.body.insertBefore(d,document.body.firstChild)}'
@@ -32,7 +33,7 @@ function cargarArmado(ruta) {
   const iH = html.indexOf(mT[0]);
   return {
     DATA,
-    htmlAntes: html.slice(0, iH).replace('</head>', () => AVISO_SCRIPT + '</head>'), htmlDespues: html.slice(iH + mT[0].length),
+    htmlAntes: html.slice(0, iH).replace('</head>', () => AVISO_SCRIPT + ICONOS_HEAD + '</head>'), htmlDespues: html.slice(iH + mT[0].length),
     tplAntes: template.slice(0, iL) + logica.slice(0, iD) + 'const DATA = ',
     tplDespues: logica.slice(fD) + template.slice(iL + logica.length),
   };
@@ -119,4 +120,4 @@ function crearVistas({ ruta, maxEntradas = 24 }) {
   return { paraPermisos, datos: () => { recargarSiCambio(); return armado.DATA; }, htmlCompleto: () => { recargarSiCambio(); return armarHtml(armado, armado.DATA); }, tamanoCache: () => cache.size };
 }
 
-module.exports = { AVISO_SCRIPT, crearVistas, alcanceDe, recortar, cargarArmado, armarHtml, esProyecto };
+module.exports = { AVISO_SCRIPT, ICONOS_HEAD, crearVistas, alcanceDe, recortar, cargarArmado, armarHtml, esProyecto };

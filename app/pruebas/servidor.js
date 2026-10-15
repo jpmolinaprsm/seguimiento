@@ -11,7 +11,7 @@ const { leerConfig } = require('../../servidor/config');
 const { crearSesiones } = require('../../servidor/sesion');
 const { crearAccesosDe } = require('../../servidor/accesos');
 const { validarIdentidad } = require('../../servidor/google');
-const { cargarArmado, AVISO_SCRIPT } = require('../../servidor/vista');
+const { cargarArmado, AVISO_SCRIPT, ICONOS_HEAD } = require('../../servidor/vista');
 const { crearDisparador, activo: actualizacionActiva } = require('../../servidor/actualizacion');
 const { EventEmitter } = require('events');
 const { crearAlmacen } = require('../../base/almacen');
@@ -118,7 +118,7 @@ const datosDe = (texto) => { const f = path.join(tmp, 'v' + Math.random() + '.ht
 
   v = await ver('admin@empresa.test');
   ok(v.texto.includes('OFICIAL_alfa') && v.texto.includes('INFORM_gamma') && v.texto.includes('SUMA_DE_TODOS'), 'el administrador global recibe todo');
-  ok(v.texto === htmlFalso.replace('</head>', () => AVISO_SCRIPT + '</head>'), 'quien ve todo recibe exactamente el HTML armado (byte a byte), más la franja de aviso');
+  ok(v.texto === htmlFalso.replace('</head>', () => AVISO_SCRIPT + ICONOS_HEAD + '</head>'), 'quien ve todo recibe exactamente el HTML armado (byte a byte), más la franja de aviso');
   r = await A.pedir('/', { cookie: cookieDe('admin@empresa.test') });
   const et = r.headers.get('etag'); const r304 = await A.pedir('/', { cookie: cookieDe('admin@empresa.test'), headers: { 'if-none-match': et } });
   ok(et && r304.status === 304, 'ETag y 304');
@@ -423,7 +423,7 @@ const datosDe = (texto) => { const f = path.join(tmp, 'v' + Math.random() + '.ht
     const R = await levantar({ env: { HTML_ARMADO: real }, accesos: crearAccesosDe({ cliente: null, lista: accesosDeLista([persona('admin@empresa.test', { rol: 'administrador', administradorGlobal: true }), persona('uno@empresa.test', { accesos: [{ proyecto: 'Gobierno del Chaco', activo: null, rol: null, canales: ['Informativo'] }, { proyecto: 'Chubut', activo: null, rol: null, canales: [] }] })]) }) });
     const original = fs.readFileSync(real, 'utf8');
     const t0 = Date.now(); r = await R.pedir('/', { cookie: cookieDe('admin@empresa.test') });
-    ok(r.status === 200 && r.texto === original.replace('</head>', () => AVISO_SCRIPT + '</head>'), `administrador global: HTML idéntico al armado (más la franja de aviso) (${((Date.now() - t0) / 1000).toFixed(1)} s)`);
+    ok(r.status === 200 && r.texto === original.replace('</head>', () => AVISO_SCRIPT + ICONOS_HEAD + '</head>'), `administrador global: HTML idéntico al armado (más la franja de aviso) (${((Date.now() - t0) / 1000).toFixed(1)} s)`);
     r = await R.pedir('/', { cookie: cookieDe('uno@empresa.test') });
     ok(r.status === 200 && r.texto.length < original.length / 2, `persona con 2 proyectos: HTML mucho más chico (${(r.texto.length / 1e6).toFixed(1)} de ${(original.length / 1e6).toFixed(1)} MB)`);
     const dd = r.status === 200 ? datosDe(r.texto) : null;
