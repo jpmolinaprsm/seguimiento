@@ -6,7 +6,7 @@ Para Juan Pablo. Acá van solo **nombres** de variables y para qué sirven. Los 
 - El servidor es `server.js` (script `npm start`). Pide inicio de sesión con Google en todas las rutas, salvo `/salud` (sin datos) y la pantalla "Entrar con Google".
 - Cada persona recibe una página armada **solo con sus proyectos y canales**: lo demás no sale del servidor.
 - `app/servir.js` sigue siendo el servidor local de tu compu (sin login); no se usa en Railway.
-- El HTML armado (`app/Seguimiento y Optimizacion.html`) **no está en GitHub** (pesa ~48 MB). Lo deja en el volumen la actualización diaria (la arma Extracción). Hasta que exista, el servidor arranca y muestra "Sin datos todavía". Para la primera prueba hay que copiarlo al volumen a mano.
+- El HTML armado (`app/Seguimiento y Optimizacion.html`) **no está en GitHub** (pesa ~48 MB). Lo deja en el volumen la actualización diaria (la arma Extracción). Hasta que exista, el servidor arranca y muestra "Sin datos todavía" (o, si ya hay una actualización en curso, "Se están armando los datos. Volvé en unos minutos." con la hora de inicio). Para la primera prueba hay que copiarlo al volumen a mano.
 
 ## Pasos en Railway
 1. En Railway (cuenta de la empresa): **New Project → Deploy from GitHub repo** → `prosumia-op/optimizacion-pauta` (repo privado; Railway pide autorizar el acceso a ese repo).
@@ -185,6 +185,18 @@ El volumen de Railway se conecta **a un solo servicio**, y el HTML tiene que que
 - **Repositorio de recomendaciones y lectura temprana:** el armado todavía los escribe en `app/repositorio/` del código, que en Railway se borra al reiniciar. Pasarlos a la base es de Recomendaciones.
 - **El aviso en pantalla** "Sin dato de hoy": la app todavía no lee `estado.json`; lo muestra Interfaz.
 <!-- ===== FIN SECCIÓN: Actualización diaria ===== -->
+
+<!-- ===== SECCIÓN: Rearmado al desplegar código nuevo (Interfaz, 15/10/2026) ===== -->
+## Rearmado al desplegar código nuevo
+
+Para que un cambio de la app se vea enseguida, sin esperar a las 10:30 ni gastar BigQuery:
+- Cuando el servidor arranca (por ejemplo, tras un despliegue), compara la **versión del código** con la que quedó anotada en `estado.json` (campo `codigo_version`: es el `RAILWAY_GIT_COMMIT_SHA`; en la compu, el hash de git; si no hay ninguno, un hash de los archivos de `app/` y `borrador/`).
+- Si hay HTML armado y datos guardados (`_proyectos.json`) pero el código es otro, lanza **una vez** `node actualizar.js --solo-armar` como proceso aparte. Rearma con los datos que ya están en el volumen, corre los mismos controles (parches N de N, proyectos con campañas, prueba de contrato en `problemas 0`) y cambia el HTML de forma atómica. **Mientras tanto se sigue sirviendo la versión anterior**; si algo falla, queda la versión anterior y el error en el registro.
+- No se lanza si ya corre otra actualización, ni si `ACTUALIZACION_AUTOMATICA=0`, ni si ese mismo código ya falló al rearmar (para no repetirlo en cada reinicio; se mira el error y se vuelve a intentar con el siguiente despliegue, o a mano). Si toca la actualización completa (después de las 10:30 sin corrida buena de hoy), sale esa, que ya arma todo. Sin datos guardados, sigue la lógica de siempre (actualización completa).
+- A mano: `node actualizar.js --solo-armar` en el servicio. Tarda unos **8 minutos** (armado 1 min; la prueba de contrato, 7 min), con un pico de **3,4 GB** de memoria, y **0 GB de BigQuery** (medido en la compu el 15/10).
+- Deja rastro en `estado.json` (`codigo_version`, `version`, y `ultimo_solo_armar` con resultado y error) y una línea `tipo: "solo-armar"` en `actualizaciones.jsonl` (solo archivo, no la tabla de la base). No toca `ultimo_ok_dia` ni `ultima_corrida`, así que no cuenta como corrida del día. El rearmado no vuelve a hacer `rendimiento-piezas.json` (no depende de la app).
+- `/salud` suma `actualizacion: { corriendo, ultima: { resultado, termino, datos_hasta } }` (más `tipo` y `desde` mientras corre). Sin errores, rutas ni consumo. `resultado` es `ok`, `fallo` o `sin_dato_de_hoy`.
+<!-- ===== FIN SECCIÓN: Rearmado al desplegar código nuevo ===== -->
 
 ## Si PAUTADOR falla (accesos)
 - **Clave rechazada (401/403):** nadie entra; el registro del servidor dice "PAUTADOR rechazó la clave del servicio" y `/salud` muestra `"accesos":"degradado"`. Revisar `NEXO_CLAVE` y la del lado de PAUTADOR.

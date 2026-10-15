@@ -7,6 +7,9 @@
 //   node actualizar.js --manual        igual, pero se registra como tipo "manual"
 //   node actualizar.js --forzar        corre aunque hoy ya haya una corrida buena
 //   node actualizar.js --solo-verificar   solo mira si ayer está completo en DataJunta (no baja ni arma nada)
+//   node actualizar.js --solo-armar    rearma la app con los datos ya guardados (_proyectos.json del volumen), sin BigQuery: lo lanza el
+//                                      servidor al arrancar cuando el código cambió (estado.json.codigo_version). Mismos controles y cambio
+//                                      atómico; si falla queda la versión anterior. No es una corrida diaria: no toca ultimo_ok_dia ni ultima_corrida.
 //
 // Pasos (cada uno en su proceso, con el medidor infra/medir-bq.js que suma los GB de BigQuery y la memoria):
 //   1. Verificar que ayer esté completo en DataJunta (los dos canales). Si no: "sin dato de hoy", se queda la versión anterior.
@@ -26,6 +29,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
+const { codigoVersion } = require('./servidor/codigo-version');
 
 const RAIZ = __dirname;
 // HTML_ARMADO = ruta del HTML que sirve el servidor (la misma variable que lee servidor/config.js). Con ella (Railway), todo lo de la
@@ -183,6 +187,77 @@ function anotarArchivo(reg) {
 // Resumen de lo que dejaron los pasos, para el registro y el informe.
 const gb = (bytes) => Math.round(bytes / 1e9 * 1000) / 1000;
 
+// ---------- --solo-armar: rearmar con los datos ya guardados (sin BigQuery) ----------
+// Se llama con el candado ya tomado. Devuelve el código de salida. Deja el rastro en el registro (tipo "solo-armar") y en
+// estado.json.ultimo_solo_armar; si salió bien, también estado.json.codigo_version (con qué código quedó armado lo que se sirve).
+async function soloArmar() {
+  const t0 = Date.now();
+  const estadoPrevio = leerJson(ESTADO, {});
+  const codigo = codigoVersion();
+  const reg = { tipo: 'solo-armar', empezo: ahoraISO(), pasos: [], maxRssMb: 0 };
+  const pasos = reg.pasos;
+  const sumar = (r) => { reg.maxRssMb = Math.max(reg.maxRssMb, r.maxRssMb || 0); pasos.push({ paso: r.nombre, ok: r.codigo === 0, ms: r.ms, memoria_mb: r.maxRssMb }); };
+  let resultado = 'fallo', error = null, version = null, datosHasta = null, proys = null; const controles = { codigo };
+  try {
+    log(`Rearmado con los datos guardados (código ${codigo}); no se consulta BigQuery.`);
+    if (!fs.existsSync(RUTAS.proyectos)) throw new Error('No hay datos guardados (falta ' + path.basename(RUTAS.proyectos) + '): hace falta una actualización completa.');
+    fs.mkdirSync(NUEVO, { recursive: true });
+    borrar(NUEVO_HTML);
+
+    log('1. Armando la app...');
+    let r = await correr('armar', 'armar.js', [], { env: { SEGUIMIENTO_PROYECTOS: RUTAS.proyectos, SEGUIMIENTO_SALIDA: NUEVO_HTML }, cwd: path.join(RAIZ, 'app') });
+    sumar(r);
+    if (r.codigo !== 0) throw Object.assign(new Error('El armado falló: ' + r.salida.trim().split('\n').slice(-3).join(' | ')), { salida: r.salida });
+    const armado = r.salida;
+
+    log('2. Controles antes de cambiar de versión...');
+    const pm = armado.match(/parches aplicados (\d+)\/(\d+)/);
+    controles.parches = pm ? `${pm[1]}/${pm[2]}` : null;
+    if (!pm || pm[1] !== pm[2]) throw new Error(`Parches de markup: ${controles.parches || 'sin dato'} (tienen que ser N/N).`);
+    const hm = armado.match(/datos al (\d{4}-\d{2}-\d{2})/);
+    datosHasta = hm ? hm[1] : estadoPrevio.datos_hasta || null;
+    controles.datosHasta = datosHasta;
+    proys = proyectosDelArmado(armado);
+    controles.proyectosConCampanias = Object.keys(proys).filter((k) => proys[k] > 0).length;
+    const antes = estadoPrevio.proyectos || {};
+    const perdidos = Object.keys(antes).filter((k) => antes[k] > 0 && !(proys[k] > 0));
+    if (!controles.proyectosConCampanias) throw new Error('El armado no dejó ningún proyecto con campañas.');
+    if (perdidos.length) throw new Error('Proyectos que tenían campañas y ahora no tienen datos: ' + perdidos.join(', '));
+    r = await correr('contrato', path.join('app', 'pruebas', 'contrato.js'), [], { env: { SEGUIMIENTO_SALIDA: NUEVO_HTML } });
+    sumar(r);
+    const pc = r.salida.match(/problemas (\d+)/);
+    controles.contrato = pc ? `problemas ${pc[1]}` : 'sin resultado';
+    if (r.codigo !== 0 || !pc || pc[1] !== '0') throw Object.assign(new Error(`La prueba de contrato no dio "problemas 0" (${controles.contrato}).`), { salida: r.salida });
+
+    log('3. Cambiando de versión...');
+    version = `${datosHasta || 'sin-fecha'}@${ahoraISO().slice(0, 16)}`;
+    promover(NUEVO_HTML, RUTAS.html);   // solo el HTML: los datos no cambiaron
+    resultado = 'ok';
+    log(`Versión nueva en servicio con los mismos datos (${version}).`);
+    return 0;
+  } catch (e) {
+    error = String(e && e.message || e).slice(0, 1500);
+    reg.salidaDelPasoQueFallo = e && e.salida ? String(e.salida).slice(-3000) : undefined;
+    log('FALLÓ: ' + error + ' — se sigue sirviendo la versión anterior.');
+    return 1;
+  } finally {
+    borrar(NUEVO);
+    const duracion = Date.now() - t0, ok = resultado === 'ok';
+    anotarArchivo({ id: `${Date.now()}-${process.pid}`, tipo: 'solo-armar', empezo: reg.empezo, termino: ahoraISO(), resultado: ok ? 'ok' : 'fallo', datos_hasta: ok ? datosHasta : null,
+      version, duracion_ms: duracion, memoria_mb: reg.maxRssMb, error: ok ? null : error, codigo_version: codigo, detalle: { pasos, controles } });
+    try {
+      const actual = leerJson(ESTADO, estadoPrevio) || {};   // se vuelve a leer: es lo último escrito
+      escribirAtomico(ESTADO, JSON.stringify({
+        ...actual, actualizado: ahoraISO(),
+        ...(ok ? { version, codigo_version: codigo, datos_hasta: actual.datos_hasta || datosHasta, proyectos: proys && Object.keys(proys).length ? proys : actual.proyectos || null } : {}),
+        ultimo_solo_armar: { resultado: ok ? 'ok' : 'fallo', empezo: reg.empezo, termino: ahoraISO(), duracion_ms: duracion, codigo_version: codigo, error: ok ? null : error },
+      }, null, 1));
+    } catch (e) { console.error('No se pudo escribir estado.json:', e.message); }
+    log(`Rearmado ${ok ? 'ok' : 'fallo'} · ${Math.round(duracion / 1000)} s · memoria máxima de un paso ${reg.maxRssMb} MB`);
+    soltarCandado();
+  }
+}
+
 async function main() {
   const tipo = ARGS.has('--manual') ? 'manual' : 'diaria';
   const t0 = Date.now();
@@ -190,6 +265,7 @@ async function main() {
   const hoy = hoyAR();
 
   if (!tomarCandado()) { log('Ya hay una corrida en curso: no se hace nada.'); return 0; }
+  if (ARGS.has('--solo-armar')) return soloArmar();
   if (!ARGS.has('--forzar') && !ARGS.has('--solo-verificar') && estadoPrevio.ultimo_ok_dia === hoy) {
     log(`Hoy (${hoy}) ya hay una corrida buena; no se repite (usar --forzar para repetirla).`);
     soltarCandado();
@@ -322,7 +398,8 @@ async function main() {
       const servido = ok ? datosHasta : estadoPrevio.datos_hasta || null;
       const ayer = sumarDias(hoy, -1);
       escribirAtomico(ESTADO, JSON.stringify({
-        actualizado: ahoraISO(), hoy, datos_hasta: servido, version: ok ? version : estadoPrevio.version || null,
+        actualizado: ahoraISO(), hoy, datos_hasta: servido, version: ok ? version : estadoPrevio.version || null, codigo_version: ok ? codigoVersion() : estadoPrevio.codigo_version || null,
+        ...(estadoPrevio.ultimo_solo_armar ? { ultimo_solo_armar: estadoPrevio.ultimo_solo_armar } : {}),
         sin_dato_de_hoy: !servido || servido < ayer,
         aviso: !servido ? 'Sin datos' : servido < ayer ? `Sin dato de hoy: los números son al ${dmy(servido)}` : null,
         ultimo_ok_dia: ok ? hoy : estadoPrevio.ultimo_ok_dia || null, ultimo_ok: ok ? ahoraISO() : estadoPrevio.ultimo_ok || null,
@@ -338,4 +415,4 @@ async function main() {
 if (require.main === module) {
   main().then((codigo) => process.exit(codigo), (e) => { console.error('ERROR inesperado:', e && e.stack || e); soltarCandado(); process.exit(1); });
 }
-module.exports = { main, verificarAyer, filasDeLaExtraccion, proyectosDelArmado, escribirAtomico, promover, hoyAR, sumarDias, RUTAS };
+module.exports = { main, soloArmar, verificarAyer, filasDeLaExtraccion, proyectosDelArmado, escribirAtomico, promover, hoyAR, sumarDias, RUTAS };

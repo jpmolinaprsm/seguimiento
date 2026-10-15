@@ -12,7 +12,7 @@ const { crearVistas, esProyecto } = require('./servidor/vista');
 const { crearNexo } = require('./nexo/cliente');
 const { crearAlmacen } = require('./base/almacen');
 const { construirAlias, oficialDe } = require('./app/alias-campanas');
-const { crearDisparador, crearAviso } = require('./servidor/actualizacion');
+const { crearDisparador, crearAviso, arDe } = require('./servidor/actualizacion');
 
 const MAX_RESPUESTA = 20 * 1024, MAX_NEXO = 50 * 1024;
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -36,7 +36,9 @@ function crearServidor(opciones = {}) {
   const nexo = opciones.nexo || crearNexo({ accesos: accesosDe, repositorio: almacen.nexo });   // el registro de pedidos va al mismo almacen: base en Railway, archivo en local
   const aliasCamp = opciones.aliasCampanas || construirAlias();   // nombres viejos de campaña → oficial (borrador/nombres-oficiales.js)
   const avisoDeHoy = opciones.aviso || crearAviso({ rutaEstado: cfg.estadoActualizacion });
-  const disparador = opciones.disparador || crearDisparador({ rutaEstado: cfg.estadoActualizacion, log });
+  const disparador = opciones.disparador || crearDisparador({ rutaEstado: cfg.estadoActualizacion, rutaHtml: cfg.htmlArmado, rutaProyectos: cfg.proyectosGuardados, log });
+  // { corriendo, desde?, tipo?, ultima: { resultado, termino, datos_hasta } }: sin datos sensibles
+  const resumenActualizacion = () => { try { return disparador.resumen ? disparador.resumen() : { corriendo: !!(disparador.corriendo && disparador.corriendo()), ultima: null }; } catch (e) { return { corriendo: false, ultima: null }; } };
   if (cfg.usuarioPrueba) log('ATENCIÓN: modo prueba con usuario falso (solo vale fuera de producción)');
 
   const cabeceras = (extra = {}) => ({
@@ -78,7 +80,7 @@ function crearServidor(opciones = {}) {
     const api = ruta.startsWith('/api/');
 
     // ---- públicas ----
-    if (req.method === 'GET' && ruta === '/salud') return json(res, 200, { ok: true, accesos: accesosDe.salud && accesosDe.salud().degradado ? 'degradado' : 'ok' });   // sin datos sensibles
+    if (req.method === 'GET' && ruta === '/salud') return json(res, 200, { ok: true, accesos: accesosDe.salud && accesosDe.salud().degradado ? 'degradado' : 'ok', actualizacion: resumenActualizacion() });   // sin datos sensibles
     if (req.method === 'GET' && ruta === '/entrar') return pantallaEntrar(res, 200, url.searchParams.get('error') ? 'No se pudo entrar. Probá de nuevo con tu cuenta de la empresa.' : '');
     if (req.method === 'GET' && ruta === '/auth/google') {
       if (!google.habilitado) return pagina(res, 503, 'Inicio de sesión no disponible', '<p>El inicio de sesión con Google no está configurado.</p>');
@@ -119,6 +121,14 @@ function crearServidor(opciones = {}) {
     let vista;
     try { vista = await vistas.paraPermisos(permisos); } catch (e) {
       log('no se pudo armar la vista: ' + e.message);
+      // primer arranque con una corrida en curso: se avisa que se están armando los datos, con la hora de inicio
+      const act = e.codigo === 'sin_armado' ? resumenActualizacion() : null;
+      if (act && act.corriendo) {
+        const m = arDe(Date.parse(act.desde)).min, hora = `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+        const msg = 'Se están armando los datos. Volvé en unos minutos.';
+        return api ? json(res, 503, { error: msg, armando_desde: act.desde })
+          : pagina(res, 503, 'Armando los datos', `<p>${msg}</p><p>Empezó a las ${hora} (hora de Argentina).</p>`, { 'Retry-After': '60' });
+      }
       return api ? json(res, 503, { error: 'Todavía no hay datos armados' }) : pagina(res, 503, 'Sin datos todavía', '<p>Optimización todavía no tiene datos armados. Probá en un rato.</p>');
     }
     if (!vista) return api ? json(res, 403, { error: 'No tenés proyectos asignados' }) : pagina(res, 403, 'Sin proyectos', '<p>Tu usuario no tiene proyectos del tablero asignados.</p>');

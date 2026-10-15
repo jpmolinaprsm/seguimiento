@@ -51,9 +51,9 @@ const LISTA = [
 const sesionesPrueba = crearSesiones({ secreto: SECRETO, seguro: false });
 const cookieDe = (email) => 'syo_sesion=' + sesionesPrueba.crearValor({ email, nombre: email });
 
-async function levantar({ accesos, env = {}, google, nexo, aliasCampanas } = {}) {
+async function levantar({ accesos, env = {}, google, nexo, aliasCampanas, disparador } = {}) {
   const cfg = leerConfig({ SESSION_SECRET: SECRETO, GOOGLE_CLIENT_ID: 'x', GOOGLE_CLIENT_SECRET: 'x', AUTH_DOMINIO: 'empresa.test', URL_BASE: 'http://localhost', HTML_ARMADO: rutaHtml, DATOS_DIR: path.join(tmp, 'datos' + Math.random()), SUPABASE_URL: '', ...env });
-  const s = crearServidor({ cfg, log: () => {}, almacen: crearAlmacen({ tipo: 'archivo', carpeta: cfg.datosDir }), google, ...(nexo ? { nexo } : {}), ...(aliasCampanas ? { aliasCampanas } : {}), accesosDe: accesos || crearAccesosDe({ cliente: null, lista: accesosDeLista(LISTA) }) });
+  const s = crearServidor({ cfg, log: () => {}, almacen: crearAlmacen({ tipo: 'archivo', carpeta: cfg.datosDir }), google, ...(nexo ? { nexo } : {}), ...(aliasCampanas ? { aliasCampanas } : {}), ...(disparador ? { disparador } : {}), accesosDe: accesos || crearAccesosDe({ cliente: null, lista: accesosDeLista(LISTA) }) });
   await new Promise((r) => s.listen(0, '127.0.0.1', r));
   const base = 'http://127.0.0.1:' + s.address().port;
   const pedir = async (ruta, { cookie, metodo = 'GET', cuerpo, headers = {} } = {}) => {
@@ -69,7 +69,7 @@ const datosDe = (texto) => { const f = path.join(tmp, 'v' + Math.random() + '.ht
 
   console.log('1. /salud y pantalla de entrada: sin datos');
   let r = await A.pedir('/salud');
-  ok(r.status === 200 && JSON.parse(r.texto).ok === true && JSON.parse(r.texto).accesos === 'ok' && Object.keys(JSON.parse(r.texto)).length === 2, '/salud responde solo {ok, accesos} (sin datos)');
+  ok(r.status === 200 && JSON.parse(r.texto).ok === true && JSON.parse(r.texto).accesos === 'ok' && Object.keys(JSON.parse(r.texto)).sort().join() === 'accesos,actualizacion,ok' && !/OFICIAL_|Alfa/.test(r.texto), '/salud responde solo {ok, accesos, actualizacion} (sin datos)');
   r = await A.pedir('/entrar');
   ok(r.status === 200 && /Entrar con Google/.test(r.texto) && !/OFICIAL_|Alfa/.test(r.texto), '/entrar muestra el botón y ningún dato');
 
@@ -333,6 +333,60 @@ const datosDe = (texto) => { const f = path.join(tmp, 'v' + Math.random() + '.ht
   for (let i = 0; i < 100 && DR.corriendo(); i++) await new Promise((x) => setTimeout(x, 50));
   ok(DR.corriendo() === false && logsR.some((l) => l.includes('termino')), 'al terminar queda registrado');
   ok(typeof A.s.disparador.revisar === 'function' && A.s.disparador.activo === false, 'el servidor trae el disparador, apagado fuera de producción');
+
+  console.log('12b. rearmado al arrancar con código nuevo (--solo-armar), reloj y procesos simulados');
+  const dirS = fs.mkdtempSync(path.join(tmp, 'rearm-')); const estS = path.join(dirS, 'actualizacion', 'estado.json'); fs.mkdirSync(path.dirname(estS), { recursive: true });
+  const htmlS = path.join(dirS, 'armado.html'), proyS = path.join(dirS, '_proyectos.json');
+  const ponerS = (o) => fs.writeFileSync(estS, JSON.stringify(o));
+  const crearS = (extra = {}) => { const c = { completas: 0, solo: 0 }; const D = crearDisparador({ rutaEstado: estS, rutaHtml: htmlS, rutaProyectos: proyS, codigo: () => 'v2', reloj: () => utc('2026-10-14', '11:00'),
+    lanzar: () => { c.completas++; return falso(); }, lanzarSoloArmar: () => { c.solo++; return falso(); }, env: { NODE_ENV: 'production' }, cadaMs: 3600000, ...extra }); return { c, D }; };
+  fs.writeFileSync(htmlS, 'x'); fs.writeFileSync(proyS, '{}');
+  ponerS({ ultimo_ok_dia: '2026-10-14', codigo_version: 'v1', datos_hasta: '2026-10-13' });
+  let X = crearS(); ok(X.D.rearmarSiCambioElCodigo().lanzo === true && X.c.solo === 1 && X.c.completas === 0 && X.D.corriendo() === true, 'código distinto, con HTML y datos guardados: lanza el rearmado (y no la corrida completa)');
+  ok(X.D.rearmarSiCambioElCodigo().lanzo === false && X.c.solo === 1, 'una sola vez por arranque');
+  ultimoProc.emit('close', 0); ok(X.D.corriendo() === false, 'al terminar queda libre');
+  ponerS({ ultimo_ok_dia: '2026-10-14', codigo_version: 'v2' }); X = crearS(); ok(X.D.rearmarSiCambioElCodigo().motivo === 'codigo_al_dia' && X.c.solo === 0, 'mismo código que el último armado: no hace nada');
+  ponerS({ ultimo_ok_dia: '2026-10-14' }); X = crearS(); ok(X.D.rearmarSiCambioElCodigo().lanzo === true, 'estado.json sin codigo_version (anterior a esta función): rearma'); ultimoProc.emit('close', 0);
+  ponerS({ codigo_version: 'v1', ultimo_solo_armar: { resultado: 'fallo', codigo_version: 'v2' } }); X = crearS(); ok(X.D.rearmarSiCambioElCodigo().motivo === 'ya_fallo_con_este_codigo' && X.c.solo === 0, 'si este mismo código ya falló al rearmar, no se repite en cada reinicio');
+  ponerS({ codigo_version: 'v1', ultimo_solo_armar: { resultado: 'fallo', codigo_version: 'v0' } }); X = crearS(); ok(X.D.rearmarSiCambioElCodigo().lanzo === true, 'un fallo de un código anterior no impide probar con el nuevo'); ultimoProc.emit('close', 1);
+  ponerS({ codigo_version: 'v1' }); fs.rmSync(proyS); X = crearS(); ok(X.D.rearmarSiCambioElCodigo().motivo === 'sin_datos_guardados' && X.c.solo === 0, 'sin datos guardados: no rearma (sigue la lógica de hoy)');
+  fs.writeFileSync(proyS, '{}'); fs.rmSync(htmlS); X = crearS(); ok(X.D.rearmarSiCambioElCodigo().motivo === 'sin_datos_guardados', 'sin HTML armado: tampoco');
+  fs.writeFileSync(htmlS, 'x');
+  // iniciar(): antes de las 10:30 y con código nuevo → rearmado; pasadas las 10:30 sin corrida buena → la completa (que ya rearma todo)
+  ponerS({ ultimo_ok_dia: '2026-10-13', codigo_version: 'v1' }); X = crearS({ reloj: () => utc('2026-10-14', '11:00') }); X.D.iniciar(); X.D.detener();
+  ok(X.c.solo === 1 && X.c.completas === 0, 'al arrancar a las 08:00 con código nuevo: rearmado, no corrida completa'); ultimoProc.emit('close', 0);
+  X = crearS({ reloj: () => utc('2026-10-14', '14:00') }); X.D.iniciar(); X.D.detener();
+  ok(X.c.completas === 1 && X.c.solo === 0, 'al arrancar a las 11:00 sin corrida buena de hoy: sale la completa y no se suma el rearmado'); ultimoProc.emit('close', 0);
+  ponerS({ ultimo_ok_dia: '2026-10-14', codigo_version: 'v1' }); X = crearS({ reloj: () => utc('2026-10-14', '14:00') }); X.D.iniciar(); X.D.detener();
+  ok(X.c.completas === 0 && X.c.solo === 1, 'al arrancar con corrida buena de hoy y código nuevo: solo el rearmado'); ultimoProc.emit('close', 0);
+  X = crearS({ env: { NODE_ENV: 'production', ACTUALIZACION_AUTOMATICA: '0' } }); ok(X.D.iniciar() === false && X.c.solo === 0, 'con ACTUALIZACION_AUTOMATICA=0 tampoco rearma');
+  // mientras rearma, la corrida de las 10:30 espera (no se pisan)
+  ponerS({ ultimo_ok_dia: '2026-10-13', codigo_version: 'v1' }); let tt = utc('2026-10-14', '11:00'); X = crearS({ reloj: () => tt }); X.D.rearmarSiCambioElCodigo(); tt = utc('2026-10-14', '13:30');
+  ok(X.D.revisar().motivo === 'ya_corre' && X.c.completas === 0, 'si el rearmado sigue corriendo a las 10:30, la completa espera'); ultimoProc.emit('close', 0);
+  ok(X.D.revisar().lanzo === true && X.c.completas === 1, 'y sale apenas termina'); ultimoProc.emit('close', 0);
+  // resumen para /salud: sin errores ni rutas
+  ponerS({ datos_hasta: '2026-10-13', ultima_corrida: { resultado: 'fallo', sin_dato_de_hoy: false, termino: '2026-10-14T13:40:00Z', error: 'SECRETO C:\\ruta\\interna', gb_bigquery: 6 } });
+  X = crearS(); let rs = X.D.resumen(); ok(rs.corriendo === false && rs.ultima.resultado === 'fallo' && rs.ultima.datos_hasta === '2026-10-13' && !JSON.stringify(rs).includes('SECRETO'), 'resumen: última corrida sin el texto del error');
+  ponerS({ datos_hasta: '2026-10-13', ultima_corrida: { resultado: 'fallo', sin_dato_de_hoy: true, termino: '2026-10-14T13:40:00Z' } }); ok(X.D.resumen().ultima.resultado === 'sin_dato_de_hoy', 'resumen: "sin dato de hoy" se distingue de un error');
+  fs.rmSync(estS); ok(X.D.resumen().ultima.resultado === null && X.D.resumen().corriendo === false, 'resumen sin estado.json: vacío, sin romper');
+  ponerS({ codigo_version: 'v1' }); X.D.rearmarSiCambioElCodigo(); rs = X.D.resumen(); ok(rs.corriendo === true && rs.tipo === 'solo-armar' && rs.desde === '2026-10-14T11:00:00.000Z', 'resumen mientras corre: tipo y hora de inicio'); ultimoProc.emit('close', 0);
+
+  console.log('12c. primer arranque: pantalla "Se están armando los datos" y /salud con la actualización');
+  const htmlNo = path.join(tmp, 'todavia-no-hay', 'armado.html');
+  const dirP = fs.mkdtempSync(path.join(tmp, 'primer-')); const estP = path.join(dirP, 'estado.json');
+  const dispP = crearDisparador({ rutaEstado: estP, reloj: () => utc('2026-10-14', '14:05'), lanzar: falso, env: { NODE_ENV: 'production' } });
+  const P0 = await levantar({ env: { HTML_ARMADO: htmlNo }, disparador: dispP }); const ca = cookieDe('admin@empresa.test');
+  r = await P0.pedir('/', { cookie: ca }); ok(r.status === 503 && /Sin datos todavía/.test(r.texto) && !/Se están armando/.test(r.texto), 'sin HTML y sin corrida en curso: "Sin datos todavía"');
+  r = await P0.pedir('/salud'); let sl = JSON.parse(r.texto); ok(r.status === 200 && sl.ok === true && sl.actualizacion.corriendo === false && 'ultima' in sl.actualizacion, '/salud trae actualizacion { corriendo, ultima }');
+  fs.writeFileSync(estP, JSON.stringify({ datos_hasta: '2026-10-13', ultima_corrida: { resultado: 'ok', termino: '2026-10-13T13:50:00Z', error: null, gb_bigquery: 6.4 } }));
+  r = await P0.pedir('/salud'); sl = JSON.parse(r.texto); ok(sl.actualizacion.ultima.resultado === 'ok' && sl.actualizacion.ultima.termino === '2026-10-13T13:50:00Z' && sl.actualizacion.ultima.datos_hasta === '2026-10-13' && Object.keys(sl.actualizacion.ultima).length === 3, '/salud: última corrida con resultado, cuándo terminó y datos hasta (nada más)');
+  dispP.revisar();   // 11:05 de Argentina, sin corrida buena de hoy: lanza la completa (simulada)
+  r = await P0.pedir('/', { cookie: ca });
+  ok(r.status === 503 && /Se están armando los datos\. Volvé en unos minutos\./.test(r.texto) && /11:05/.test(r.texto) && !/Sin datos todavía/.test(r.texto), 'con una corrida en curso: "Se están armando los datos. Volvé en unos minutos." con la hora de inicio (11:05)');
+  r = await P0.pedir('/api/yo', { cookie: ca }); ok(r.status === 503 && /armando/.test(r.texto), 'la API también avisa que se están armando');
+  r = await P0.pedir('/salud'); sl = JSON.parse(r.texto); ok(sl.actualizacion.corriendo === true && !JSON.stringify(sl).includes('gb_bigquery'), '/salud: corriendo true, sin datos de consumo');
+  ultimoProc.emit('close', 0); r = await P0.pedir('/', { cookie: ca }); ok(/Sin datos todavía/.test(r.texto), 'al terminar la corrida sin dejar HTML, vuelve el aviso de siempre');
+  await P0.cerrar();
 
   console.log('13. nombres viejos de campaña → oficial (tipos, comentarios y decisiones guardados)');
   const AC = require('../alias-campanas');

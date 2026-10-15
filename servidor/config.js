@@ -31,6 +31,8 @@ function leerConfig(env = process.env) {
     datosDir: datos,
     // dónde deja actualizar.js el estado de la última corrida (la misma regla que usa él)
     estadoActualizacion: limpio(env.HTML_ARMADO) ? path.join(path.dirname(path.resolve(limpio(env.HTML_ARMADO))), 'actualizacion', 'estado.json') : path.join(__dirname, '..', 'infra', 'registro', 'estado.json'),
+    // los datos guardados con los que actualizar.js arma (junto al HTML en el volumen; en local, borrador/)
+    proyectosGuardados: limpio(env.HTML_ARMADO) ? path.join(path.dirname(path.resolve(limpio(env.HTML_ARMADO))), '_proyectos.json') : path.join(__dirname, '..', 'borrador', '_proyectos.json'),
     htmlArmado: limpio(env.HTML_ARMADO) || path.join(__dirname, '..', 'app', 'Seguimiento y Optimizacion.html'),
     // el modo prueba NUNCA existe en producción, aunque la variable esté puesta
     usuarioPrueba: produccion ? '' : limpio(env.MODO_PRUEBA_USUARIO).toLowerCase(),
