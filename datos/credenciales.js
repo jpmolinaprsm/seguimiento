@@ -28,6 +28,12 @@ function opcionesAuth(uso, scopes) {
     }
     return { credentials, scopes };
   }
+  // En Railway (o con NODE_ENV=production) no hay archivo local: si falta la variable, decirlo claro en vez de buscar
+  // un archivo de la compu de Juan Pablo (15/10/2026: faltaba SHEETS_CREDENTIALS_JSON y el error hablaba de /pautador/credentials).
+  const enServidor = process.env.NODE_ENV === 'production' || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.RAILWAY_ENVIRONMENT_NAME;
+  if (enServidor && !process.env[VARIABLE_RUTA[uso]]) {
+    throw new Error(`Falta la variable ${VARIABLE[uso]} en Railway (o está vacía): cargarla con el texto completo del JSON de la cuenta de servicio y volver a desplegar.`);
+  }
   const keyFile = process.env[VARIABLE_RUTA[uso]] ? path.resolve(process.env[VARIABLE_RUTA[uso]]) : ARCHIVO_LOCAL[uso];
   return { keyFile, scopes };
 }

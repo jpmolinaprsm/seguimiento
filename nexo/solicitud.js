@@ -56,8 +56,8 @@ const NO_ENCAJAN = {
   'Sin entrega': A_MANO + 'hay que revisar en el administrador de anuncios si hay rechazos, anuncios en revisión o falta presupuesto.',
   'Apagón': A_MANO + 'hay que revisar las cuentas del activo (anuncios pausados, rechazados o sin presupuesto).',
   'Pico': A_MANO + 'hay que confirmar que el aumento de gasto sea intencional.',
-  'Placements débiles': A_MANO + 'sacar placements cambia la segmentación, y desde el Tablero de optimización solo se puede pausar o cambiar el presupuesto.',
-  'Sumar Facebook Reels': A_MANO + 'sumar un placement cambia la segmentación, y desde el Tablero de optimización solo se puede pausar o cambiar el presupuesto.',
+  'Placements débiles': A_MANO + 'sacar placements cambia la segmentación, y desde Optimización solo se puede pausar o cambiar el presupuesto.',
+  'Sumar Facebook Reels': A_MANO + 'sumar un placement cambia la segmentación, y desde Optimización solo se puede pausar o cambiar el presupuesto.',
   'Genera conversación': A_MANO + 'los comentarios se leen y se moderan desde la página.',
   'Costo por objetivo': A_MANO + 'hay que revisar la pieza, la audiencia y la puja de esa red.',
   'Se abandona temprano': A_MANO + 'hay que revisar el comienzo del video (los primeros segundos).',
@@ -73,10 +73,10 @@ const fechaCorta = (x) => {   // 'AAAA-MM-DD' o fecha y hora → 'dd/mm' (con ho
   return dia.slice(8, 10) + '/' + dia.slice(5, 7);
 };
 const TEXTO = {
-  otraPlataforma: (p) => A_MANO + `desde el Tablero de optimización los cambios son solo para Meta; en ${p} se hacen en la plataforma.`,                // N5
+  otraPlataforma: (p) => A_MANO + `desde Optimización los cambios son solo para Meta; en ${p} se hacen en la plataforma.`,                // N5
   sinPiezaPeor: A_MANO + 'no hay una pieza claramente peor para pausar; revisar la pieza y la audiencia, y pausar si en 2 días no mejora.', // N5
   sinIdsAnuncio: A_MANO + 'no encontramos estos conjuntos en Meta (faltan los ids de sus anuncios).',                                  // N5
-  fueraDelCatalogo: A_MANO + 'desde el Tablero de optimización solo se puede pausar o cambiar el presupuesto.',
+  fueraDelCatalogo: A_MANO + 'desde Optimización solo se puede pausar o cambiar el presupuesto.',
   sinConjuntos: A_MANO + 'la recomendación no dice qué conjuntos tocar.',
   // N7: un nombre con varios conjuntos en Meta
   variosSinDato: (n) => A_MANO + `hay ${n} conjuntos con este nombre en Meta y no tenemos cuándo gastó cada uno, así que no sabemos a cuál aplicar el cambio.`,

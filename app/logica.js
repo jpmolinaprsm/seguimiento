@@ -1,4 +1,4 @@
-// Lógica del "Tablero de optimización" sobre el diseño curado (Claude Design). Se inyecta después de `const DATA = …`
+// Lógica de "Optimización" sobre el diseño curado (Claude Design). Se inyecta después de `const DATA = …`
 // en el script text/x-dc del bundle. Produce exactamente los valores que el markup del diseño (y los parches) interpolan.
 const COL = { g: '#46C678', y: '#FCB942', o: '#F98C3E', r: '#F7444C', n: '#D5D5D5' };
 const COLN = { verde: COL.g, amarillo: COL.y, naranja: COL.o, rojo: COL.r, gris: COL.n };
@@ -1398,7 +1398,7 @@ class Component extends DCLogic {
   }
   exportar() {
     const s = this.state, hoy = new Date().toISOString().slice(0, 10);
-    const L = [`# Comentarios sobre el Tablero de optimización (${hoy})`, '', `Datos al ${dm(DATA.datosHasta)}.`, '', '## Recomendaciones', ''];
+    const L = [`# Comentarios sobre Optimización (${hoy})`, '', `Datos al ${dm(DATA.datosHasta)}.`, '', '## Recomendaciones', ''];
     let n = 0;
     for (const p of DATA.proyectos) for (const [canal, b] of Object.entries(p.canales)) for (const a of b.acciones) {
       const x = s.st[a.id]; if (!x || !(x.status && x.status !== 'pending' || x.op || x.comment)) continue; n++;

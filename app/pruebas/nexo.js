@@ -935,8 +935,8 @@ async function main() {
     'Sin entrega': 'Se hace a mano: hay que revisar en el administrador de anuncios si hay rechazos, anuncios en revisión o falta presupuesto.',
     'Apagón': 'Se hace a mano: hay que revisar las cuentas del activo (anuncios pausados, rechazados o sin presupuesto).',
     'Pico': 'Se hace a mano: hay que confirmar que el aumento de gasto sea intencional.',
-    'Placements débiles': 'Se hace a mano: sacar placements cambia la segmentación, y desde el Tablero de optimización solo se puede pausar o cambiar el presupuesto.',
-    'Sumar Facebook Reels': 'Se hace a mano: sumar un placement cambia la segmentación, y desde el Tablero de optimización solo se puede pausar o cambiar el presupuesto.',
+    'Placements débiles': 'Se hace a mano: sacar placements cambia la segmentación, y desde Optimización solo se puede pausar o cambiar el presupuesto.',
+    'Sumar Facebook Reels': 'Se hace a mano: sumar un placement cambia la segmentación, y desde Optimización solo se puede pausar o cambiar el presupuesto.',
     'Genera conversación': 'Se hace a mano: los comentarios se leen y se moderan desde la página.',
     'Costo por objetivo': 'Se hace a mano: hay que revisar la pieza, la audiencia y la puja de esa red.',
     'Se abandona temprano': 'Se hace a mano: hay que revisar el comienzo del video (los primeros segundos).',
@@ -948,7 +948,7 @@ async function main() {
   }
   ok(Object.keys(N.NO_ENCAJAN).length === Object.keys(esperados).length, 'N5: no quedó ninguna tarea manual con el texto viejo');
   ok(Object.values(N.NO_ENCAJAN).concat(Object.values(N.TEXTO).filter((x) => typeof x === 'string')).every((t) => !/catálogo|v0\.3|D6|reglas/i.test(t)), 'N5: sin jerga (catálogo, reglas v0.3, D6)');
-  ok(N.aSolicitud(tarjeta('Mejor momento', [conj(C_A, ['900000000000001'])], { id: 'n5-yt', plataforma: 'YouTube' }), CTX).motivo === 'Se hace a mano: desde el Tablero de optimización los cambios son solo para Meta; en YouTube se hacen en la plataforma.', 'N5: texto de otra plataforma');
+  ok(N.aSolicitud(tarjeta('Mejor momento', [conj(C_A, ['900000000000001'])], { id: 'n5-yt', plataforma: 'YouTube' }), CTX).motivo === 'Se hace a mano: desde Optimización los cambios son solo para Meta; en YouTube se hacen en la plataforma.', 'N5: texto de otra plataforma');
   ok(N.aSolicitud(tarjeta('Rinde por debajo', [conj(C_A, ['900000000000001'])], { id: 'n5-c1' }), CTX).motivo === 'Se hace a mano: no hay una pieza claramente peor para pausar; revisar la pieza y la audiencia, y pausar si en 2 días no mejora.', 'N5: texto de C1 sin pieza peor');
   ok(/^Se hace a mano: /.test(N.aSolicitud(tarjeta('Algo nuevo', [conj(C_A, ['900000000000001'])], { id: 'n5-x' }), CTX).motivo), 'N5: una recomendación desconocida también empieza con "Se hace a mano:"');
   ok(N.aSolicitud(tarjeta('Mejor momento', [conj(C_A, ['900000000000001'])], { id: 'n5-d1' }), { ...CTX, cambioPct: 30 }).motivo === 'No se puede pedir: el cambio es de 30 %, y el máximo es 20 % por vez.', 'N5: texto del bloqueo por más de 20 %');

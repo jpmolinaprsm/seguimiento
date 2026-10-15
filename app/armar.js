@@ -919,7 +919,7 @@ for (const [desde, hasta] of parches) {
   template = typeof hasta === 'function' ? template.replace(desde, hasta) : template.replace(desde, () => hasta); n++; // función: así los "$" del reemplazo no se interpretan como patrones
 }
 // el template va como JSON adentro de un <script>: los "</script>" internos se escapan como "<\/script>" (JSON válido) para no cortar el HTML
-const salida = html.replace(m[0], () => `<script type="__bundler/template">${JSON.stringify(template).replace(/<\//g, '<\\/')}</script>`).replace('<title>Bundled Page</title>', '<title>Tablero de optimización</title>');
+const salida = html.replace(m[0], () => `<script type="__bundler/template">${JSON.stringify(template).replace(/<\//g, '<\\/')}</script>`).replace('<title>Bundled Page</title>', '<title>Optimización</title>');
 fs.writeFileSync(SALIDA, salida);
 // repositorio de recomendaciones (lo guarda redaccion.js)
 // en Railway guarda en la base (devuelve una promesa); en local, en archivos. Si falla, el armado termina con error.

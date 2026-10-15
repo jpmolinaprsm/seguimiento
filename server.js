@@ -1,4 +1,4 @@
-// Tablero de optimización · servidor de producción (Railway). Arranca con:  npm start   (node server.js)
+// Optimización · servidor de producción (Railway). Arranca con:  npm start   (node server.js)
 // Toda ruta pide sesión, salvo /salud, /entrar (pantalla "Entrar con Google") y el ida y vuelta de Google (/auth/google…).
 // Quién ve qué: ver servidor/vista.js (el servidor arma un HTML solo con los proyectos y canales de cada persona).
 // Configuración: solo variables de entorno (servidor/config.js). Esto no reemplaza a app/servir.js, que sigue siendo el servidor local.
@@ -17,7 +17,7 @@ const { crearDisparador, crearAviso } = require('./servidor/actualizacion');
 const MAX_RESPUESTA = 20 * 1024, MAX_NEXO = 50 * 1024;
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-const PAGINA = (titulo, cuerpo) => `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tablero de optimización</title>`
+const PAGINA = (titulo, cuerpo) => `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Optimización</title>`
   + `<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#faf9f5;color:#2b2b2b;font:16px/1.5 Poppins,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif}`
   + `main{max-width:420px;padding:32px;text-align:center}h1{font-size:22px;margin:0 0 12px}p{margin:8px 0;color:#555}a.b,button{display:inline-block;margin-top:16px;padding:10px 20px;border-radius:8px;border:1px solid #2b2b2b;background:#2b2b2b;color:#fff;font:inherit;text-decoration:none;cursor:pointer}`
   + `.err{color:#a1260d}</style></head><body><main><h1>${esc(titulo)}</h1>${cuerpo}</main></body></html>`;
@@ -26,7 +26,7 @@ function crearServidor(opciones = {}) {
   const cfg = opciones.cfg || leerConfig();
   const falta = faltantes(cfg);
   if (falta.length) throw new Error('Faltan variables de entorno: ' + falta.join(', '));
-  const log = opciones.log || ((m) => console.log('[tablero] ' + m));
+  const log = opciones.log || ((m) => console.log('[optimización] ' + m));
   const sesiones = crearSesiones({ secreto: cfg.sesionSecreto, seguro: cfg.seguro });
   const google = opciones.google || crearGoogle(cfg);
   const accesosDe = opciones.accesosDe || crearAccesosDe({ registrar: log });
@@ -47,7 +47,7 @@ function crearServidor(opciones = {}) {
   const json = (res, codigo, obj) => enviar(res, codigo, 'application/json; charset=utf-8', JSON.stringify(obj));
   const pagina = (res, codigo, titulo, cuerpo, extra) => enviar(res, codigo, 'text/html; charset=utf-8', PAGINA(titulo, cuerpo), extra);
   const redirigir = (res, donde) => { res.writeHead(302, cabeceras({ Location: donde })); res.end(); };
-  const pantallaEntrar = (res, codigo, error) => pagina(res, codigo, 'Tablero de optimización',
+  const pantallaEntrar = (res, codigo, error) => pagina(res, codigo, 'Optimización',
     `<p>Entrá con tu cuenta de Google de la empresa.</p>${error ? `<p class="err">${esc(error)}</p>` : ''}<a class="b" href="/auth/google">Entrar con Google</a>`);
 
   const cuerpoDe = (req, res, max) => new Promise((ok) => {
@@ -114,12 +114,12 @@ function crearServidor(opciones = {}) {
     if (permisos === null) return api ? json(res, 503, { error: 'No se pudieron verificar tus accesos. Probá en un rato.' }) : pagina(res, 503, 'No pudimos verificar tus accesos', '<p>Probá de nuevo en unos minutos.</p>');
     if (!permisos.ok) {
       sesiones.cerrar(res);
-      return api ? json(res, 403, { error: 'Tu usuario no tiene acceso al tablero' }) : pagina(res, 403, 'Sin acceso', `<p>${esc(ses.email)} no tiene proyectos asignados en el tablero. Pedile el acceso a Juan Pablo.</p>`);
+      return api ? json(res, 403, { error: 'Tu usuario no tiene acceso a Optimización' }) : pagina(res, 403, 'Sin acceso', `<p>${esc(ses.email)} no tiene proyectos asignados en el tablero. Pedile el acceso a Juan Pablo.</p>`);
     }
     let vista;
     try { vista = await vistas.paraPermisos(permisos); } catch (e) {
       log('no se pudo armar la vista: ' + e.message);
-      return api ? json(res, 503, { error: 'Todavía no hay datos armados' }) : pagina(res, 503, 'Sin datos todavía', '<p>El tablero todavía no tiene datos armados. Probá en un rato.</p>');
+      return api ? json(res, 503, { error: 'Todavía no hay datos armados' }) : pagina(res, 503, 'Sin datos todavía', '<p>Optimización todavía no tiene datos armados. Probá en un rato.</p>');
     }
     if (!vista) return api ? json(res, 403, { error: 'No tenés proyectos asignados' }) : pagina(res, 403, 'Sin proyectos', '<p>Tu usuario no tiene proyectos del tablero asignados.</p>');
     const alcance = vista.alcance;
@@ -169,7 +169,7 @@ function crearServidor(opciones = {}) {
       if (!s || !puedeVer(alcance, s.proyecto, s.canal)) return json(res, 404, { error: 'No existe esa solicitud' });
       try { return json(res, 200, await nexo.consultar(id)); } catch (e) { return json(res, 500, { error: 'No se pudo consultar' }); }
     }
-    return api ? json(res, 404, { error: 'No existe' }) : pagina(res, 404, 'No existe', '<p><a href="/">Volver al tablero</a></p>');
+    return api ? json(res, 404, { error: 'No existe' }) : pagina(res, 404, 'No existe', '<p><a href="/">Volver al inicio</a></p>');
   }
 
   const servidor = http.createServer((req, res) => {
@@ -187,10 +187,10 @@ if (require.main === module) {
   try {
     const s = crearServidor();
     s.listen(s.cfg.puerto, () => {
-      console.log(`[tablero] escuchando en el puerto ${s.cfg.puerto}`);
-      console.log(`[tablero] actualización automática: ${s.disparador.iniciar() ? 'prendida (10:30, 12:00 y 14:00 de Argentina)' : 'apagada'}`);
+      console.log(`[optimización] escuchando en el puerto ${s.cfg.puerto}`);
+      console.log(`[optimización] actualización automática: ${s.disparador.iniciar() ? 'prendida (10:30, 12:00 y 14:00 de Argentina)' : 'apagada'}`);
     });
-  } catch (e) { console.error('[tablero] no arranca: ' + e.message); process.exit(1); }
+  } catch (e) { console.error('[optimización] no arranca: ' + e.message); process.exit(1); }
 }
 
 module.exports = { crearServidor };

@@ -299,8 +299,8 @@ module.exports = [
   ['<helmet>', '<helmet><style>@keyframes mapaFlash{0%{opacity:1;transform:scale(.7)}100%{opacity:0;transform:scale(1.9)}}</style>'],
   // 06/10: encabezado más bajo en todas las pantallas (el Mapa de Estructura tiene que entrar sin scroll en 1600 × 780)
   ['padding:10px 28px;min-height:56px', 'padding:5px 28px;min-height:44px'],
-  // 07/10: la app se llama "Tablero de optimización" (nombre en el encabezado)
-  ['letter-spacing:-0.01em">Seguimiento y Optimización</span>', 'letter-spacing:-0.01em">Tablero de optimización</span>'],
+  // 07/10: la app se llama "Tablero de optimización" (15/10: "Optimización") (nombre en el encabezado)
+  ['letter-spacing:-0.01em">Seguimiento y Optimización</span>', 'letter-spacing:-0.01em">Optimización</span>'],
   [/(<sc-for list="\{\{ projTabs \}\}" as="t"[^>]*>\s*<button sc-camel-on-click="\{\{ t\.onClick \}\}" style="border:none;background:none;)padding:10px 0 12px/, (m, a) => a + 'padding:5px 0 7px'],
 ];
 

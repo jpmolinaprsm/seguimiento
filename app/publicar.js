@@ -4,7 +4,7 @@
 //   datos-1.js …   los datos, repartidos por proyecto en archivos de menos de 16 MB, que se cargan con <script> antes de abrir la app
 // No toca la app local ni la salida de armar.js. Límites de la plataforma: index.html y cada archivo hasta 16 MB, todo hasta 64 MB.
 // Sin servidor: lo que hoy va a servir.js (repositorio de respuestas y comentarios a las reglas) no se manda; la app lo dice en simple y
-// guarda en este navegador (localStorage) lo que ya guardaba ahí. Arriba, una franja chica: "Tablero de optimización · Copia para comentarios · datos al DD/MM".
+// guarda en este navegador (localStorage) lo que ya guardaba ahí. Arriba, una franja chica: "Optimización · Copia para comentarios · datos al DD/MM".
 const fs = require('fs');
 const path = require('path');
 
@@ -61,14 +61,14 @@ fs.mkdirSync(SALIDA, { recursive: true });
 const archivos = [];
 grupos.forEach((g, i) => {
   const nombre = `datos-${i + 1}.js`;
-  const txt = `// Tablero de optimización · datos de ${g.map((p) => p.nombre).join(', ')}\nwindow.__SYO_DATA.proyectos.push(...${JSON.stringify(g)});\n`;
+  const txt = `// Optimización · datos de ${g.map((p) => p.nombre).join(', ')}\nwindow.__SYO_DATA.proyectos.push(...${JSON.stringify(g)});\n`;
   fs.writeFileSync(path.join(SALIDA, nombre), txt);
   archivos.push(nombre);
 });
 
 // ---- index.html: el HTML armado, con los datos afuera, la carga de los archivos y la franja ----
 const dmy = (iso) => `${String(iso).slice(8, 10)}/${String(iso).slice(5, 7)}`;
-const franja = `Tablero de optimización · Copia para comentarios · datos al ${dmy(DATA.datosHasta)}`;
+const franja = `Optimización · Copia para comentarios · datos al ${dmy(DATA.datosHasta)}`;
 const cabeza = `<script>window.__SYO_DATA = ${JSON.stringify(base).replace(/<\//g, '<\\/')};</script>\n`
   + archivos.map((a) => `<script src="${a}"></script>`).join('\n') + '\n'
   // la franja: el armado del diseño reemplaza la página entera al abrir, así que se agrega (y se repone) después
