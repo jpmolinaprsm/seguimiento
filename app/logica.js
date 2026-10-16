@@ -781,7 +781,7 @@ class Component extends DCLogic {
     const b = pid === TODOS ? bloqueTodos(canal) : canal === 'General' ? bloqueGeneral(pr) : pr.canales[canal], period = b && b.periodos && b.periodos[s.period] ? s.period : DATA.mes;
     if (canal !== s.canal) keep('syo.canal', canal);
     this.setState({ pid, canal, period, screen: 'proyecto', campId: null, campPid: null, campCanal: null, panel: false, modal: null, busca: '', abierto: {}, sel: null, discardFor: null, otraFor: null, manualFor: null,
-      mpSel: null, mpEjeF: '', mpActF: '', mpExpZ: {}, mpExpU: false, mpQ: '', mpQOpen: false, mpNotice: '', mpFlash: null, mpView: null });
+      mpSel: null, mpEjeF: '', mpActF: '', mpAbre: {}, mpCols: [], mpMenuCol: null, mpFichas: {}, mpExpZ: {}, mpQ: '', mpQOpen: false, mpNotice: '', mpFlash: null, mpView: null });
   }
   vistaCamp() {
     const s = this.state; if (s.screen !== 'campana' || !this.compuesta()) return null;

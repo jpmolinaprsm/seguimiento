@@ -38,16 +38,19 @@ if (/en las pestañas Campañas, Activos, Ejes, Audiencias y Proyección|\['Revi
   const iE = markup.indexOf('<sc-if value="{{ pasoEstTablas }}">');
   if (iE < 0 || !markup.slice(iE, iE + 3000).includes('{{ marcaKpiOps }}') || iE > markup.indexOf('<sc-if value="{{ isEjes }}">')) faltan_markup.push('Estructura no tiene el selector de Métrica arriba');
   // Creatividades (06/10) salió de la app: queda solo el link a su plataforma
-  // Mapa de Estructura (06/10, A5 · Zonas): primera pestaña de Estructura, antes de las tablas; todo con divs (un {{ }} dentro de un <text> de SVG
+  // Mapa de Estructura (06/10, A5; desde el 15/10 se arma con lo que se toca): primera pestaña de Estructura, antes de las tablas; todo con divs (un {{ }} dentro de un <text> de SVG
   // mete un <span> y no se dibuja); sin SVG; sin alcance; sin el selector Columnas / Libre ni la vista de nodos
   { const iM = markup.indexOf('data-screen-label="Proyecto · Mapa"'), jM = markup.indexOf('data-screen-label="Proyecto · Ejes"'), sM = markup.slice(iM, jM > iM ? jM : undefined);
     if (iM < 0) faltan_markup.push('falta el Mapa de Estructura en el markup');
     if (jM >= 0 && jM < iM) faltan_markup.push('el Mapa tiene que ir antes que las tablas de Estructura');
     const sinIcono = sM.replace(/<svg width="16"[\s\S]*?<\/svg>/, '');
     if (/<svg|<text|<circle|<path/.test(sinIcono)) faltan_markup.push('el Mapa tiene un SVG: los nombres no se dibujan si llevan {{ }} adentro; tiene que ir con divs');
-    for (const k of ['mpZones', 'mpEdges', 'mpHlEdges', 'mpDots', 'mpLabels', 'mpPorOps', 'mpLeyenda']) if (!sM.includes('{{ ' + k + ' }}')) faltan_markup.push('al Mapa le falta ' + k);
-    if (/mpVistaOps|Columnas|Libre|mpSh\./.test(sM) || /layNodos|layLibre|MP_K_DISENO/.test(logic)) faltan_markup.push('el Mapa todavía tiene la vista de nodos o el selector Columnas / Libre');
-    if (!sM.includes('Agrupar campañas por')) faltan_markup.push('falta el selector "Agrupar campañas por"');
+    for (const k of ['mpEdges', 'mpHlEdges', 'mpDots', 'mpLabels', 'mpPorOpts', 'mpMigas', 'mpLeyenda']) if (!sM.includes('{{ ' + k + ' }}')) faltan_markup.push('al Mapa le falta ' + k);
+    if (/mpVistaOps|>Columnas<|>Libre<|mpSh\./.test(sM) || /layNodos|layLibre|MP_K_DISENO/.test(logic)) faltan_markup.push('el Mapa todavía tiene la vista de nodos o el selector Columnas / Libre');
+    { const pos = ['Empezar por', 'Ordenar por', '>Métrica', 'placeholder="¿Dónde está…?"', '>Eje', 'Volver a empezar'].map((k) => sM.indexOf(k)); if (pos.some((x, i) => x < 0 || (i && x < pos[i - 1])) || sM.indexOf('>Activo') < sM.indexOf('>Eje') || sM.indexOf('>Activo') > sM.indexOf('Volver a empezar')) faltan_markup.push('la barra del Mapa no va en el orden Empezar por · Ordenar por · Métrica · ¿Dónde está…? · Eje · Activo · Volver a empezar'); }
+    for (const k of ['mpCajas', 'mpInfos', 'mpFlechas', 'mpFichas', 'mpLeyEjes', 'mpOpciones', 'mpFantasmas', 'mpColumnas', 'mpMenu']) if (!sM.includes('{{ ' + k + ' }}')) faltan_markup.push('al Mapa le falta ' + k);
+    if (!sM.includes('Empezar por') || !sM.includes('Volver a empezar')) faltan_markup.push('faltan "Empezar por" o "Volver a empezar" en el Mapa');
+    if (/Agrupar campañas por|mpZones|mpPorOps|mpGrpBtns|Ver todo<\/button>/.test(sM)) faltan_markup.push('el Mapa todavía tiene el selector "Agrupar campañas por", las zonas o "Ver todo"');
     if (/alcanzad|alcance/i.test(sM)) faltan_markup.push('el Mapa habla de alcance'); }
   if (/Proyecto · Creatividades|creaCmp|isCrea/.test(markup) || /creaVals|DATA.creatividades/.test(logic) || /"creatividades":/.test(logic)) faltan_markup.push('todavía queda código o datos de la sección Creatividades');
 }
@@ -695,175 +698,309 @@ const kpiMarca = { vistas: 0, filas: 0, distintas: 0 };
   console.log(`marca por KPI: ${kpiMarca.vistas} vistas · ${kpiMarca.filas} campañas de Estructura comparadas con marcas.js · ${kpiMarca.distintas} marcas que cambian al elegir otro KPI`);
   if (!kpiMarca.distintas) faltan.add('elegir otro KPI no cambió ninguna marca');
 }
-// ---- Mapa de Estructura (06/10): primera pestaña de Estructura, A5 · Zonas de Claude Design. Con clic real en el selector, los nodos, el buscador y los filtros ----
-const mapaN = { ordenes: 0, vistas: 0, clics: 0, busquedas: 0, filtros: 0, pills: 0, otras: 0, terminadas: 0, detalleCamp: 0, tabla: 0, metricas: 0, porOps: 0, rotulos: 0, escalaMin: 1, zonas: 0 };
+// ---- Mapa de Estructura (15/10): primera pestaña de Estructura. Se va armando con lo que se toca: "Empezar por" Activo, Eje o Audiencia; el tipo de lo que sigue se elige una vez por columna (botones "Abrir por" a la derecha) y se cambia desde el encabezado de la columna. Contenidos solo cuelga de una Campaña. Con clic real ----
+const mapaN = { vistas: 0, empezar: 0, elige: 0, aperturas: 0, directos: 0, columnas: 0, cierraDer: 0, cierres: 0, hojas: 0, migas: 0, busquedas: 0, filtros: 0, pills: 0, otras: 0, terminadas: 0, detalleCamp: 0, tabla: 0, metricas2: 0, ordenes: 0, reinicios: 0, zoom: 0, cajas: 0, fichas: 0, fichasP: 0, cierraFicha: 0, cadenas: 0, cuatro: 0, escalaMin: 1, escalaAbierta: 1, abiertasSinAjuste: 0, rotulos: 0, noEntra: 0 };
 {
   const evento = { preventDefault() {}, stopPropagation() {}, target: {}, currentTarget: {} };
   const setOrig = c.setState; c.setState = function (u) { const p = typeof u === 'function' ? u(this.state) : u; this.state = { ...this.state, ...p }; };   // como el runtime: estado nuevo
-  const base = { screen: 'proyecto', paso: 'estructura', tab: 'mapa', panel: false, modal: null, busca: '', abierto: {}, kpiSel: 'obj', mpPor: 'eje', mpSel: null, mpEjeF: '', mpActF: '', mpExpZ: {}, mpExpU: false, mpQ: '', mpQOpen: false, mpNotice: '', mpFlash: null, w: 1600, hv: 780 };
+  const base = { screen: 'proyecto', paso: 'estructura', tab: 'mapa', panel: false, modal: null, busca: '', abierto: {}, kpiSel: 'obj', mpPor: 'eje', mpSel: null, mpAbre: {}, mpCols: [], mpMenuCol: null, mpFichas: {}, mpEjeF: '', mpActF: '', mpExpZ: {}, mpQ: '', mpQOpen: false, mpNotice: '', mpFlash: null, mpView: null, mpOrden: 'gasto', w: 1600, hv: 780 };
   const css = (s, k) => { const m = new RegExp('(?:^|;)' + k + ':([^;]+)').exec(s || ''); return m ? m[1] : null; };
   const px = (s, k) => { const v = css(s, k); return v == null ? null : parseFloat(v); };
-  const POR_TXT = { eje: 'Eje', activo: 'Activo', objetivo: 'Objetivo' };
+  const FLD = { eje: 'eje', activo: 'a', audiencia: 'u' }, PLURAL = { eje: 'Ejes', activo: 'Activos', audiencia: 'Audiencias' }, LET = { eje: 'e', activo: 'a', audiencia: 'u' };
+  const FK = { c: 'c', a: 'a', e: 'eje', u: 'u', p: 'p' }, KN = { c: ['Campaña', 'Campañas'], a: ['Activo', 'Activos'], e: ['Eje', 'Ejes'], u: ['Audiencia', 'Audiencias'], p: ['Contenidos', 'Contenidos'] };
+  // la jerarquía, escrita aparte para la prueba (no se copia del código): qué tipos puede abrir cada tipo
+  const SIGUE = { e: ['c', 'e', 'a', 'u'], a: ['c', 'e', 'a', 'u'], u: ['c', 'e', 'a', 'u'], c: ['p', 'a', 'u', 'e'], p: ['a', 'u'] };
+  const validos = (kinds) => ['c', 'a', 'e', 'u', 'p'].filter((k) => SIGUE[kinds[kinds.length - 1]].includes(k) && !kinds.includes(k));
+  const SEP = '¦', RAIZ_MAX = 14, CAMP_MAX = 10;
+  const tr = (s) => (s.length > 22 ? s.slice(0, 21).trimEnd() + '…' : s);
+  const tr28 = (s) => (s.length > 28 ? s.slice(0, 27).trimEnd() + '…' : s);
+  const esPill = (x) => /^\+\d+ /.test(x.label);
+  const partes = (v) => { const nodosL = v.mpLabels.filter((x) => [12.5, 12, 11.5].includes(px(x.style, 'font-size'))), dotsN = v.mpDots.filter((x) => x.label === ''), pills = v.mpDots.filter(esPill), caps = v.mpLabels.filter((x) => px(x.style, 'font-size') === 10.5);
+    const nom = (l) => l.label.slice(0, l.label.lastIndexOf(' · '));
+    return { nodosL, dotsN, pills, caps, raicesL: nodosL.filter((x) => px(x.style, 'font-size') === 12.5), nom }; };
+  const gastoPor = (P, fld, Rx) => { const g = {}; for (const r of (Rx || P.recs)) if (r[fld]) g[r[fld]] = (g[r[fld]] || 0) + r.v; return g; };
+  const cuenta = (Rx, k) => new Set(Rx.map((r) => r[FK[k]]).filter(Boolean)).size;
+  // lo que se ofrece nunca rompe la jerarquía: Contenidos solo después de una Campaña
+  const jerarquiaOk = (kinds, ofrecidos, donde, faltan2) => { if (ofrecidos.includes('Contenidos') && kinds[kinds.length - 1] !== 'c') faltan2.add(`se ofrece Contenidos sin una Campaña justo arriba (${kinds.join('›')}): ${donde}`);
+    const esp = validos(kinds).map((k) => KN[k][0]); if (ofrecidos.join('|') !== esp.join('|')) faltan2.add(`se ofrece ${ofrecidos.join(', ') || 'nada'} y la jerarquía dice ${esp.join(', ') || 'nada'} (${kinds.join('›')}): ${donde}`); };
   const revisarMapa = (v, donde) => {
     mapaN.vistas++;
     if (!v.pasoMapa) faltan.add(`el Mapa no está a la vista: ${donde}`);
-    if (v.mpHasMap && (!(v.mpEscala > 0 && v.mpEscala <= 1) || v.mpBoxW > 1144 || !(v.mpBoxW > 0 && v.mpBoxH > 0))) faltan.add(`el Mapa tiene mal la escala o el tamaño (${v.mpBoxW} × ${v.mpBoxH}, escala ${v.mpEscala}): ${donde}`);
-    if ((v.mpPorOps || []).map((x) => x.label).join('|') !== 'Eje|Activo|Objetivo' || (v.mpPorOps || []).filter((x) => x.on).length !== 1) faltan.add(`el selector "Agrupar campañas por" está mal armado: ${donde}`);
-    // todo lo que se dibuja: con texto donde corresponde, sin números rotos, dentro del lienzo
-    const todo = [...v.mpZones, ...v.mpEdges, ...v.mpHlEdges, ...v.mpDots, ...v.mpLabels, ...v.mpFlashList];
-    for (const x of todo) if (/NaN|undefined|Infinity/.test(x.style + (x.lab || '') + (x.label || ''))) faltan.add(`un elemento del Mapa tiene un número roto: ${donde}`);
-    for (const z of v.mpZones) { mapaN.zonas++; if (!z.label || /NaN|undefined/.test(z.label) || !/ · \$/.test(z.label)) faltan.add(`zona sin nombre y gasto "${z.label}": ${donde}`); }
+    if (v.mpHasMap && (!(v.mpEscala >= 0.5 && v.mpEscala <= 1.4) || !(v.mpBoxW > 0 && v.mpBoxH > 0))) faltan.add(`el Mapa tiene mal la escala o el tamaño (${v.mpBoxW} × ${v.mpBoxH}, escala ${v.mpEscala}): ${donde}`);
+    if ((v.mpPorOpts || []).map((x) => x.t).join('|') !== 'Activo|Eje|Audiencia' || !(v.mpPorOpts || []).some((x) => x.v === v.mpPorVal)) faltan.add(`el desplegable "Empezar por" está mal armado: ${donde}`);
+    const todo = [...v.mpEdges, ...v.mpHlEdges, ...v.mpDots, ...v.mpLabels, ...v.mpFlashList, ...v.mpMigas, ...v.mpCajas, ...v.mpInfos, ...v.mpFlechas, ...v.mpColumnas, ...v.mpMenu, ...v.mpOpciones.map((q) => ({ style: q.style + q.ico, label: q.label })), ...v.mpFantasmas, ...v.mpFichas.map((f) => ({ style: f.style, label: f.titulo + f.sub + f.metVal + f.pill + f.motivo + f.minis.map((l) => l.val).join('|') }))];
+    for (const x of todo) if (/NaN|undefined|Infinity/.test((x.style || '') + (x.lab || '') + (x.label || ''))) faltan.add(`un elemento del Mapa tiene un número roto: ${donde}`);
     for (const x of v.mpLabels) { mapaN.rotulos++; if (!String(x.label).trim()) faltan.add(`rótulo vacío en el Mapa: ${donde}`); }
-    // los rótulos no se pisan (ancho estimado por cantidad de letras)
-    const cajas = v.mpLabels.map((x) => { const tam = px(x.style, 'font-size') || 11, w = String(x.label).length * tam * 0.56 + 6, h = tam + 3, y = px(x.style, 'top'), l = px(x.style, 'left'), r = px(x.style, 'right');
-      const x0 = l != null ? l : v.mpCW - r - w; return { x0, y0: y, x1: x0 + w, y1: y + h, s: x.label }; });
+    // encabezados de columna: uno por columna con nodos, con el tipo; el de la columna 0 es "Empezar por"
+    if (v.mpHasMap) { if (!v.mpColumnas.length || v.mpColumnas[0].label !== PLURAL[v.mpPorVal] + ' ▾') faltan.add(`el encabezado de la primera columna no es "${PLURAL[v.mpPorVal]} ▾": ${donde}`); mapaN.columnas++; }
+    // los rótulos no se pisan (ancho estimado por cantidad de letras) y no salen del lienzo
+    const cajas = v.mpLabels.map((x) => { const tam = px(x.style, 'font-size') || 11, w = String(x.label).length * tam * 0.56 + 6, h = tam + 3, y = px(x.style, 'top'), l = px(x.style, 'left'); return { x0: l, y0: y, x1: l + w, y1: y + h, s: x.label }; });
     let pis = 0; for (let i = 0; i < cajas.length; i++) for (let j = i + 1; j < cajas.length; j++) { const a = cajas[i], b = cajas[j]; if (a.x0 < b.x1 - 1 && b.x0 < a.x1 - 1 && a.y0 < b.y1 - 2 && b.y0 < a.y1 - 2) { pis++; if (pis < 3) faltan.add(`rótulos que se pisan "${a.s}" y "${b.s}": ${donde}`); } }
     for (const q of cajas) if (q.x0 < -2 || q.y0 < -2 || q.x1 > v.mpCW + 2 || q.y1 > v.mpCH + 2) { faltan.add(`rótulo fuera del lienzo "${q.s}": ${donde}`); break; }
+    // fichas y botones "Abrir por": no se tapan entre sí ni tapan rótulos, burbujas o íconos, y quedan dentro del lienzo
+    { const rec = (x, w, h) => ({ x0: px(x.style, 'left'), y0: px(x.style, 'top'), x1: px(x.style, 'left') + w, y1: px(x.style, 'top') + h });
+      const flot = [...v.mpFichas.map((f) => ({ ...rec(f, px(f.style, 'width'), f.alto), q: 'una ficha de métricas' })), ...v.mpOpciones.map((q) => ({ ...rec(q, q.label.length * 6.8 + 28, 22), q: `un botón "Abrir por" (${q.label})` }))];
+      const cho = (a, b) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
+      for (let i = 0; i < flot.length; i++) { const a = flot[i]; if (a.x0 < -1 || a.y0 < -1 || a.x1 > v.mpCW + 1 || a.y1 > v.mpCH + 1) faltan.add(`${a.q} sale del lienzo: ${donde}`);
+        for (let j = i + 1; j < flot.length; j++) if (cho(a, flot[j])) faltan.add(`${a.q} y ${flot[j].q} se tapan: ${donde}`);
+        for (const x of [...v.mpDots, ...v.mpInfos]) { const w = px(x.style, 'width') || 0, h = px(x.style, 'height') || 0; if (w && cho(a, rec(x, w, h))) { faltan.add(`${a.q} tapa una burbuja o un ícono (${x.title}): ${donde}`); break; } }
+        for (const x of v.mpLabels) { const tam = px(x.style, 'font-size') || 11; if (cho(a, rec(x, String(x.label).length * tam * 0.56 + 6, tam + 3))) { faltan.add(`${a.q} tapa un rótulo (${x.label}): ${donde}`); break; } } }
+      if (v.mpOpciones.length && v.mpFantasmas.length !== v.mpOpciones.length) faltan.add(`cada botón "Abrir por" tiene que tener su línea punteada: ${donde}`);
+      if (v.mpFichas.length) { const f = v.mpFichas[0]; if (f.minis.map((l) => l.lab).slice(0, 3).join('|') !== 'Gasto|Impr.|Reacc.' || !/^\$/.test(f.minis[0].val) || !/ · /.test(f.sub) || !f.metLab || !(f.hayPill || f.hayMotivo) || (f.hayPill && /…/.test(f.pill))) faltan.add(`la ficha de métricas (con la píldora sin cortar) no tiene nombre, tipo y período, métrica con su marca, gasto, impresiones y reacciones: ${donde}`); } }
+    if (v.mpHasMap && (v.mpMigas || []).length < 1) faltan.add(`faltan las migas: ${donde}`);
+    // la jerarquía en lo que se ve: las migas nunca ponen Contenidos sin una Campaña justo antes
+    { const ms = v.mpMigas.map((x) => x.label); const iP = ms.indexOf('Contenidos'); if (iP >= 0 && ms[iP - 1] !== 'Campañas') faltan.add(`las migas ponen Contenidos sin Campañas antes (${ms.join(' › ')}): ${donde}`); }
     if (/alcanzad/i.test(JSON.stringify([v.mpTitle, v.mpSub, v.mpSum, v.mpEmptyTitle, v.mpEmptySub, v.mpPn.conn, v.mpPn.mkSub, v.mpPn.otras, v.mpPn.gastoNote, v.mpLeyenda.map((x) => x.label), v.mpNota.replace('Las personas alcanzadas no aparecen porque no se pueden sumar.', '')]))) faltan.add(`el Mapa habla de alcance: ${donde}`);
   };
   const lugaresDe = (canal) => [['todos', 'Todos los proyectos'], ...D.proyectos.filter((p) => (canal === 'General' ? p.general : p.canales[canal])).map((p) => [p.id, p.nombre])];
+  // tipos de las columnas que se pueden armar (hasta 4 columnas en total), desde "Empezar por"
+  const cadenas = (ini) => { const out = []; const rec = (kinds) => { if (kinds.length > 1) out.push(kinds.slice(1)); if (kinds.length >= 4) return; for (const k of validos(kinds)) rec([...kinds, k]); }; rec([ini]); return out; };
   for (const canal of ['Oficial', 'Informativo', 'General']) {
+    let nLug = 0;
     for (const [pid, nombre] of lugaresDe(canal)) {
+      nLug++;
       const b = (() => { Object.assign(c.state, { canal, pid }); return c.blk(); })(); if (!b) continue;
       const periodos = ['30d', D.mes, '7d'].filter((x) => b.periodos[x]);
       for (const period of periodos) {
         const P = MP.mpPrep(b.periodos[period]);
-        for (const por of ['eje', 'activo', 'objetivo']) {
+        for (const por of ['eje', 'activo', 'audiencia']) {
           if (period !== periodos[0] && por !== 'eje') continue;
-          const donde = `Mapa ${nombre} ${canal} ${period} por ${por}`;
-          Object.assign(c.state, { canal, pid, period, ...base });
-          // el selector con clic real: cambia la agrupación y se arma otra vez
-          let v = c.renderVals(); const op = v.mpPorOps.find((x) => x.label === POR_TXT[por]); op.onClick(evento); mapaN.porOps++;
-          if (c.state.mpPor !== por) faltan.add(`el selector "Agrupar campañas por" no pone ${por}: ${donde}`);
+          const fld = FLD[por], plural = PLURAL[por], L0 = LET[por], donde = `Mapa ${nombre} ${canal} ${period} empezando por ${por}`;
+          const st = (extra) => Object.assign(c.state, { canal, pid, period, ...base, ...(extra || {}) });
+          // arranca en Eje sin que nadie elija nada; el desplegable cambia lo de arranque con el evento real de cambio
+          st({ mpPor: undefined }); let v = c.renderVals(); chequear(v, donde + ' · apertura'); revisarMapa(v, donde + ' · apertura');
+          if (v.mpPorVal !== 'eje') faltan.add(`"Empezar por" no abre en Eje: ${donde}`);
+          v.mpOnPor({ target: { value: por } }); mapaN.empezar++;
+          if (c.state.mpPor !== por) faltan.add(`"Empezar por" no pone ${por}: ${donde}`);
           v = c.renderVals(); chequear(v, donde); revisarMapa(v, donde);
-          if (!v.mpHasMap) { if (P.recs.length) faltan.add(`hay gasto y el Mapa está vacío: ${donde}`); continue; }
-          // zonas: una por eje, activo u objetivo (según se agrupe)
-          const ejesN = new Set(P.recs.map((r) => (por === 'eje' ? r.eje : por === 'objetivo' ? r.o : r.a))).size;
-          if (v.mpZones.length !== ejesN) faltan.add(`el Mapa tiene ${v.mpZones.length} zonas y deberían ser ${ejesN} (${por}): ${donde}`);
-          // a la izquierda lo otro (activos si se agrupa por eje u objetivo; ejes si se agrupa por activo); a la derecha las audiencias
-          const izq = v.mpLabels.filter((x) => (px(x.style, 'font-size') === 12.5) && px(x.style, 'left') != null && px(x.style, 'left') < 60);
-          const nIzq = new Set(P.recs.map((r) => (por === 'activo' ? r.eje : r.a))).size;
-          if (izq.length !== nIzq) faltan.add(`a la izquierda hay ${izq.length} nodos y deberían ser ${nIzq} (${por === 'activo' ? 'ejes' : 'activos'}): ${donde}`);
-          if (por === 'activo' && !v.mpLeyenda.some((x) => x.label === 'Eje') || por !== 'activo' && !v.mpLeyenda.some((x) => x.label === 'Activo')) faltan.add(`la leyenda no dice qué hay a la izquierda: ${donde}`);
-          // "Otras redes" (Google, DV360): un nodo a la izquierda o una zona punteada
-          if (P.recs.some((r) => r.a === 'a:otras')) { mapaN.otras++;
-            const hay = por === 'activo' ? v.mpZones.some((z) => /dashed/.test(z.style) && /Otras redes/.test(z.label)) : v.mpLabels.some((x) => /^Otras redes · sin cuenta ·/.test(x.label));
-            if (!hay) faltan.add(`falta "Otras redes": ${donde}`); }
-          // campañas terminadas en gris
-          const termV = Object.values(P.camps).some((x) => x.termino && x.gasto > 0);
-          if (termV) { const g = v.mpDots.some((x) => /background:#D5D5D5/.test(x.style)); if (g) mapaN.terminadas++; else if (!v.mpDots.some((x) => /\+\d+ campañas/.test(x.label))) faltan.add(`las campañas terminadas no van en gris: ${donde}`); }
-          // más de 7 campañas en una zona: "+N campañas" (se abre tocándolo) y "Ver las N campañas"
-          const camposZona = {}; for (const r of P.recs) { const z = por === 'eje' ? r.eje : por === 'objetivo' ? r.o : r.a; (camposZona[z] = camposZona[z] || new Set()).add(r.c); }
-          const grandes = Object.entries(camposZona).filter(([, st]) => st.size > 7);
-          const pills = v.mpDots.filter((x) => /^\+\d+ campañas$/.test(x.label));
-          if (grandes.length !== pills.length) faltan.add(`hay ${grandes.length} zonas con más de 7 campañas y ${pills.length} "+N campañas": ${donde}`);
-          if (grandes.length) { mapaN.pills++;
-            if (!v.mpGrpBtns.some((x) => /^Ver las \d+ campañas$/.test(x.label))) faltan.add(`falta "Ver las N campañas": ${donde}`);
-            Object.assign(c.state, { mpExpZ: {} }); pills[0].onClick(evento); const ex = Object.keys(c.state.mpExpZ || {}); if (ex.length !== 1) faltan.add(`tocar "+N campañas" no abre solo esa zona: ${donde}`);
-            else { const vo = c.renderVals(); chequear(vo, donde + ' · una zona abierta'); revisarMapa(vo, donde + ' · una zona abierta'); if (vo.mpDots.filter((x) => /^\+\d+ campañas$/.test(x.label)).length !== pills.length - 1) faltan.add(`abrir una zona tendría que dejar las demás agrupadas: ${donde}`);
-              if (!vo.mpGrpBtns.some((x) => x.label === 'Agrupar campañas chicas')) faltan.add(`con una zona abierta falta "Agrupar campañas chicas": ${donde}`);
-              vo.mpGrpBtns.find((x) => /^Ver las \d+ campañas$/.test(x.label)) && vo.mpGrpBtns.find((x) => /^Ver las \d+ campañas$/.test(x.label)).onClick();
-              const vt = c.renderVals(); chequear(vt, donde + ' · todas abiertas'); revisarMapa(vt, donde + ' · todas abiertas'); if (vt.mpDots.some((x) => /^\+\d+ campañas$/.test(x.label))) faltan.add(`"Ver las campañas" no abre todas las zonas: ${donde}`);
-              vt.mpGrpBtns.find((x) => x.label === 'Agrupar campañas chicas').onClick(); if (Object.keys(c.state.mpExpZ || {}).length) faltan.add(`"Agrupar campañas chicas" no vuelve a agrupar: ${donde}`); }
-            Object.assign(c.state, { mpExpZ: {} }); }
-          // "Ordenar por": Gasto (de mayor a menor, el de siempre), Nombre (A–Z) y Cómo rinde; ordena las zonas y las columnas de los costados
-          if (period === periodos[0]) {
-            const sinGasto = (s) => s.slice(0, s.lastIndexOf(' · '));
-            const gastoZ = {}; for (const r of P.recs) { const z = por === 'eje' ? r.eje : por === 'objetivo' ? r.o : r.a; gastoZ[z] = (gastoZ[z] || 0) + r.v; }
-            const esperadoGasto = Object.keys(gastoZ).sort((x, y) => gastoZ[y] - gastoZ[x] || (x < y ? -1 : 1)).map((id) => P.names[id] || id);
-            Object.assign(c.state, { ...base, canal, pid, period, mpPor: por });
-            const v0 = c.renderVals(); if (v0.mpOrden !== 'gasto' || v0.mpOrdenOps.filter((x) => x.on).map((x) => x.label).join() !== 'Gasto' || v0.mpOrdenOps.map((x) => x.label).join('|') !== 'Gasto|Nombre|Cómo rinde') faltan.add(`"Ordenar por" mal armado o no abre en Gasto: ${donde}`);
-            const zNom = (vv) => vv.mpZones.map((z) => sinGasto(z.label)), izqNom = (vv) => vv.mpLabels.filter((x) => px(x.style, 'font-size') === 12.5 && px(x.style, 'left') != null && px(x.style, 'left') < 60).map((x) => sinGasto(x.label)), audNom = (vv) => vv.mpLabels.filter((x) => /right:/.test(x.style) && !/^\+/.test(x.label)).map((x) => x.label);
-            const trunc = (s) => (s.length > 30 ? s.slice(0, 29).trimEnd() + '…' : s);
-            if (JSON.stringify(zNom(v0)) !== JSON.stringify(esperadoGasto.map(trunc))) faltan.add(`las zonas no van de mayor a menor gasto: ${donde}`);
-            for (const [ord, etq] of [['nombre', 'Nombre'], ['rinde', 'Cómo rinde'], ['gasto', 'Gasto']]) {
-              Object.assign(c.state, { ...base, canal, pid, period, mpPor: por, mpOrden: ord === 'gasto' ? 'nombre' : 'gasto' }); const va = c.renderVals(); va.mpOrdenOps.find((x) => x.label === etq).onClick(evento); mapaN.ordenes = (mapaN.ordenes || 0) + 1;
-              if (c.state.mpOrden !== ord) { faltan.add(`"Ordenar por ${etq}" no cambia el orden: ${donde}`); continue; }
-              const vo = c.renderVals(); chequear(vo, donde + ' · orden ' + ord); revisarMapa(vo, donde + ' · orden ' + ord);
-              if (vo.mpOrdenOps.filter((x) => x.on).map((x) => x.label).join() !== etq) faltan.add(`el selector de orden no marca ${etq}: ${donde}`);
-              if (vo.mpZones.length !== v0.mpZones.length) faltan.add(`el orden ${ord} cambia la cantidad de zonas: ${donde}`);
-              const ordenado = (xs) => xs.every((x, i) => !i || xs[i - 1].localeCompare(x, 'es') <= 0);
-              if (ord === 'nombre') { if (!ordenado(zNom(vo))) faltan.add(`las zonas no van de la A a la Z: ${donde} (${zNom(vo).join(', ')})`); if (!ordenado(izqNom(vo))) faltan.add(`la columna de la izquierda no va de la A a la Z: ${donde}`); const an = audNom(vo); if (!ordenado(an)) faltan.add(`las audiencias no van de la A a la Z: ${donde}`); }
-              if (ord === 'gasto' && JSON.stringify(zNom(vo)) !== JSON.stringify(zNom(v0))) faltan.add(`volver a Gasto no deja las zonas como al principio: ${donde}`);
+          const g = gastoPor(P, fld), ids = Object.keys(g);
+          if (!ids.length) { if (!v.mpEmpty && v.mpHasMap) faltan.add(`no hay ${plural.toLowerCase()} y el Mapa dibuja algo: ${donde}`); if (P.recs.length && por === 'eje') faltan.add(`hay gasto y el Mapa está vacío: ${donde}`); continue; }
+          if (!v.mpHasMap) { faltan.add(`hay ${plural.toLowerCase()} y el Mapa está vacío: ${donde}`); continue; }
+          // al principio solo están los nodos de lo elegido, sin líneas ni botones, ordenados por gasto, con un solo encabezado de columna
+          let pt = partes(v);
+          const esperadosN = ids.length <= RAIZ_MAX ? ids.length : RAIZ_MAX - 1;
+          if (pt.dotsN.length !== esperadosN || pt.raicesL.length !== esperadosN || pt.nodosL.length !== esperadosN) faltan.add(`al empezar hay ${pt.dotsN.length} nodos y deberían ser ${esperadosN} (${plural}): ${donde}`);
+          if (v.mpEdges.length || v.mpHlEdges.length || v.mpOpciones.length || v.mpFantasmas.length || v.mpColumnas.length !== 1) faltan.add(`al empezar el Mapa ya muestra líneas, botones o más de una columna: ${donde}`);
+          if (ids.length > RAIZ_MAX) { mapaN.pills++; if (pt.pills.length !== 1 || pt.pills[0].label !== `+${ids.length - (RAIZ_MAX - 1)} ${plural.toLowerCase()}`) faltan.add(`falta o está mal el "+N ${plural.toLowerCase()}": ${donde} (${pt.pills.map((x) => x.label)})`); }
+          else if (pt.pills.length) faltan.add(`hay un "+N" de más al empezar: ${donde}`);
+          const esperadoGasto = ids.sort((x, y) => g[y] - g[x] || (x < y ? -1 : 1)).map((id) => tr(P.names[id] || id));
+          if (JSON.stringify(pt.raicesL.map(pt.nom)) !== JSON.stringify(esperadoGasto.slice(0, esperadosN))) faltan.add(`lo de arranque no va de mayor a menor gasto: ${donde}`);
+          if (v.mpFlechas.length !== pt.raicesL.length || v.mpFlechas.some((f) => f.abierta)) faltan.add(`cada nodo de arranque tiene que llevar su flecha "›" al final, sin abrir: ${donde}`);
+          if (por === 'activo' && P.recs.some((r) => r.a === 'a:otras') && ids.length <= RAIZ_MAX) { mapaN.otras++; if (!pt.nodosL.some((x) => /^Otras redes · sin/.test(x.label))) faltan.add(`falta "Otras redes": ${donde}`); }
+          // que se vea entero en una ventana de 1600 × 780 sin scroll
+          mapaN.escalaMin = Math.min(mapaN.escalaMin, v.mpEscala);
+          if (!v.mpAjusta && ids.length <= RAIZ_MAX) { mapaN.noEntra++; faltan.add(`el Mapa de arranque no entra en 1600 × 780 sin scroll: ${donde} (alto ${v.mpCH} de ${v.mpVH})`); }
+          if (v.mpRowH + 243 > 780) faltan.add(`el Mapa más la cabecera pasan los 780 px: ${donde}`);
+          const primero = ids[0], Rprim = P.recs.filter((r) => r[fld] === primero), campsPrim = [...new Set(Rprim.map((r) => r.c))];
+          // ---- tocar el primer nodo: "Abrir por" con lo que la jerarquía permite (nunca Contenidos al principio); volver a tocarlo lo esconde ----
+          pt.dotsN[pt.nodosL.indexOf(pt.raicesL[0])].onClick(evento); mapaN.elige++;
+          if (c.state.mpSel !== primero || Object.keys(c.state.mpAbre).length || c.state.mpCols.length) faltan.add(`tocar un nodo sin tipo elegido lo elige pero no tiene que abrir nada solo: ${donde}`);
+          let vs = c.renderVals(); chequear(vs, donde + ' · abrir por'); revisarMapa(vs, donde + ' · abrir por');
+          jerarquiaOk([L0], vs.mpOpciones.map((x) => x.label), donde + ' · raíz', faltan);
+          if (partes(vs).dotsN.length !== esperadosN || vs.mpEdges.length) faltan.add(`mostrar "Abrir por" no debería dibujar hijos: ${donde}`);
+          { const vt = c.renderVals(), pq = partes(vt); pq.dotsN[pq.nodosL.indexOf(pq.raicesL[0])].onClick(evento); } if (c.state.mpSel || c.renderVals().mpOpciones.length) faltan.add(`volver a tocar el nodo no esconde "Abrir por": ${donde}`);
+          // ---- elegir Campaña: el tipo de TODA la columna siguiente; aparecen las campañas con líneas y un encabezado "Campañas ▾" ----
+          { const vt = c.renderVals(), pq = partes(vt); pq.dotsN[pq.nodosL.indexOf(pq.raicesL[0])].onClick(evento); } vs = c.renderVals(); vs.mpOpciones.find((x) => x.label === 'Campaña').onClick(evento); mapaN.aperturas++;
+          if (c.state.mpCols.join() !== 'c' || !c.state.mpAbre[primero] || c.state.mpSel !== primero) faltan.add(`elegir Campaña no fija el tipo de la columna ni abre el nodo: ${donde}`);
+          let vo = c.renderVals(); chequear(vo, donde + ' · campañas'); revisarMapa(vo, donde + ' · campañas'); let po = partes(vo);
+          const campVis = campsPrim.length <= CAMP_MAX ? campsPrim.length : CAMP_MAX - 1;
+          if (po.dotsN.length !== esperadosN + campVis) faltan.add(`al abrir por Campaña hay ${po.dotsN.length - esperadosN} campañas y deberían ser ${campVis}: ${donde}`);
+          if (vo.mpEdges.length !== campVis) faltan.add(`al abrir por Campaña hay ${vo.mpEdges.length} líneas y deberían ser ${campVis}: ${donde}`);
+          if (!vo.mpHlEdges.length) faltan.add(`el camino elegido no tiene líneas resaltadas: ${donde}`);
+          if (vo.mpOpciones.length) faltan.add(`un nodo ya abierto no tiene que mostrar "Abrir por": ${donde}`);
+          if (!vo.mpFlechas.some((f) => f.abierta)) faltan.add(`el nodo abierto no marca su flecha como abierta: ${donde}`);
+          if (vo.mpColumnas.map((x) => x.label).join('|') !== `${plural} ▾|Campañas ▾`) faltan.add(`los encabezados no son "${plural} ▾" y "Campañas ▾" (son ${vo.mpColumnas.map((x) => x.label).join(', ')}): ${donde}`);
+          { const esp = [plural, 'Campañas', tr28(P.names[primero] || primero)]; if (vo.mpMigas.map((x) => x.label).join('|') !== esp.join('|')) faltan.add(`las migas no dicen ${esp.join(' › ')} (dicen ${vo.mpMigas.map((x) => x.label).join(' › ')}): ${donde}`); else mapaN.migas++; }
+          if (vo.mpPn.name !== (P.names[primero] || primero)) faltan.add(`el panel no es del nodo tocado: ${donde}`);
+          { const ejesVis = new Set(campsPrim.map((id) => P.camps[id].eje));
+            if (por === 'eje') { if (vo.mpCajas.length || vo.mpHayLeyEjes) faltan.add(`empezando por Eje no hay recuadros de eje: ${donde}`); }
+            else { if (vo.mpCajas.length < 1 || (campsPrim.length <= CAMP_MAX && vo.mpCajas.length !== ejesVis.size) || !vo.mpHayLeyEjes || po.caps.length !== vo.mpCajas.length) faltan.add(`las campañas no van en un recuadro por eje (${vo.mpCajas.length} recuadros, ${po.caps.length} rótulos, ${ejesVis.size} ejes): ${donde}`); else mapaN.cajas++;
+              const porEje = {}; for (const cj of vo.mpCajas) { (porEje[cj.eje] = porEje[cj.eje] || new Set()).add(cj.color); } if (Object.values(porEje).some((x) => x.size !== 1)) faltan.add(`un mismo eje tiene dos colores: ${donde}`);
+              const colores = Object.values(porEje).map((x) => [...x][0]); if (new Set(colores).size !== colores.length && P.ejes.length <= 12) faltan.add(`dos ejes comparten color de recuadro: ${donde}`); } }
+          { const termVis = campsPrim.some((id) => P.camps[id].termino && P.camps[id].gasto > 0); if (termVis && vo.mpDots.some((x) => /background:#D5D5D5/.test(x.style))) mapaN.terminadas++; }
+          // "+N campañas": se abre tocándolo
+          if (campsPrim.length > CAMP_MAX) { mapaN.pills++; const pc0 = po.pills.filter((x) => / campañas$/.test(x.label)); if (pc0.length !== 1 || pc0[0].label !== `+${campsPrim.length - (CAMP_MAX - 1)} campañas`) faltan.add(`falta o está mal el "+N campañas": ${donde} (${po.pills.map((x) => x.label)})`); else { pc0[0].onClick(evento); const vp = c.renderVals(); chequear(vp, donde + ' · todas las campañas'); revisarMapa(vp, donde + ' · todas las campañas'); const pp = partes(vp); if (pp.pills.filter((x) => / campañas$/.test(x.label)).length || pp.dotsN.length !== esperadosN + campsPrim.length) faltan.add(`"+N campañas" no muestra todas: ${donde}`); Object.assign(c.state, { mpExpZ: {} }); } }
+          // ---- otro nodo de la misma columna: se abre directo con el mismo tipo, sin volver a preguntar ----
+          if (ids.length > 1) {
+            const seg = ids[1], R2 = P.recs.filter((r) => r[fld] === seg), camps2 = [...new Set(R2.map((r) => r.c))];
+            const vz = c.renderVals(), pz = partes(vz), i2 = pz.raicesL.findIndex((x) => pz.nom(x) === pt.nom(pt.raicesL[1]));
+            if (i2 < 0) faltan.add(`no se encuentra el segundo nodo: ${donde}`);
+            else { pz.dotsN[pz.nodosL.indexOf(pz.raicesL[i2])].onClick(evento); const v2 = c.renderVals(); mapaN.directos++;
+              if (v2.mpOpciones.length || c.state.mpCols.join() !== 'c' || !c.state.mpAbre[seg] || !c.state.mpAbre[primero]) faltan.add(`otro nodo de la columna no se abre directo con el mismo tipo: ${donde}`);
+              chequear(v2, donde + ' · dos abiertos'); revisarMapa(v2, donde + ' · dos abiertos');
+              const n2 = camps2.length <= CAMP_MAX ? camps2.length : CAMP_MAX - 1; if (partes(v2).dotsN.length !== esperadosN + campVis + n2) faltan.add(`el segundo nodo no muestra sus ${n2} campañas: ${donde}`);
+              // cerrar el primero cierra lo que colgaba de él, y el otro sigue abierto
+              { const pd = partes(v2), iA = pd.raicesL.findIndex((x) => pd.nom(x) === esperadoGasto[0]); pd.dotsN[pd.nodosL.indexOf(pd.raicesL[iA])].onClick(evento);
+                const ab = Object.keys(c.state.mpAbre); if (ab.length !== 1 || ab[0] !== seg || c.state.mpSel || c.state.mpCols.join() !== 'c') faltan.add(`cerrar un nodo no cierra lo que colgaba de él (quedan ${ab.length}): ${donde}`); else mapaN.cierres++; }
+              Object.assign(c.state, { mpAbre: { [primero]: true, [seg]: true }, mpSel: null }); } }
+          // ---- encabezado de la columna: cambia el tipo de TODA la columna a la vez; las columnas de la derecha se cierran ----
+          { st({ mpPor: por, mpCols: ['c'], mpAbre: { [primero]: true } }); const vh = c.renderVals(); const h1 = vh.mpColumnas[1]; h1.onClick(evento); const vm = c.renderVals();
+            const ofreceCol = vm.mpMenu.map((x) => x.label), esp1 = validos([L0]).map((k) => KN[k][1]);
+            if (ofreceCol.join('|') !== esp1.join('|')) faltan.add(`el menú del encabezado ofrece ${ofreceCol.join(', ')} y la jerarquía dice ${esp1.join(', ')}: ${donde}`);
+            if (ofreceCol.includes('Contenidos')) faltan.add(`el menú de la columna que sigue a un ${plural} ofrece Contenidos: ${donde}`);
+            if (vm.mpMenu.filter((x) => x.actual).length !== 1 || !vm.mpMenu.find((x) => x.actual).label.startsWith('Campañas')) faltan.add(`el menú no marca el tipo actual: ${donde}`);
+            chequear(vm, donde + ' · menú'); revisarMapa(vm, donde + ' · menú');
+            const otro = vm.mpMenu.find((x) => !x.actual); if (otro) { otro.onClick(evento); mapaN.cierraDer++; const k2 = c.state.mpCols[0];
+              if (c.state.mpCols.length !== 1 || k2 === 'c' || !c.state.mpAbre[primero]) faltan.add(`cambiar el tipo de la columna desde el encabezado no lo cambia o cierra de más: ${donde}`);
+              const vc = c.renderVals(); chequear(vc, donde + ' · columna cambiada'); revisarMapa(vc, donde + ' · columna cambiada'); const hijosN = Math.min(cuenta(Rprim, k2), 99); if (vc.mpColumnas[1].label !== KN[k2][1] + ' ▾') faltan.add(`el encabezado no dice ${KN[k2][1]}: ${donde}`);
+              const visK = hijosN <= CAMP_MAX ? hijosN : CAMP_MAX - 1; if (partes(vc).dotsN.length !== esperadosN + visK) faltan.add(`al cambiar la columna a ${KN[k2][1]} hay ${partes(vc).dotsN.length - esperadosN} nodos y deberían ser ${visK}: ${donde}`); }
+            // cambiar el tipo de la columna 1 cuando ya hay columnas a la derecha las cierra
+            if (campsPrim.length && cuenta(Rprim.filter((r) => r.c === campsPrim[0]), 'p') > 0) { const pathC = primero + SEP + campsPrim[0]; st({ mpPor: por, mpCols: ['c', 'p'], mpAbre: { [primero]: true, [pathC]: true } }); const vq = c.renderVals(); vq.mpColumnas[1].onClick(evento); const vq2 = c.renderVals(); const alt = vq2.mpMenu.find((x) => !x.actual); if (alt) { alt.onClick(evento); if (c.state.mpCols.length !== 1 || c.state.mpAbre[pathC] || !c.state.mpAbre[primero]) faltan.add(`cambiar la columna 1 no cerró las de la derecha: ${donde}`); else mapaN.cierraDer++; } }
+            // la primera columna es el mismo "Empezar por": cambiarlo desde el encabezado lo cambia y vuelve a empezar
+            st({ mpPor: por, mpCols: ['c'], mpAbre: { [primero]: true } }); const v0h = c.renderVals(); v0h.mpColumnas[0].onClick(evento); const v0m = c.renderVals(); if (v0m.mpMenu.map((x) => x.label).join('|') !== 'Activos|Ejes|Audiencias') faltan.add(`el menú de la primera columna no ofrece Activos, Ejes y Audiencias: ${donde}`);
+            const otroP = v0m.mpMenu.find((x) => !x.actual && x.label !== plural); if (otroP) { otroP.onClick(evento); if (c.state.mpPor === por || c.state.mpCols.length || Object.keys(c.state.mpAbre).length) faltan.add(`cambiar "Empezar por" desde el encabezado no vuelve a empezar: ${donde}`); } }
+          // ---- tocar una campaña: "Abrir por" con Contenidos entre las opciones (porque ya hay una Campaña arriba); elegir Contenidos fija el tipo de la columna 2 ----
+          st({ mpPor: por, mpCols: ['c'], mpAbre: { [primero]: true } }); vo = c.renderVals(); po = partes(vo);
+          const titulosPrev = new Set(pt.dotsN.map((x) => x.title)), campDots = po.dotsN.filter((x) => !titulosPrev.has(x.title));
+          if (campDots.length) {
+            const cdot = campDots[0], cid = campsPrim.find((id) => P.camps[id].nombre === cdot.title) || campsPrim[0], rr = Rprim.filter((r) => r.c === cid), pathC = primero + SEP + cid;
+            cdot.onClick(evento); const vc0 = c.renderVals(); chequear(vc0, donde + ' · campaña elegida'); revisarMapa(vc0, donde + ' · campaña elegida');
+            jerarquiaOk([L0, 'c'], vc0.mpOpciones.map((x) => x.label), donde + ' · campaña', faltan);
+            if (c.state.mpSel !== pathC) faltan.add(`tocar una campaña no la elige: ${donde}`);
+            if (vc0.mpPn.type !== 'Campaña' || vc0.mpPn.detalleTxt !== 'Ver en Detalle' || !vc0.mpPn.hasGastoNote) faltan.add(`el panel de la campaña está mal (${vc0.mpPn.type}): ${donde}`);
+            const kindC = validos([L0, 'c']).find((k) => cuenta(rr, k) > 0);
+            if (kindC) {
+              vc0.mpOpciones.find((x) => x.label === KN[kindC][0]).onClick(evento); mapaN.aperturas++;
+              if (c.state.mpCols.join() !== 'c,' + kindC || !c.state.mpAbre[pathC]) faltan.add(`elegir ${KN[kindC][0]} en la campaña no fija el tipo de la columna 2: ${donde}`);
+              const vc = c.renderVals(); chequear(vc, donde + ' · campaña abierta'); revisarMapa(vc, donde + ' · campaña abierta'); const pc = partes(vc); mapaN.escalaAbierta = Math.min(mapaN.escalaAbierta, vc.mpEscala); if (!vc.mpAjusta) mapaN.abiertasSinAjuste++;
+              const nHij = cuenta(rr, kindC), vis = nHij <= CAMP_MAX ? nHij : CAMP_MAX - 1;
+              if (pc.dotsN.length !== po.dotsN.length + vis) faltan.add(`al abrir la campaña por ${KN[kindC][1]} aparecen ${pc.dotsN.length - po.dotsN.length} nodos y deberían ser ${vis}: ${donde}`);
+              if (vc.mpEdges.length !== vo.mpEdges.length + vis) faltan.add(`al abrir la campaña las líneas no suman ${vis}: ${donde}`);
+              if (nHij > CAMP_MAX) mapaN.pills++;
+              if (vc.mpColumnas.map((x) => x.label).join('|') !== `${plural} ▾|Campañas ▾|${KN[kindC][1]} ▾`) faltan.add(`los encabezados no son ${plural}, Campañas y ${KN[kindC][1]} (son ${vc.mpColumnas.map((x) => x.label).join(', ')}): ${donde}`);
+              const migasEsp = [plural, 'Campañas', KN[kindC][1], tr28(P.names[cid])].join('|');
+              if (vc.mpMigas.map((x) => x.label).join('|') !== migasEsp) faltan.add(`las migas de la campaña no son ${migasEsp.replace(/\|/g, ' › ')} (son ${vc.mpMigas.map((x) => x.label).join(' › ')}): ${donde}`); else mapaN.migas++;
+              // la primera miga suelta la selección
+              vc.mpMigas[0].onClick(); if (c.state.mpSel) faltan.add(`tocar la primera miga no suelta la selección: ${donde}`);
+              // hojas: tocar un nodo del último nivel lo elige (y volver a tocarlo lo suelta)
+              Object.assign(c.state, { mpSel: pathC });
+              const vh = c.renderVals(), ph = partes(vh), hojaI = ph.nodosL.findIndex((x) => px(x.style, 'font-size') === 11.5);
+              if (hojaI >= 0) { ph.dotsN[hojaI].onClick(evento); mapaN.hojas++; const vl = c.renderVals(); chequear(vl, donde + ' · hoja'); revisarMapa(vl, donde + ' · hoja');
+                if (!vl.mpHasSel) faltan.add(`tocar un nodo del tercer nivel no lo elige: ${donde}`);
+                if (vl.mpPn.hasGastoNote && !/^Solo lo que corrió en /.test(vl.mpPn.gastoNote) && !c.state.mpEjeF) faltan.add(`el panel de una hoja no aclara el recorte: ${donde}`);
+                if (kindC !== 'p' && !/Activo|Audiencia|Eje|Otras redes/.test(vl.mpPn.type)) faltan.add(`el panel de la hoja dice "${vl.mpPn.type}": ${donde}`);
+                if (/Activo|Audiencia|Eje/.test(vl.mpPn.type) && vl.mpPn.canDetalle) { const guardado = { ...c.state }; if (vl.mpPn.detalleTxt !== 'Ver en la tabla') faltan.add(`la hoja dice "${vl.mpPn.detalleTxt}": ${donde}`); vl.mpPn.onDetalle(); if (c.state.paso !== 'estructura' || c.state.tab === 'mapa' || !c.state.busca) faltan.add(`"Ver en la tabla" no abre su tabla con el nombre puesto: ${donde}`); else mapaN.tabla++; Object.assign(c.state, guardado, { busca: '', screen: 'proyecto', paso: 'estructura', tab: 'mapa' }); }
+                if (vl.mpOpciones.length) jerarquiaOk([L0, 'c', kindC], vl.mpOpciones.map((x) => x.label), donde + ' · hoja', faltan);
+                const v2 = c.renderVals(), p2 = partes(v2); p2.dotsN[hojaI].onClick(evento); if (c.state.mpSel) faltan.add(`volver a tocar una hoja sin tipo elegido no la suelta: ${donde}`); }
             }
-            Object.assign(c.state, base);
+            // "Ver en Detalle" de la campaña
+            Object.assign(c.state, { mpSel: pathC }); const vd = c.renderVals(); vd.mpPn.onDetalle(); if (c.state.screen !== 'campana') faltan.add(`"Ver en Detalle" no abre la ficha de la campaña: ${donde}`); else mapaN.detalleCamp++;
+            Object.assign(c.state, { screen: 'proyecto', paso: 'estructura', tab: 'mapa', mpSel: null });
+            // volver a tocar la campaña abierta la cierra (con lo que colgaba); el nodo sigue abierto y la columna conserva su tipo
+            if (kindC) { const vx = c.renderVals(), px2 = partes(vx), ci = px2.dotsN.findIndex((x) => x.title === cdot.title && !titulosPrev.has(x.title)); px2.dotsN[ci].onClick(evento);
+              if (c.state.mpAbre[pathC] || !c.state.mpAbre[primero] || c.state.mpCols.join() !== 'c,' + kindC) faltan.add(`volver a tocar la campaña no la cierra (o cierra de más): ${donde}`); else mapaN.cierres++; }
           }
-          // que se vea entero en una ventana de 1600 × 780 sin scroll: el dibujo entra en el alto del mapa (o se achica hasta 40 %)
-          if (period === periodos[0]) { v = c.renderVals(); mapaN.escalaMin = Math.min(mapaN.escalaMin, v.mpEscala);
-            if (v.mpBoxH > v.mpRowH - 60 && v.mpEscala > 0.4) faltan.add(`el Mapa no entra en 1600 × 780 sin scroll: ${donde} (alto ${v.mpBoxH} de ${v.mpRowH})`);
-            if (v.mpRowH + 243 > 780) faltan.add(`el Mapa más la cabecera pasan los 780 px: ${donde}`); }
-          // zoom: los botones +, − y Ajustar (la rueda y el arrastre son del navegador); el resaltado y el panel siguen igual
-          if (period === periodos[0] && por === 'eje') {
-            Object.assign(c.state, { ...base, canal, pid, period, mpPor: por, mpView: null }); let vz = c.renderVals(); const ini = vz.mpCanvasStyle;
+          // ---- jerarquía completa: todas las cadenas posibles de tipos (hasta 4 columnas), abriendo el primer nodo de cada columna; lo que se ofrece en cada paso sale de la jerarquía ----
+          if (period === periodos[0] && nLug <= 3) {
+            for (const chain of cadenas(L0)) {
+              if (chain.includes('p') && chain[chain.indexOf('p') - 1] !== 'c') { faltan.add(`la jerarquía arma una cadena con Contenidos sin Campaña justo arriba (${[L0, ...chain].join('›')}): ${donde}`); continue; }
+              // se baja por el primer nodo de cada columna y se abre el último, para que se vean todas las columnas de la cadena
+              let Rx = Rprim, path = primero; const abre = { [primero]: true }; let ok = true; const kinds = [L0, ...chain];
+              for (let i = 0; i < chain.length - 1 && ok; i++) { const lst = Object.entries(gastoPor(P, FK[chain[i]], Rx)).sort((x, y) => y[1] - x[1]); if (!lst.length) { ok = false; break; } const idn = lst[0][0]; Rx = Rx.filter((r) => r[FK[chain[i]]] === idn); path += SEP + idn; abre[path] = true; }
+              if (!ok) continue;
+              st({ mpPor: por, mpCols: chain, mpAbre: abre, mpSel: null }); const vq = c.renderVals(); chequear(vq, donde + ' · cadena ' + kinds.join('›')); revisarMapa(vq, donde + ' · cadena ' + kinds.join('›')); mapaN.cadenas++;
+              if (chain.length >= 3) mapaN.cuatro++;
+              const hdrEsp = kinds.map((k, i) => (i === 0 ? PLURAL[por] : KN[k][1]) + ' ▾');
+              if (vq.mpColumnas.map((x) => x.label).join('|') !== hdrEsp.slice(0, vq.mpColumnas.length).join('|') || vq.mpColumnas.length > hdrEsp.length) faltan.add(`los encabezados no siguen los tipos ${kinds.join('›')} (son ${vq.mpColumnas.map((x) => x.label).join(', ')}): ${donde}`);
+              // en la última columna: un nodo elegido ofrece lo que la jerarquía permite después de toda la cadena
+              const lst2 = Object.entries(gastoPor(P, FK[chain[chain.length - 1]], Rx)).sort((x, y) => y[1] - x[1]);
+              if (lst2.length) { const path2 = path + SEP + lst2[0][0]; st({ mpPor: por, mpCols: chain, mpAbre: abre, mpSel: path2 }); const vq2 = c.renderVals(); chequear(vq2, donde + ' · cadena ' + kinds.join('›') + ' · último nodo'); revisarMapa(vq2, donde + ' · cadena ' + kinds.join('›') + ' · último nodo');
+                jerarquiaOk(kinds, vq2.mpOpciones.map((x) => x.label), donde + ' · cadena', faltan);
+                if (vq2.mpColumnas.length !== kinds.length) faltan.add(`la cadena ${kinds.join('›')} muestra ${vq2.mpColumnas.length} columnas y deberían ser ${kinds.length}: ${donde}`);
+                const migasT = vq2.mpMigas.map((x) => x.label).slice(0, kinds.length).join('|'); if (migasT !== [PLURAL[por], ...chain.map((k) => KN[k][1])].join('|')) faltan.add(`las migas no muestran los tipos ${kinds.join('›')} (son ${vq2.mpMigas.map((x) => x.label).join(' › ')}): ${donde}`); }
+            }
+          }
+          // ---- Métrica: define el número y el color de cada burbuja ----
+          { const KPIS = ['obj', 'cr', 'cpm', 'ctr', 'etrV', 'etrI', 'cv', 'ca'], CORTO = { cr: 'Costo/reacción', cpm: 'CPM', ctr: 'CTR', etrV: 'ETR videos', etrI: 'ETR imág.', cv: 'Costo/repr.', ca: 'CPM alcance' };
+            for (const k of KPIS) { st({ mpPor: por, kpiSel: k, mpCols: ['c'], mpAbre: { [primero]: true } }); const vk = c.renderVals(); chequear(vk, donde + ' · métrica ' + k); revisarMapa(vk, donde + ' · métrica ' + k); mapaN.metricas2++; if (vk.mpMetric !== k) faltan.add(`el Mapa no sigue la Métrica ${k}: ${donde}`);
+              const pk = partes(vk), raizL = pk.raicesL[0].label, campL = pk.nodosL.filter((x) => px(x.style, 'font-size') === 12);
+              if (/NaN|undefined|Infinity/.test(pk.nodosL.map((x) => x.label).join('|'))) faltan.add(`un número roto en un rótulo con la Métrica ${k}: ${donde}`);
+              if (k === 'ca' && /CPM alcance/.test(raizL)) faltan.add(`el CPM de Alcance se junta en un nodo (nunca se suma alcance): ${donde}`);
+              if (k !== 'obj' && k !== 'ca' && campL.length && !campL.some((x) => x.label.includes(CORTO[k]) || /\$/.test(x.label))) faltan.add(`las campañas no muestran la Métrica ${k}: ${donde}`);
+              if (k === 'obj' && campL.length && !campL.every((x) => Object.values(CORTO).some((n) => x.label.includes(n)) || / · \$/.test(x.label))) faltan.add(`las campañas no muestran su número según el objetivo: ${donde}`); }
+            Object.assign(c.state, { kpiSel: 'obj' });
+            // fichas: la del primer nodo y la de una campaña, las dos a la vez; cerrar con la ×
+            st({ mpPor: por, mpCols: ['c'], mpAbre: { [primero]: true } }); const vf0 = c.renderVals(); if (!vf0.mpInfos.length) faltan.add(`no hay ícono para ver las métricas: ${donde}`); else {
+              vf0.mpInfos[0].onClick(evento); if (!c.state.mpFichas[primero]) faltan.add(`el ícono no abre la ficha: ${donde}`); let vf = c.renderVals(); chequear(vf, donde + ' · ficha'); revisarMapa(vf, donde + ' · ficha'); mapaN.fichas++;
+              if (vf.mpFichas.length !== 1) faltan.add(`hay ${vf.mpFichas.length} fichas y debería haber 1: ${donde}`);
+              else { const ff = vf.mpFichas[0], lf = [ff.titulo, ff.sub, ...ff.minis.map((l) => l.lab + ' ' + l.val), ff.metLab, ff.metVal, ff.pill, ff.motivo].join(' | '); if (/alcanzad/i.test(lf)) faltan.add(`la ficha habla de alcance: ${donde}`); if (!/\d/.test(lf)) faltan.add(`la ficha no tiene números: ${donde}`); if (/\d\.\d{3}\.\d{3}/.test(ff.minis.map((l) => l.val).join(' '))) faltan.add(`la ficha no usa "mil" y "M": ${donde}`);
+                if (ff.hayPill && !/^(Bueno|Normal|Malo|Sin referencia)/.test(ff.pill)) faltan.add(`la píldora de la ficha no dice Bueno, Normal o Malo: ${donde}`); }
+              if (vf.mpInfos.length > 1) { vf.mpInfos[1].onClick(evento); vf = c.renderVals(); chequear(vf, donde + ' · dos fichas'); revisarMapa(vf, donde + ' · dos fichas'); if (vf.mpFichas.length !== 2) faltan.add(`no se pueden tener dos fichas abiertas: ${donde}`); else if (!vf.mpFichas[1].minis.some((l) => l.lab === 'Al aire')) faltan.add(`la ficha de una campaña no dice los días al aire: ${donde}`); }
+              const n0 = vf.mpFichas.length; vf.mpFichas[0].onClose(evento); const vc2 = c.renderVals(); if (vc2.mpFichas.length !== n0 - 1) faltan.add(`la × no cierra la ficha: ${donde}`); else mapaN.cierraFicha++;
+              if (vc2.mpFichas.length) vc2.mpFichas[0].onClose(evento); if (c.renderVals().mpFichas.length) faltan.add(`quedan fichas abiertas: ${donde}`); }
+            // la ficha de un contenido (Eje/Activo/Audiencia › Campaña › Contenidos): tiene ficha y se puede seguir abriendo por Audiencia o Activo
+            { const cid = campsPrim[0], R2 = Rprim.filter((r) => r.c === cid), pid = [...new Set(R2.map((r) => r.p).filter(Boolean))][0];
+              if (pid) { const pathK = primero + SEP + cid + SEP + pid; st({ mpPor: por, mpCols: ['c', 'p'], mpAbre: { [primero]: true, [primero + SEP + cid]: true }, mpSel: pathK, mpFichas: { [pathK]: true } }); const vk = c.renderVals(); chequear(vk, donde + ' · contenido'); revisarMapa(vk, donde + ' · contenido');
+                if (!vk.mpFichas.length) faltan.add(`un contenido no tiene ficha: ${donde}`); else mapaN.fichasP++;
+                jerarquiaOk([L0, 'c', 'p'], vk.mpOpciones.map((x) => x.label), donde + ' · contenido', faltan);
+                const sig = validos([L0, 'c', 'p']).find((k) => cuenta(R2.filter((r) => r.p === pid), k) > 0);
+                if (sig) { vk.mpOpciones.find((x) => x.label === KN[sig][0]).onClick(evento); const v4 = c.renderVals(); chequear(v4, donde + ' · cuarto nivel'); revisarMapa(v4, donde + ' · cuarto nivel'); mapaN.cuatro++;
+                  if (c.state.mpCols.join() !== 'c,p,' + sig) faltan.add(`un contenido no fija el tipo ${KN[sig][0]} para la columna 3: ${donde}`);
+                  const espM = [PLURAL[por], 'Campañas', 'Contenidos', KN[sig][1], tr28(P.names[pid])].join('|'); if (v4.mpMigas.map((x) => x.label).join('|') !== espM) faltan.add(`las migas del cuarto nivel no son ${espM.replace(/\|/g, ' › ')} (son ${v4.mpMigas.map((x) => x.label).join(' › ')}): ${donde}`); }
+                else mapaN.sinDatoP = (mapaN.sinDatoP || 0) + 1; } } }
+          // ---- "Volver a empezar": todo cerrado, sin tipos de columna, sin filtros ni fichas, y queda lo elegido en "Empezar por" ----
+          { Object.assign(c.state, { mpEjeF: P.ejes[0] || '', mpQ: 'x', mpCols: ['c'], mpMenuCol: 1, mpAbre: { [primero]: true }, mpFichas: { [primero]: true }, mpSel: primero }); const vr = c.renderVals(); vr.mpVerTodo(); mapaN.reinicios++;
+            if (Object.keys(c.state.mpAbre).length || c.state.mpCols.length || c.state.mpMenuCol != null || Object.values(c.state.mpFichas || {}).some(Boolean) || c.state.mpSel || c.state.mpEjeF || c.state.mpActF || c.state.mpQ || c.state.mpPor !== por) faltan.add(`"Volver a empezar" no deja el Mapa como al principio (o cambia "Empezar por"): ${donde}`);
+            const vv = c.renderVals(); if (partes(vv).dotsN.length !== esperadosN || vv.mpEdges.length || vv.mpOpciones.length || vv.mpColumnas.length !== 1) faltan.add(`después de "Volver a empezar" quedan nodos abiertos: ${donde}`); }
+          if (period !== periodos[0]) { Object.assign(c.state, base); continue; }
+          // ---- "Ordenar por": Gasto (de mayor a menor), Nombre (A–Z) y Cómo rinde ----
+          for (const [ord, etq] of [['nombre', 'Nombre'], ['rinde', 'Cómo rinde'], ['gasto', 'Gasto']]) {
+            st({ mpPor: por, mpOrden: ord === 'gasto' ? 'nombre' : 'gasto' }); const va = c.renderVals(); va.mpOrdenOps.find((x) => x.label === etq).onClick(evento); mapaN.ordenes++;
+            if (c.state.mpOrden !== ord) { faltan.add(`"Ordenar por ${etq}" no cambia el orden: ${donde}`); continue; }
+            const vq = c.renderVals(); chequear(vq, donde + ' · orden ' + ord); revisarMapa(vq, donde + ' · orden ' + ord); const nq = partes(vq).raicesL.map(pt.nom);
+            if (vq.mpOrdenOps.filter((x) => x.on).map((x) => x.label).join() !== etq) faltan.add(`el selector de orden no marca ${etq}: ${donde}`);
+            if (ord === 'nombre' && !(nq.every((x, i) => !i || nq[i - 1].localeCompare(x, 'es') <= 0))) faltan.add(`lo de arranque no va de la A a la Z: ${donde} (${nq.join(', ')})`);
+            if (ord === 'gasto' && JSON.stringify(nq) !== JSON.stringify(esperadoGasto.slice(0, esperadosN))) faltan.add(`volver a Gasto no deja el orden como al principio: ${donde}`);
+            if (ord === 'nombre' && por === 'eje') { Object.assign(c.state, { mpCols: ['c'], mpAbre: { [primero]: true } }); const vn = c.renderVals(), cn = partes(vn).nodosL.filter((x) => px(x.style, 'font-size') === 12).map((x) => x.label.replace(/ · .*$/, '')); if (!cn.every((x, i) => !i || cn[i - 1].localeCompare(x, 'es') <= 0)) faltan.add(`las campañas abiertas no van de la A a la Z: ${donde}`); }
+          }
+          // ---- zoom: los botones +, − y Ajustar; al cambiar lo que se ve el dibujo es otro y se vuelve a ajustar ----
+          if (por === 'eje') {
+            st({ mpCols: ['c'], mpAbre: { [primero]: true }, mpSel: primero }); const vz = c.renderVals(); const ini = vz.mpCanvasStyle;
             if (!vz.mpMas || !vz.mpMenos || !vz.mpAjustar || vz.mpZoomado) faltan.add(`faltan los botones de zoom o el mapa abre ya acercado: ${donde}`);
-            const idc = vz.mpDots.find((x) => x.label === '' && /border-radius:50%/.test(x.style) && /background:#(46C678|FCB942|F7444C|A6AAA9|D5D5D5)/.test(x.style)); if (idc) idc.onClick(evento);
-            vz = c.renderVals(); vz.mpMas(evento); mapaN.zoom = (mapaN.zoom || 0) + 1; let v1 = c.renderVals();
+            vz.mpMas(evento); mapaN.zoom++; const v1 = c.renderVals();
             if (!(v1.mpZoom > 1.2) || !v1.mpZoomado || v1.mpCanvasStyle === ini || !/scale\(/.test(v1.mpCanvasStyle)) faltan.add(`el botón + no acerca el mapa: ${donde}`);
             chequear(v1, donde + ' · con zoom'); revisarMapa(v1, donde + ' · con zoom');
             if (!v1.mpHasSel || !v1.mpHlEdges.length) faltan.add(`con zoom se pierde el resaltado o el panel: ${donde}`);
-            v1.mpMenos(evento); v1.mpMenos(evento); v1 = c.renderVals(); if (!(v1.mpZoom < 1.01)) { /* alejar de más está permitido hasta la mitad */ }
-            const vq = c.renderVals(); vq.mpMas(evento); const v2 = c.renderVals(); v2.mpAjustar(evento); const v3 = c.renderVals();
-            const sinTr = (s) => s.replace(/transition:[^;]*/, '');
+            v1.mpMenos(evento); const vq = c.renderVals(); vq.mpMas(evento); const v2 = c.renderVals(); v2.mpAjustar(evento); const v3 = c.renderVals(); const sinTr = (s) => s.replace(/transition:[^;]*/, '');
             if (c.state.mpView || v3.mpZoomado || sinTr(v3.mpCanvasStyle) !== sinTr(ini)) faltan.add(`"Ajustar" no vuelve a ver todo el mapa: ${donde}`);
-            // al cambiar la agrupación el zoom no se arrastra (el dibujo es otro)
-            v3.mpMas(evento); const v4 = c.renderVals(); v4.mpPorOps.find((x) => x.label === 'Activo').onClick(evento); const v5 = c.renderVals(); if (v5.mpZoomado) faltan.add(`al cambiar de agrupación el mapa queda acercado: ${donde}`);
-            Object.assign(c.state, { ...base, canal, pid, period, mpPor: por, mpView: null });
+            v3.mpMas(evento); const v4 = c.renderVals(); v4.mpOnPor({ target: { value: 'activo' } }); const v5 = c.renderVals(); if (v5.mpZoomado) faltan.add(`al cambiar "Empezar por" el mapa queda acercado: ${donde}`);
           }
-          // métricas del selector: el mapa se arma con cada una
-          if (por === 'eje' && period === periodos[0]) for (const k of ['cr', 'cpm', 'ctr', 'ca', 'cv']) { Object.assign(c.state, { kpiSel: k }); const vk = c.renderVals(); chequear(vk, donde + ' · ' + k); revisarMapa(vk, donde + ' · ' + k); mapaN.metricas++; if (vk.mpMetric !== k) faltan.add(`el Mapa no sigue la Métrica elegida (${k}): ${donde}`); }
-          Object.assign(c.state, { kpiSel: 'obj' });
-          // clic real en un nodo de cada tipo (campaña, zona, activo o eje de la izquierda, audiencia): se resalta lo conectado y el panel dice lo esencial
-          if (period === periodos[0]) {
-            Object.assign(c.state, { ...base, canal, pid, period, mpPor: por }); v = c.renderVals();
-            const zonaClic = v.mpZones[0], campClic = v.mpDots.find((x) => x.label === '' && /border-radius:50%/.test(x.style) && /background:#(46C678|FCB942|F7444C|A6AAA9|D5D5D5)/.test(x.style)),
-              izqClic = v.mpDots.find((x) => /border-radius:8px/.test(x.style)), audClic = v.mpDots.find((x) => /dashed #8A8A8A/.test(x.style));
-            for (const [que, nodo, tipoEsp] of [['la zona', zonaClic, null], ['una campaña', campClic, 'Campaña'], ['un nodo de la izquierda', izqClic, null], ['una audiencia', audClic, 'Audiencia']]) {
-              if (!nodo) { if (que !== 'una audiencia' || P.recs.some((r) => r.u)) faltan.add(`no hay ${que} para tocar: ${donde}`); continue; }
-              const lista = que === 'la zona' ? 'mpZones' : 'mpDots', idx = v[lista].indexOf(nodo);
-              Object.assign(c.state, { ...base, canal, pid, period, mpPor: por }); nodo.onClick(evento); mapaN.clics++;
-              const vs = c.renderVals(); chequear(vs, donde + ' · ' + que); revisarMapa(vs, donde + ' · ' + que);
-              if (!c.state.mpSel || !vs.mpHasSel || !vs.mpPn.gasto || !/\d/.test(vs.mpPn.conn)) faltan.add(`tocar ${que} no abre el panel con lo esencial: ${donde}`);
-              if (tipoEsp && vs.mpPn.type !== tipoEsp) faltan.add(`el panel de ${que} dice "${vs.mpPn.type}": ${donde}`);
-              if (!vs.mpHlEdges.length && que !== 'la zona') faltan.add(`tocar ${que} no resalta sus líneas: ${donde}`);
-              if (que !== 'la zona' && vs.mpDots.length > 6 && !vs.mpDots.some((x) => /opacity:0.15/.test(x.style))) faltan.add(`tocar ${que} no apaga lo que no está conectado: ${donde}`);
-              // tocar de nuevo lo suelta (como en el navegador, la pantalla se arma otra vez entre un clic y otro); tocar el fondo también
-              const nodo2 = vs[lista][idx]; if (!nodo2) faltan.add(`no se encuentra ${que} para volver a tocarlo: ${donde}`); else { nodo2.onClick(evento); if (c.state.mpSel) faltan.add(`volver a tocar ${que} no lo suelta: ${donde}`); }
-              nodo.onClick(evento); const v3 = c.renderVals(); v3.mpClearSel(); if (c.state.mpSel) faltan.add(`tocar el fondo no suelta la selección: ${donde}`);
-              // "Ver en Detalle" (campañas) o "Ver en la tabla" (activos, ejes y audiencias)
-              if (que === 'una campaña' || que === 'una audiencia') { nodo.onClick(evento); const vd = c.renderVals(); const guardado = { ...c.state };
-                if (que === 'una campaña') { if (vd.mpPn.detalleTxt !== 'Ver en Detalle') faltan.add(`la campaña dice "${vd.mpPn.detalleTxt}": ${donde}`); vd.mpPn.onDetalle(); if (c.state.screen !== 'campana') faltan.add(`"Ver en Detalle" no abre la ficha de la campaña: ${donde}`); else mapaN.detalleCamp++; }
-                else { if (vd.mpPn.detalleTxt !== 'Ver en la tabla') faltan.add(`la audiencia dice "${vd.mpPn.detalleTxt}": ${donde}`); vd.mpPn.onDetalle(); const vt = c.renderVals(); if (c.state.paso !== 'estructura' || !vt.isAud || !c.state.busca) faltan.add(`"Ver en la tabla" no abre Audiencias con el nombre puesto: ${donde}`); else mapaN.tabla++; }
-                Object.assign(c.state, guardado, { mpSel: null, busca: '', screen: 'proyecto', paso: 'estructura', tab: 'mapa' }); }
-            }
-            // buscador "¿Dónde está…?": una campaña, una zona, un activo y una audiencia; y algo que no existe
-            for (const id of [P.recs[0].c, P.recs[0].eje, P.recs.find((r) => r.a !== 'a:otras') && P.recs.find((r) => r.a !== 'a:otras').a, P.recs.find((r) => r.u) && P.recs.find((r) => r.u).u, P.recs[0].o].filter(Boolean)) {
-              Object.assign(c.state, { ...base, canal, pid, period, mpPor: por, mpQ: P.names[id].slice(0, 14), mpQOpen: true }); const vq = c.renderVals();
-              const sug = vq.mpSugs.find((x) => x.id === id); if (!sug) { faltan.add(`el buscador no encuentra "${P.names[id]}": ${donde}`); continue; }
+          // ---- buscador "¿Dónde está…?": arma el camino y fija el tipo de cada columna ----
+          { const rs = P.recs, algun = (f) => rs.find((r) => f(r)), cand = [];
+            const rc = rs[0]; if (rc) cand.push(rc.c, rc.eje);
+            const ra = algun((r) => r.a !== 'a:otras'); if (ra) cand.push(ra.a);
+            const ru = algun((r) => r.u); if (ru) cand.push(ru.u);
+            const rp = algun((r) => r.p); if (rp) cand.push(rp.p);
+            for (const id of cand) {
+              const nombreId = P.names[id]; st({ mpPor: por, mpQ: (nombreId || '').slice(0, 14), mpQOpen: true }); const vq = c.renderVals();
+              const sug = id[0] === 'p' ? null : vq.mpSugs.find((x) => x.id === id); if (id[0] !== 'p' && !sug) { faltan.add(`el buscador no encuentra "${nombreId}": ${donde}`); continue; }
+              if (id[0] === 'p') { c.state.mpSel = null; vq.mpPn; continue; }
               sug.onPick(evento); mapaN.busquedas++; const vf = c.renderVals(); chequear(vf, donde + ' · buscar ' + id); revisarMapa(vf, donde + ' · buscar ' + id);
-              if (c.state.mpSel !== id || !vf.mpHasSel) faltan.add(`buscar "${P.names[id]}" no lo selecciona: ${donde}`);
-              if (!vf.mpFlashList.length) faltan.add(`buscar "${P.names[id]}" no lo ubica con el destello: ${donde}`);
-              if (id[0] === 'o' && c.state.mpPor !== 'objetivo' && c.state.mpPor !== undefined) faltan.add(`un objetivo buscado no cambia la agrupación: ${donde}`);
-              if (!vf.mpHasSel) continue;
+              const sel = c.state.mpSel || '', segs = sel.split(SEP), t = id[0], raizLet = LET[por];
+              const ejeRecuadro = t === 'e' && por !== 'eje', esperaLargo = ejeRecuadro ? 2 : t === raizLet ? 1 : t === 'c' ? 2 : 3;
+              if ((ejeRecuadro ? !(segs[1] || '').startsWith('c:') || 'e:' + P.camps[segs[1]].eje !== id : segs[segs.length - 1] !== id) || segs.length !== esperaLargo) faltan.add(`buscar "${P.names[id]}" no arma el camino de ${esperaLargo} tramos (${segs.length}): ${donde}`);
+              if (c.state.mpCols.join() !== segs.slice(1).map((x) => x[0]).join() || segs.slice(0, -1).some((_, i) => !c.state.mpAbre[segs.slice(0, i + 1).join(SEP)])) faltan.add(`buscar "${P.names[id]}" no fija los tipos de columna del camino ni abre cada tramo: ${donde}`);
+              if (c.state.mpCols.includes('p') && c.state.mpCols[c.state.mpCols.indexOf('p') - 1] !== 'c') faltan.add(`buscar "${P.names[id]}" deja Contenidos sin Campaña arriba: ${donde}`);
+              if (!vf.mpHasSel || !vf.mpFlashList.length) faltan.add(`buscar "${P.names[id]}" no lo elige ni lo ubica con el destello: ${donde}`);
+              if (!ejeRecuadro && !vf.mpDots.some((x) => x.title === P.names[id])) faltan.add(`buscar "${P.names[id]}" no lo deja a la vista: ${donde}`);
             }
-            Object.assign(c.state, { ...base, canal, pid, period, mpPor: por, mpQ: 'zzzz-nada', mpQOpen: true }); v = c.renderVals(); if (!v.mpNoSug || v.mpSugs.length) faltan.add(`buscar algo que no existe no avisa: ${donde}`);
-            // filtros de eje y de activo, y "Ver todo"
-            if (P.ejes.length > 1) { Object.assign(c.state, { ...base, canal, pid, period, mpPor: por, mpEjeF: P.ejes[0] }); const vf = c.renderVals(); chequear(vf, donde + ' · filtro de eje'); revisarMapa(vf, donde + ' · filtro de eje'); mapaN.filtros++;
-              if (por === 'eje' && vf.mpZones.length !== 1) faltan.add(`el filtro de eje deja ${vf.mpZones.length} zonas: ${donde}`);
-              vf.mpVerTodo(); if (c.state.mpEjeF || c.state.mpSel) faltan.add(`"Ver todo" no saca el filtro de eje: ${donde}`); }
-            if (P.acts.length) { Object.assign(c.state, { ...base, canal, pid, period, mpPor: por, mpActF: P.acts[0] }); const vf = c.renderVals(); chequear(vf, donde + ' · filtro de activo'); revisarMapa(vf, donde + ' · filtro de activo'); mapaN.filtros++;
-              if (!vf.mpDots.length) faltan.add(`el filtro de activo deja el Mapa vacío: ${donde}`);
-              vf.mpVerTodo(); if (c.state.mpActF) faltan.add(`"Ver todo" no saca el filtro de activo: ${donde}`); }
-          }
+            st({ mpPor: por, mpQ: 'zzzz-nada', mpQOpen: true }); v = c.renderVals(); if (!v.mpNoSug || v.mpSugs.length) faltan.add(`buscar algo que no existe no avisa: ${donde}`); }
+          // ---- filtros de eje y de activo, con "Volver a empezar" ----
+          if (P.ejes.length > 1) { st({ mpPor: por, mpEjeF: P.ejes[0] }); const vf = c.renderVals(); chequear(vf, donde + ' · filtro de eje'); revisarMapa(vf, donde + ' · filtro de eje'); mapaN.filtros++;
+            if (por === 'eje' && partes(vf).dotsN.length !== 1) faltan.add(`el filtro de eje deja ${partes(vf).dotsN.length} nodos: ${donde}`);
+            vf.mpVerTodo(); if (c.state.mpEjeF || c.state.mpSel) faltan.add(`"Volver a empezar" no saca el filtro de eje: ${donde}`); }
+          if (P.acts.length) { st({ mpPor: por, mpActF: P.acts[0] }); const vf = c.renderVals(); chequear(vf, donde + ' · filtro de activo'); revisarMapa(vf, donde + ' · filtro de activo'); mapaN.filtros++;
+            if (!vf.mpDots.length) faltan.add(`el filtro de activo deja el Mapa vacío: ${donde}`);
+            vf.mpVerTodo(); if (c.state.mpActF) faltan.add(`"Volver a empezar" no saca el filtro de activo: ${donde}`); }
           Object.assign(c.state, base);
         }
       }
     }
   }
   c.setState = setOrig; c.state.tab = 'campañas'; c.state.paso = 'explora'; c.state.w = 1400; c.state.hv = 900;
-  console.log(`Mapa: escala más chica en 1600 × 780 ${Math.round(mapaN.escalaMin * 100)} % · ${mapaN.vistas} vistas · ${mapaN.zonas} zonas · ${mapaN.rotulos} rótulos · ${mapaN.porOps} clics en "Agrupar por" · ${mapaN.clics} nodos tocados · ${mapaN.busquedas} búsquedas · ${mapaN.filtros} filtros · ${mapaN.pills} con "+N campañas" · ${mapaN.otras} con "otras redes" · ${mapaN.terminadas} con terminadas en gris · ${mapaN.detalleCamp} "Ver en Detalle" · ${mapaN.tabla} "Ver en la tabla" · ${mapaN.metricas} métricas`);
-  if (!mapaN.clics || !mapaN.pills || !mapaN.otras || !mapaN.terminadas || !mapaN.detalleCamp || !mapaN.tabla || !mapaN.filtros || !mapaN.busquedas) faltan.add('el Mapa no se probó completo (nodos, "+N campañas", otras redes, terminadas, Detalle, tabla, filtros, buscador)');
+  console.log(`Mapa: escala más chica en 1600 × 780 ${Math.round(mapaN.escalaMin * 100)} % (con un nodo y una campaña abiertos ${Math.round(mapaN.escalaAbierta * 100)} %, ${mapaN.abiertasSinAjuste} casos que pasan del alto y se mueven con el zoom) · ${mapaN.vistas} vistas · ${mapaN.rotulos} rótulos · ${mapaN.empezar} cambios de "Empezar por" · ${mapaN.elige} "Abrir por" · ${mapaN.aperturas} tipos elegidos · ${mapaN.directos} nodos que se abren directo con el tipo de su columna · ${mapaN.columnas} vistas con encabezados · ${mapaN.cierraDer} cambios de columna que cierran las de la derecha · ${mapaN.cadenas} cadenas de tipos (${mapaN.cuatro} de 4 columnas) · ${mapaN.cierres} cierres · ${mapaN.hojas} hojas tocadas · ${mapaN.migas} migas · ${mapaN.reinicios} "Volver a empezar" · ${mapaN.busquedas} búsquedas · ${mapaN.filtros} filtros · ${mapaN.pills} con "+N" · ${mapaN.otras} con "otras redes" · ${mapaN.terminadas} con terminadas en gris · ${mapaN.detalleCamp} "Ver en Detalle" · ${mapaN.tabla} "Ver en la tabla" · ${mapaN.metricas2} métricas · ${mapaN.fichas} fichas (${mapaN.fichasP} de contenidos) · ${mapaN.cierraFicha} cierres con × · ${mapaN.cajas} con recuadros de eje · ${mapaN.ordenes} órdenes · ${mapaN.zoom} zooms`);
+  if (!mapaN.elige || !mapaN.aperturas || !mapaN.directos || !mapaN.cierraDer || !mapaN.cadenas || !mapaN.cuatro || !mapaN.cierres || !mapaN.hojas || !mapaN.pills || !mapaN.otras || !mapaN.terminadas || !mapaN.detalleCamp || !mapaN.tabla || !mapaN.filtros || !mapaN.busquedas || !mapaN.migas || !mapaN.fichas || !mapaN.fichasP || !mapaN.cajas || !mapaN.cierraFicha) faltan.add('el Mapa no se probó completo ("Abrir por", tipo por columna, encabezados, cadenas de la jerarquía, cierres, hojas, "+N", otras redes, terminadas, Detalle, tabla, filtros, buscador, migas, fichas, recuadros)');
 }
-console.log(`CPM de Alcance en la ficha: ${cpmAlcFicha} tarjetas`);
 // ---- cambiar de proyecto desde la ruta de arriba (06/10): el proyecto es un desplegable; se mantiene el paso, la pestaña, el período y el canal ----
 const cambioN = { clics: 0, canalCambiado: 0, desdeCampana: 0 };
 {
