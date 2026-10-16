@@ -473,6 +473,8 @@ const RITMO_L = { rapido: 'R', normal: 'N', lento: 'L' };
 // cuartiles (P25/P50/P75 por proyecto × canal × objetivo × placement y por objetivo) van una sola vez en DATA.cuartiles.
 const mksDe = (filas, proyecto, canal) => MARCAS.letras(filas, { proyecto, canal });
 const porCodDe = (filas) => { const m = {}; for (const r of filas) (m[r.cod] = m[r.cod] || []).push(r); return m; };
+// nota de 1 a 5 de una campaña (15/10): su KPI según objetivo por percentil en su celda (marcas.js); sin referencia = null
+const ntDe = (filas, obj, proyecto, canal) => { if (!filas.length) return null; const x = MARCAS.marcaCampana(filas, obj, { proyecto, canal }); return x && x.nota != null ? x.nota : null; };
 const mkDe = (filas, obj, proyecto, canal) => { if (!filas.length) return 'S'; const x = MARCAS.marcaCampana(filas, obj, { proyecto, canal }); return LETRA[x && x.estado] || 'S'; };
 const porComDe = (filas) => { const m = {}; for (const r of filas) (m[r.com] = m[r.com] || []).push(r); return m; };
 const enMeses = (filas, per) => filas.filter((r) => r.mes >= per.desde.slice(0, 7) && r.mes <= per.hasta.slice(0, 7));
@@ -565,7 +567,7 @@ function bloqueApp(P, canal, b) {
     const gTot = rs.reduce((s, r) => s + r.g, 0) || 1;
     const porCom = {}; for (const r of rs) (porCom[r.com] = porCom[r.com] || []).push(r);
     const campRows = Object.entries(porCom).map(([com, xs]) => filaCamp(com, xs, per)).filter((c) => c.gastoN > 20000).sort((a, b) => b.gastoN - a.gastoN);
-    for (const c of campRows) { const fm = enMeses(cruceCom[c.id] || [], per); c.mk = mkDe(fm, c.obj, cli, canal); c.mks = mksDe(fm, cli, canal); }
+    for (const c of campRows) { const fm = enMeses(cruceCom[c.id] || [], per); c.mk = mkDe(fm, c.obj, cli, canal); c.nt = ntDe(fm, c.obj, cli, canal); c.mks = mksDe(fm, cli, canal); }
     const porPub = {}; for (const r of rs) (porPub[`${r.cod}|${r.red}`] = porPub[`${r.cod}|${r.red}`] || []).push(r);
     const pubs = Object.values(porPub).map((xs) => filaPub(xs, per)).filter((p) => (p.gasto >= 20000 || p.imp >= 20000) && !/^Sin C[oó]digo/i.test(p.name)).sort((a, b) => b.gasto - a.gasto).slice(0, 100);
     { const pc = porCodDe(enMeses(cruceRows, per)); for (const p of pubs) if (p.cod && pc[p.cod]) p.mks = mksDe(pc[p.cod], cli, canal); }
@@ -814,7 +816,7 @@ function generalApp(P, apps) {
     if (!rs.length) continue;
     const porCom = {}; for (const r of rs) (porCom[r.com] = porCom[r.com] || []).push(r);
     const campRows = Object.entries(porCom).map(([com, xs]) => filaG(com, xs, per)).filter((c) => c.gastoN > 20000).sort((a, b) => b.gastoN - a.gastoN);
-    for (const c of campRows) { const fm = enMeses(cruceComG[c.id] || [], per); c.mk = mkDe(fm, c.obj, cli, MARCAS_M.CANAL_AMBAS); c.mks = mksDe(fm, cli, MARCAS_M.CANAL_AMBAS); }
+    for (const c of campRows) { const fm = enMeses(cruceComG[c.id] || [], per); c.mk = mkDe(fm, c.obj, cli, MARCAS_M.CANAL_AMBAS); c.nt = ntDe(fm, c.obj, cli, MARCAS_M.CANAL_AMBAS); c.mks = mksDe(fm, cli, MARCAS_M.CANAL_AMBAS); }
     // contenidos distintos por activo y por activo × campaña, juntando los dos canales (una pieza puede estar en los dos)
     const contSet = {}, contTot = new Set(), contCom = {};
     for (const r of rs) { if (!r.cod || /^Sin C[oó]digo/i.test(r.cont || '')) continue; (contSet[r.voz] = contSet[r.voz] || new Set()).add(r.cod); (contSet[`${r.voz}|${r.com}`] = contSet[`${r.voz}|${r.com}`] || new Set()).add(r.cod); contTot.add(r.cod); (contCom[r.com] = contCom[r.com] || new Set()).add(r.cod); }
@@ -918,10 +920,10 @@ for (const [desde, hasta] of parches) {
   if (!hay) { console.error('PARCHE NO ENCONTRADO:', String(desde).slice(0, 100)); continue; }
   template = typeof hasta === 'function' ? template.replace(desde, hasta) : template.replace(desde, () => hasta); n++; // función: así los "$" del reemplazo no se interpretan como patrones
 }
-// el template va como JSON adentro de un <script>: los "</script>" internos se escapan como "<\/script>" (JSON válido) para no cortar el HTML
-const salida = html.replace(m[0], () => `<script type="__bundler/template">${JSON.stringify(template).replace(/<\//g, '<\\/')}</script>`).replace('<title>Bundled Page</title>', '<title>Optimización</title>');
 // íconos de pestaña: el bundler reemplaza el <html> entero por el del template, así que tienen que ir en su <head> (los del <head> de afuera se pierden)
 template = template.replace(/<head[^>]*>/, (h) => h + require('../servidor/vista.js').ICONOS_HEAD);
+// el template va como JSON adentro de un <script>: los "</script>" internos se escapan como "<\/script>" (JSON válido) para no cortar el HTML
+const salida = html.replace(m[0], () => `<script type="__bundler/template">${JSON.stringify(template).replace(/<\//g, '<\\/')}</script>`).replace('<title>Bundled Page</title>', '<title>Optimización</title>');
 fs.writeFileSync(SALIDA, salida);
 // repositorio de recomendaciones (lo guarda redaccion.js)
 // en Railway guarda en la base (devuelve una promesa); en local, en archivos. Si falla, el armado termina con error.

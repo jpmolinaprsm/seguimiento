@@ -86,6 +86,13 @@ function tablaDeciles(unidades, { minN = MIN_N, minImp = MIN_IMP } = {}) {
   };
   return { decil, celdas: ord };
 }
+// nota de 1 a 5 (15/10, pedido de Juan Pablo para "Mis proyectos"): por percentil dentro de la misma celda que la marca. 5 = el 10 % mejor, 4 = 10 a 35 %, 3 = 35 a 65 %,
+// 2 = 65 a 90 %, 1 = el 10 % peor. Costos: más bajo es mejor; tasas: al revés. Usa los mismos cortes por celda (con las mismas condiciones mínimas); no cambia la marca de 3 niveles.
+function notaDe(valor, c, costo) {
+  if (valor == null || !c || c.p10 == null || c.p35 == null || c.p65 == null || c.p90 == null) return null;
+  if (costo) return valor <= c.p10 ? 5 : valor <= c.p35 ? 4 : valor <= c.p65 ? 3 : valor <= c.p90 ? 2 : 1;
+  return valor >= c.p90 ? 5 : valor >= c.p65 ? 4 : valor >= c.p35 ? 3 : valor >= c.p10 ? 2 : 1;
+}
 function estadoDe(valor, p25, p75, costo) {
   if (valor == null || p25 == null || p75 == null) return 'sin_ref';
   if (costo) return valor <= p25 ? 'bueno' : valor > p75 ? 'malo' : 'normal';
@@ -115,7 +122,7 @@ function crearMarcas(filas, { desde = DESDE, minN = MIN_N, minImp = MIN_IMP } = 
       (xo[`${o.canal}|${o.cli}|${o.obj}`] = xo[`${o.canal}|${o.cli}|${o.obj}`] || []).push(x);
     }
     const cortes = (m) => Object.fromEntries(Object.entries(m).filter(([, xs]) => xs.length >= minN)
-      .map(([k, xs]) => [k, { p25: r4(percentil(xs, 0.25)), p50: r4(percentil(xs, 0.5)), p75: r4(percentil(xs, 0.75)), n: xs.length }]));
+      .map(([k, xs]) => [k, { p25: r4(percentil(xs, 0.25)), p50: r4(percentil(xs, 0.5)), p75: r4(percentil(xs, 0.75)), p10: r4(percentil(xs, 0.1)), p35: r4(percentil(xs, 0.35)), p65: r4(percentil(xs, 0.65)), p90: r4(percentil(xs, 0.9)), n: xs.length }]));
     celdas[kpi] = cortes(xp); objetivo[kpi] = cortes(xo);
     // los valores ordenados de cada celda con base (para los deciles de Creatividades, pedido 053)
     const orden = (m) => Object.fromEntries(Object.entries(m).filter(([, xs]) => xs.length >= minN).map(([k, xs]) => [k, xs.slice().sort((a, b) => a - b)]));
@@ -134,7 +141,7 @@ function crearMarcas(filas, { desde = DESDE, minN = MIN_N, minImp = MIN_IMP } = 
     if (!def) throw new Error(`KPI desconocido: ${kpi}`);
     const c = corteDe(kpi, proyecto, canal, obj, placement);
     if (!c || valor == null) return { estado: 'sin_ref', p25: c ? c.p25 : null, p50: c ? c.p50 : null, p75: c ? c.p75 : null, base: c ? c.base : null, n: c ? c.n : 0 };
-    return { estado: estadoDe(valor, c.p25, c.p75, def.costo), p25: c.p25, p50: c.p50, p75: c.p75, base: c.base, n: c.n };
+    return { estado: estadoDe(valor, c.p25, c.p75, def.costo), nota: notaDe(valor, c, def.costo), p25: c.p25, p50: c.p50, p75: c.p75, base: c.base, n: c.n };
   }
 
   // un grupo de filas (campaña, pieza, audiencia…): el valor del grupo contra los cortes de su mezcla. Cada objetivo × placement del
@@ -149,15 +156,15 @@ function crearMarcas(filas, { desde = DESDE, minN = MIN_N, minImp = MIN_IMP } = 
     const grupos = {};
     for (const r of rows) { if (!entra(r, def) || !(r[def.den] > 0)) continue; const k = `${r.obj}|${r.pl}`; grupos[k] = grupos[k] || { obj: r.obj, pl: r.pl, d: 0 }; grupos[k].d += r[def.den]; }
     for (const base of ['objetivo×placement', 'objetivo']) {
-      let w = 0; const s = { p25: 0, p50: 0, p75: 0 };
+      let w = 0; const s = { p25: 0, p50: 0, p75: 0, p10: 0, p35: 0, p65: 0, p90: 0 };
       for (const gr of Object.values(grupos)) {
         const c = base === 'objetivo' ? corteDe(kpi, proyecto, canal, gr.obj, null) : (celdas[kpi][`${canal}|${proyecto}|${gr.obj}|${gr.pl}`] || null);
         if (!c) continue;
-        w += gr.d; s.p25 += c.p25 * gr.d; s.p50 += c.p50 * gr.d; s.p75 += c.p75 * gr.d;
+        w += gr.d; s.p25 += c.p25 * gr.d; s.p50 += c.p50 * gr.d; s.p75 += c.p75 * gr.d; s.p10 += c.p10 * gr.d; s.p35 += c.p35 * gr.d; s.p65 += c.p65 * gr.d; s.p90 += c.p90 * gr.d;
       }
       if (w && w >= d * COBERTURA) {
         const p25 = r4(s.p25 / w), p50 = r4(s.p50 / w), p75 = r4(s.p75 / w);
-        return { estado: estadoDe(v, p25, p75, def.costo), valor: v, p25, p50, p75, base };
+        return { estado: estadoDe(v, p25, p75, def.costo), nota: notaDe(v, { p10: r4(s.p10 / w), p35: r4(s.p35 / w), p65: r4(s.p65 / w), p90: r4(s.p90 / w) }, def.costo), valor: v, p25, p50, p75, base };
       }
     }
     return { estado: 'sin_ref', valor: v, p25: null, p50: null, p75: null, base: null };

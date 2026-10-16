@@ -360,7 +360,7 @@ function revisarPeriodoRend(vals, x, sel, donde) {
     if (ca.length > 1) faltan.add(`CPM de Alcance repetido en la ficha: ${donde}`);
     for (const t of ca) { cpmAlcFicha++; if (!/^(\$[\d.,]+|por cuenta|sin dato.*|—)$/.test(t.val)) faltan.add(`CPM de Alcance de la ficha mal escrito "${t.val}": ${donde}`);
       if (/entre [\d.]+ y [\d.]+|acumulad|combinad/i.test(JSON.stringify(t.lineas.map((l) => l.txt)))) faltan.add(`CPM de Alcance de la ficha suma o combina cuentas: ${donde}`); } }
-  if (vals.campMarca && vals.campMarca.txt && !['Bueno', 'Normal', 'Malo', 'Sin referencia'].includes(vals.campMarca.txt)) faltan.add(`marca de la ficha desconocida: ${donde}`);
+  if (vals.campMarca && vals.campMarca.txt && !['Bueno', 'Regular', 'Malo', 'Sin referencia'].includes(vals.campMarca.txt)) faltan.add(`marca de la ficha desconocida: ${donde}`);
   const k = `${sel}${estac ? ' estacional' : ''}`;
   if (!rendEj[k] && !(sel === 'mes' && x.rp.mes.sin)) rendEj[k] = `${donde} · ${L} · ${(vals.cTiles || []).map((t) => `${t.label} ${t.val}${t.lineas.length ? ' (' + t.lineas.map((l) => l.txt).join(' / ') + ')' : ''}`).join(' · ')}`;
 }
@@ -373,7 +373,9 @@ c.state.paso = 'explora';
 const NUM_PROHIBIDO = /\$|\d\s?%|\bvs\.|▲|▼/;
 let recVistas = 0, recSinNumeros = 0, cpmAlcFicha = 0;
 const linksN = { lentos: 0, acciones: 0 };
-const MARCAS_OK = ['Bueno', 'Normal', 'Malo', 'Sin referencia'], RITMOS_OK = ['Rápido', 'Normal', 'Lento', 'Sin gasto', 'sin dato'];   // antes del día 3: 'desde el 03/MM' (03/10)
+// nota de rendimiento de 1 a 5 de la portada (15/10)
+const NOTA_PAL = { 5: 'Muy bueno', 4: 'Bueno', 3: 'Regular', 2: 'Malo', 1: 'Muy malo' }, NOTA_RE = /^([1-5]) · (Muy bueno|Bueno|Regular|Malo|Muy malo)$|^Sin referencia$/, notaN = { vistas: 0, proyectos: 0, conNota: 0, sinNota: 0, malas: 0, normalBorrado: 0 };
+const MARCAS_OK = ['Bueno', 'Regular', 'Malo', 'Sin referencia'], RITMOS_OK = ['Rápido', 'Normal', 'Lento', 'Sin gasto', 'sin dato'];   // antes del día 3: 'desde el 03/MM' (03/10)
 function revisarRecorrido(v, donde, paso) {
   recVistas++;
   if (v.isPortada) { if (v.conPasos) faltan.add(`la portada tiene la barra de pasos: ${donde}`); }
@@ -417,7 +419,7 @@ function revisarRecorrido(v, donde, paso) {
     if ((v.vistas || []).some((x) => x.label === 'Looker')) faltan.add(`todavía hay botón Looker en el encabezado: ${donde}`);
   }
   // las listas de nombres de campañas y activos no se miran: un nombre puede tener números ("100% de iluminación LED")
-  if (v.isPortada) for (const x of v.portadaVistas || []) { if (!MARCAS_OK.includes(x.rend.txt)) faltan.add(`portada sin marca: ${x.name}`); }
+  if (v.isPortada) for (const x of v.portadaVistas || []) { if (!NOTA_RE.test(x.rend.txt)) faltan.add(`portada sin nota de 1 a 5: ${x.name} ("${x.rend.txt}")`); else notaN.vistas++; if (/Rendimiento \(|según objetivo/.test(JSON.stringify(x))) faltan.add(`la tarjeta de la portada habla de "según objetivo": ${x.name}`); }
   for (const t of textos) sinNum(t, 'texto');
 }
 const recorrido = (donde) => {
@@ -661,18 +663,57 @@ for (const p of D.proyectos) for (const canal of Object.keys(p.canales)) {
 Object.assign(c.state, { panel: false, paso: 'explora', tab: 'campañas' });
 console.log(`links al lugar nuevo: ${linksN.lentos} de "Activos que gastan lento" · ${linksN.acciones} de "ver campaña" en Acciones`);
 if (!linksN.lentos) faltan.add('no se probó el link de "Activos que gastan lento"');
+// ---- nota de rendimiento de 1 a 5 en "Mis proyectos" (15/10): la nota de cada campaña viene de marcas.js (c.nt: percentil dentro de su celda proyecto × canal × objetivo × placement);
+// la del proyecto es el promedio de sus campañas al aire ponderado por gasto, redondeado; sin nota las campañas no cuentan; "Rinden mal" nombra las de 1 o 2 de más gasto a menos.
+// Y en toda la app la marca "Normal" pasó a decir "Regular" (el Ritmo de gasto sigue con "Normal"). ----
+{
+  const notaEsp = (aire) => { let g = 0, s = 0; for (const r of aire) { if (!(r.nt >= 1)) continue; const w = Math.max(r.gastoN || 0, 0) || 0.001; g += w; s += w * r.nt; } return g ? Math.min(5, Math.max(1, Math.round(s / g))) : null; };
+  const todasCamp = []; for (const p of D.proyectos) for (const k of ['Oficial', 'Informativo']) { const bb = p.canales[k]; if (bb && bb.periodos['30d']) for (const r of bb.periodos['30d'].campRows) todasCamp.push(r); }
+  if (!todasCamp.some((r) => r.nt >= 1)) faltan.add('ninguna campaña trae nota de 1 a 5 (c.nt)');
+  for (const r of todasCamp) { if (r.nt != null && ![1, 2, 3, 4, 5].includes(r.nt)) faltan.add('una campaña trae una nota fuera de 1 a 5: ' + r.id + ' (' + r.nt + ')'); if (r.nt != null && (r.mk === 'S')) faltan.add('una campaña con nota no tiene marca de tres niveles: ' + r.id); }
+  // la nota y la marca salen de los mismos cortes: una nota 5 o 4 nunca puede ser marca Malo, y una 1 o 2 nunca Bueno
+  for (const r of todasCamp) { if (r.nt >= 4 && r.mk === 'M') faltan.add('nota ' + r.nt + ' con marca Malo: ' + r.id); if (r.nt <= 2 && r.nt >= 1 && r.mk === 'B') faltan.add('nota ' + r.nt + ' con marca Bueno: ' + r.id); }
+  const alAireT = (bb) => ((((bb || {}).periodos || {})['30d'] || {}).campRows || []).filter((r) => r.estado === 'Activa' && !(((bb || {}).campanas || {})[r.id] && bb.campanas[r.id].estado === 'Terminada'));
+  for (const canal of ['Oficial', 'Informativo']) {
+    Object.assign(c.state, { canal, screen: 'portada', pid: null, kpiSel: 'obj' }); const vp = c.renderVals(); chequear(vp, 'portada nota ' + canal);
+    for (const x of vp.portadaVistas || []) {
+      const esT = /^Todos los proyectos/.test(x.name), pr = D.proyectos.find((p) => p.nombre === x.name);
+      if (!esT && !pr) continue;
+      const aire = esT ? D.proyectos.flatMap((p) => alAireT(p.canales[canal])) : alAireT(pr.canales[canal]);
+      const n = notaEsp(aire), esp = n == null ? 'Sin referencia' : n + ' · ' + NOTA_PAL[n];
+      if (x.rend.txt !== esp && !esT) faltan.add('la nota de ' + x.name + ' (' + canal + ') es "' + x.rend.txt + '" y debería ser "' + esp + '"'); else if (x.rend.txt === esp) notaN.proyectos++;
+      if (esT && x.rend.txt !== esp) { /* el panel de todos usa las campañas de todos los proyectos con su id propio: se compara por rango */ const m = /^([1-5])/.exec(x.rend.txt); if (n != null && (!m || Math.abs(Number(m[1]) - n) > 1)) faltan.add('la nota de ' + x.name + ' (' + canal + ') es "' + x.rend.txt + '" y debería parecerse a "' + esp + '"'); }
+      n == null ? notaN.sinNota++ : notaN.conNota++;
+      if (n == null && x.rend.txt !== 'Sin referencia') faltan.add('un proyecto sin notas tiene que decir "Sin referencia": ' + x.name);
+      if (x.rend.txt === 'Sin referencia' && x.rend.dot !== '#A6AAA9') faltan.add('"Sin referencia" tiene que ir en gris: ' + x.name);
+      // "Rinden mal": las de nota 1 o 2, de más gasto a menos
+      const malas = aire.filter((r) => r.nt === 1 || r.nt === 2).sort((a, b) => (b.gastoN || 0) - (a.gastoN || 0));
+      if (!esT) { if (malas.length) { notaN.malas++; if (!/^Rinden mal: /.test(x.atencion) || !x.atencion.includes(String(malas[0].name || malas[0].id).replace(/^.*::/, '').slice(0, 12))) faltan.add('"Rinden mal" de ' + x.name + ' no empieza por la de nota 1 o 2 que más gastó (' + x.atencion + ')'); } else if (x.hayAtencion) faltan.add('"Rinden mal" lista campañas sin nota 1 o 2 en ' + x.name); }
+    }
+  }
+  // colores de la nota: Muy bueno verde oscuro, Bueno el verde de hoy, Regular el amarillo de hoy, Malo el rojo de hoy, Muy malo rojo oscuro
+  for (const s of ["5: ['Muy bueno', '#1F8A4C'", "4: ['Bueno', '#46C678'", "3: ['Regular', '#FCB942'", "2: ['Malo', '#F7444C'", "1: ['Muy malo', '#B3141B'"]) if (!logic.includes(s)) faltan.add('los colores de la nota no son los pedidos: falta ' + s);
+  // la palabra "Normal" de la marca ya no está en ningún lado (el Ritmo de gasto sigue con "Normal")
+  { const ritmoNormal = "N: ['Normal', '#3C3C3C'", resto = logic.split(ritmoNormal).join('');
+    if (!logic.includes(ritmoNormal) || resto.includes("'Normal'")) faltan.add('quedó una marca que dice "Normal" en la lógica de la app (solo el Ritmo de gasto puede)'); else notaN.normalBorrado++;
+    if (!logic.includes("N: ['Regular', '#FCB942'") || logic.includes("N: ['Normal', '#FCB942'")) faltan.add('la marca de tres niveles tiene que decir Regular');
+    if (logic.includes('Bueno · Normal · Malo') || logic.includes('Normal en el medio')) faltan.add('la guía todavía habla de la marca "Normal"');
+    if (markup.includes('>Normal<')) faltan.add('el markup todavía dice "Normal" como marca'); }
+  console.log('nota de la portada: ' + notaN.vistas + ' tarjetas con nota válida · ' + notaN.proyectos + ' proyectos con la nota esperada · ' + notaN.conNota + ' con nota · ' + notaN.sinNota + ' sin referencia · ' + notaN.malas + ' con "Rinden mal" · "Normal" de la marca borrado: ' + notaN.normalBorrado);
+}
 // ---- marca con el KPI elegido (05/10): el selector de Métrica (compartido en Estructura, General y portada) cambia la marca y el rótulo ----
 // Con un KPI, la letra de cada campaña es la de r.mks en el orden de DATA.cuartiles.orden; CPM de Alcance, sin referencia.
 const kpiMarca = { vistas: 0, filas: 0, distintas: 0 };
 {
-  const LET = { Bueno: 'B', Normal: 'N', Malo: 'M', 'Sin referencia': 'S' }, orden = (D.cuartiles || {}).orden || [];
+  const LET = { Bueno: 'B', Regular: 'N', Malo: 'M', 'Sin referencia': 'S' }, orden = (D.cuartiles || {}).orden || [];
   if (!orden.length) faltan.add('faltan las tablas de cuartiles por KPI (DATA.cuartiles)');
   const p0 = D.proyectos.find((p) => p.canales.Oficial) || D.proyectos[0], canal0 = p0.canales.Oficial ? 'Oficial' : 'Informativo';
   Object.assign(c.state, { canal: canal0, screen: 'portada', pid: null, kpiSel: 'obj', paso: 'expo', tab: 'campañas', panel: false, modal: null });
   const vp = c.renderVals();
-  if (!(vp.marcaKpiOps || []).length || !markup.includes('{{ mk.onClick }}')) faltan.add('la portada no tiene el selector de Métrica de la marca');
+  if (!(vp.marcaKpiOps || []).length || !markup.includes('{{ mk.onClick }}')) faltan.add('falta el selector de Métrica de la marca (General y Estructura)');
+  { const iPo = markup.indexOf('<sc-if value="{{ esPortada }}">'), subPo = markup.slice(iPo, markup.indexOf('data-screen-label="Proyecto · General"')); if (iPo < 0 || subPo.includes('marcaKpiOps') || subPo.includes('Métrica de la marca')) faltan.add('la portada todavía tiene el selector de Métrica de la marca (Mis proyectos usa la nota de 1 a 5)'); if (!!subPo.includes('Rendimiento: ') || subPo.includes('marcaRotCorto') || subPo.includes('según objetivo)')) faltan.add('la tarjeta de la portada no dice "Rendimiento: <nota>" sin "(según objetivo)"'); }
   const iCpm = vp.marcaKpiOps.findIndex((x) => x.label === 'CPM'); vp.marcaKpiOps[iCpm].onClick({});
-  if (c.state.kpiSel !== 'cpm') faltan.add('el selector de Métrica de la portada no cambia la marca');
+  if (c.state.kpiSel !== 'cpm') faltan.add('el selector de Métrica no cambia la marca');
   // 06/10: la lista de Campañas de Detalle no cambia con el selector (siempre según objetivo); la marca por KPI se ve en Estructura
   // (Activos: activo › campaña), en General y en la portada
   const raws = p0.canales[canal0].periodos[D.mes].campRows || [];
@@ -924,7 +965,7 @@ const mapaN = { vistas: 0, empezar: 0, elige: 0, aperturas: 0, directos: 0, colu
               vf0.mpInfos[0].onClick(evento); if (!c.state.mpFichas[primero]) faltan.add(`el ícono no abre la ficha: ${donde}`); let vf = c.renderVals(); chequear(vf, donde + ' · ficha'); revisarMapa(vf, donde + ' · ficha'); mapaN.fichas++;
               if (vf.mpFichas.length !== 1) faltan.add(`hay ${vf.mpFichas.length} fichas y debería haber 1: ${donde}`);
               else { const ff = vf.mpFichas[0], lf = [ff.titulo, ff.sub, ...ff.minis.map((l) => l.lab + ' ' + l.val), ff.metLab, ff.metVal, ff.pill, ff.motivo].join(' | '); if (/alcanzad/i.test(lf)) faltan.add(`la ficha habla de alcance: ${donde}`); if (!/\d/.test(lf)) faltan.add(`la ficha no tiene números: ${donde}`); if (/\d\.\d{3}\.\d{3}/.test(ff.minis.map((l) => l.val).join(' '))) faltan.add(`la ficha no usa "mil" y "M": ${donde}`);
-                if (ff.hayPill && !/^(Bueno|Normal|Malo|Sin referencia)/.test(ff.pill)) faltan.add(`la píldora de la ficha no dice Bueno, Normal o Malo: ${donde}`); }
+                if (ff.hayPill && !/^(Bueno|Regular|Malo|Sin referencia)/.test(ff.pill)) faltan.add(`la píldora de la ficha no dice Bueno, Regular o Malo: ${donde}`); }
               if (vf.mpInfos.length > 1) { vf.mpInfos[1].onClick(evento); vf = c.renderVals(); chequear(vf, donde + ' · dos fichas'); revisarMapa(vf, donde + ' · dos fichas'); if (vf.mpFichas.length !== 2) faltan.add(`no se pueden tener dos fichas abiertas: ${donde}`); else if (!vf.mpFichas[1].minis.some((l) => l.lab === 'Al aire')) faltan.add(`la ficha de una campaña no dice los días al aire: ${donde}`); }
               const n0 = vf.mpFichas.length; vf.mpFichas[0].onClose(evento); const vc2 = c.renderVals(); if (vc2.mpFichas.length !== n0 - 1) faltan.add(`la × no cierra la ficha: ${donde}`); else mapaN.cierraFicha++;
               if (vc2.mpFichas.length) vc2.mpFichas[0].onClose(evento); if (c.renderVals().mpFichas.length) faltan.add(`quedan fichas abiertas: ${donde}`); }

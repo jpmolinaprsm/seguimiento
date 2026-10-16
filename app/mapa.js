@@ -11,7 +11,7 @@
 // Todo con divs (sin SVG). Decisión (anotada): lo que se abre dentro de un camino solo cuenta lo que corrió en ese camino (su gasto es el de ahí).
 const MP_MK = {
   mejor: { c: '#46C678', bg: '#E5F6EC', t: 'Mejor que lo normal' },
-  normal: { c: '#FCB942', bg: '#FEF3DC', t: 'Normal' },
+  normal: { c: '#FCB942', bg: '#FEF3DC', t: 'Regular' },
   peor: { c: '#F7444C', bg: '#FDE6E7', t: 'Peor que lo normal' },
   sin_referencia: { c: '#A6AAA9', bg: '#F4F4F4', t: 'Sin referencia' },
 };
@@ -241,7 +241,7 @@ class MapaVista {
     const g = Rx.reduce((a, r) => a + r.v, 0), i = Rx.reduce((a, r) => a + (r.i || 0), 0), re = Rx.reduce((a, r) => a + (r.r || 0), 0);
     const minis = [{ lab: 'Gasto', val: mpFmt(g) }, { lab: 'Impr.', val: fCant(i) }, { lab: 'Reacc.', val: fCant(re) }];
     if (c) minis.push({ lab: 'Al aire', val: c.dias ? mpPl(c.dias, 'día', 'días') : '—' });
-    const mm = MP_MK[it.mk] || MP_MK.sin_referencia, marcaTxt = { mejor: 'Bueno', normal: 'Normal', peor: 'Malo' }[it.mk] || 'Sin referencia';
+    const mm = MP_MK[it.mk] || MP_MK.sin_referencia, marcaTxt = { mejor: 'Bueno', normal: 'Regular', peor: 'Malo' }[it.mk] || 'Sin referencia';
     let metLab = 'Métrica', metVal = '—', pill = '', motivo = (met && met.motivo) || 'Sin métrica para esto';
     if (met && met.col) {
       metLab = met.col.label;

@@ -29,14 +29,14 @@ const pasos = '<sc-if value="{{ conPasos }}"><div style="border-top:1px solid #F
 // ---- portada: General y Detalle (Exploración = la portada de hoy) ----
 // portada (03/10): solo las tarjetas de los proyectos, sin pasos (un clic entra al proyecto en el paso 1 General)
 const selMarca = '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:12px;color:#808080">Métrica de la marca</span><div style="display:inline-flex;flex-wrap:wrap;padding:3px;background:#F4F4F4;border-radius:9999px"><sc-for list="{{ marcaKpiOps }}" as="mk" hint-placeholder-count="8"><button sc-camel-on-click="{{ mk.onClick }}" style="border:none;border-radius:9999px;padding:4px 12px;font-size:12.5px;font-weight:500;cursor:pointer;color:{{ mk.color }};background:{{ mk.bg }};box-shadow:{{ mk.shadow }}">{{ mk.label }}</button></sc-for></div></div>';
-const portada = '<sc-if value="{{ esPortada }}"><p style="margin:24px 0 0;font-size:13px;color:#808080">{{ portadaSub }}</p><div style="margin-top:12px">' + selMarca + '</div>'
+const portada = '<sc-if value="{{ esPortada }}"><p style="margin:24px 0 0;font-size:13px;color:#808080">{{ portadaSub }}</p>'
   + '<div style="margin-top:20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px"><sc-for list="{{ portadaVistas }}" as="pr" hint-placeholder-count="6">'
   + '<div sc-camel-on-click="{{ pr.onClick }}" style="border:1px solid #E4E4E4;border-radius:16px;padding:20px 22px;cursor:pointer;display:flex;flex-direction:column;gap:14px;background:#FFFFFF" style-hover="border-color:#A6AAA9">'
   + '<div style="font-size:18px;font-weight:600;letter-spacing:-0.01em">{{ pr.name }}</div>'
   + '<sc-if value="{{ pr.hayPresu }}"><div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px"><b style="font-weight:600">{{ pr.presuPct }}</b> <span style="color:#808080">del presupuesto del mes</span></span><div style="height:6px;background:#F4F4F4;border-radius:9999px;overflow:hidden"><div style="height:100%;width:{{ pr.presuBar }};background:#3C3C3C;border-radius:9999px"></div></div></div></sc-if>'
   + '<sc-if value="{{ pr.sinPresu }}"><span style="font-size:13px;color:#A6AAA9">Sin presupuesto cargado</span></sc-if>'
   // cada marca con su rótulo (03/10), como en las tarjetas de dentro del proyecto
-  + `<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center"><span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#808080">{{ marcaRotCorto }} ${marca('pr.rend')}</span><span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#808080">Ritmo de gasto ${ritmo('pr.ritmo')}</span></div>`
+  + `<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center"><span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#808080">Rendimiento: ${marca('pr.rend')}</span><span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#808080">Ritmo de gasto ${ritmo('pr.ritmo')}</span></div>`
   + '<div style="font-size:12.5px;color:#808080;padding-top:12px;border-top:1px solid #E4E4E4">{{ pr.atencion }}</div>'
   + '</div></sc-for></div></sc-if>';
 
