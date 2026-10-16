@@ -750,8 +750,8 @@ const mapaN = { vistas: 0, empezar: 0, elige: 0, aperturas: 0, directos: 0, colu
   const FLD = { eje: 'eje', activo: 'a', audiencia: 'u' }, PLURAL = { eje: 'Ejes', activo: 'Activos', audiencia: 'Audiencias' }, LET = { eje: 'e', activo: 'a', audiencia: 'u' };
   const FK = { c: 'c', a: 'a', e: 'eje', u: 'u', p: 'p' }, KN = { c: ['Campaña', 'Campañas'], a: ['Activo', 'Activos'], e: ['Eje', 'Ejes'], u: ['Audiencia', 'Audiencias'], p: ['Contenidos', 'Contenidos'] };
   // la jerarquía, escrita aparte para la prueba (no se copia del código): qué tipos puede abrir cada tipo
-  const SIGUE = { e: ['c', 'e', 'a', 'u'], a: ['c', 'e', 'a', 'u'], u: ['c', 'e', 'a', 'u'], c: ['p', 'a', 'u', 'e'], p: ['a', 'u'] };
-  const validos = (kinds) => ['c', 'a', 'e', 'u', 'p'].filter((k) => SIGUE[kinds[kinds.length - 1]].includes(k) && !kinds.includes(k));
+  // (escrita aparte, por reglas: sin Campaña en el camino nunca Contenidos; con Campaña en cualquier lugar de arriba, sí; desde Contenidos solo Audiencia o Activo)
+  const validos = (kinds) => ['c', 'a', 'e', 'u', 'p'].filter((k) => { if (kinds.includes(k)) return false; if (k === 'p') return kinds.includes('c'); if (kinds[kinds.length - 1] === 'p') return k === 'a' || k === 'u'; return true; });
   const SEP = '¦', RAIZ_MAX = 14, CAMP_MAX = 10;
   const tr = (s) => (s.length > 22 ? s.slice(0, 21).trimEnd() + '…' : s);
   const tr28 = (s) => (s.length > 28 ? s.slice(0, 27).trimEnd() + '…' : s);
@@ -762,8 +762,22 @@ const mapaN = { vistas: 0, empezar: 0, elige: 0, aperturas: 0, directos: 0, colu
   const gastoPor = (P, fld, Rx) => { const g = {}; for (const r of (Rx || P.recs)) if (r[fld]) g[r[fld]] = (g[r[fld]] || 0) + r.v; return g; };
   const cuenta = (Rx, k) => new Set(Rx.map((r) => r[FK[k]]).filter(Boolean)).size;
   // lo que se ofrece nunca rompe la jerarquía: Contenidos solo después de una Campaña
-  const jerarquiaOk = (kinds, ofrecidos, donde, faltan2) => { if (ofrecidos.includes('Contenidos') && kinds[kinds.length - 1] !== 'c') faltan2.add(`se ofrece Contenidos sin una Campaña justo arriba (${kinds.join('›')}): ${donde}`);
+  const jerarquiaOk = (kinds, ofrecidos, donde, faltan2) => { if (ofrecidos.includes('Contenidos') && !kinds.includes('c')) faltan2.add(`se ofrece Contenidos sin una Campaña en el camino (${kinds.join('›')}): ${donde}`);
     const esp = validos(kinds).map((k) => KN[k][0]); if (ofrecidos.join('|') !== esp.join('|')) faltan2.add(`se ofrece ${ofrecidos.join(', ') || 'nada'} y la jerarquía dice ${esp.join(', ') || 'nada'} (${kinds.join('›')}): ${donde}`); };
+  // "Según objetivo": un conjunto (eje, activo, audiencia, contenido) se mide por la nota de 1 a 5 de sus campañas, ponderada por gasto y redondeada; la burbuja y la ficha dicen lo mismo
+  const NT_COL = { 5: '#1F8A4C', 4: '#46C678', 3: '#FCB942', 2: '#F7444C', 1: '#B3141B' }, NT_PAL = { 5: 'Muy bueno', 4: 'Bueno', 3: 'Regular', 2: 'Malo', 1: 'Muy malo' };
+  const notaEsp = (P, Rx) => { const cg = {}; Rx.forEach((r) => { cg[r.c] = (cg[r.c] || 0) + r.v; }); let g = 0, sm = 0, n = 0, sin = 0; const rep = {}; Object.keys(cg).forEach((cid) => { const nt = P.camps[cid].raw.nt; n++; if (!(nt >= 1)) { sin++; return; } const w = Math.max(cg[cid], 0) || 0.001; g += w; sm += w * nt; rep[nt] = (rep[nt] || 0) + 1; }); return { nota: g ? Math.min(5, Math.max(1, Math.round(sm / g))) : null, rep, n, sin }; };
+  const revisaFichaNota = (f, esp, donde, que) => {
+    if (f.metLab !== 'Rendimiento') faltan.add('la ficha de ' + que + ' con "Según objetivo" no dice Rendimiento (dice "' + f.metLab + '"): ' + donde);
+    const palEsp = esp.nota ? NT_PAL[esp.nota] : 'Sin referencia';
+    if (!f.hayPill || f.pill !== palEsp) faltan.add('la ficha de ' + que + ' con "Según objetivo" dice "' + f.pill + '" y la nota esperada es ' + (esp.nota || 'sin referencia') + ' (' + palEsp + '): ' + donde);
+    if (!f.haySub2 || !/^\d+ campañas?/.test(f.sub2) || /…/.test(f.sub2)) faltan.add('la ficha de ' + que + ' no tiene la línea del reparto de campañas (o está cortada): "' + f.sub2 + '" ' + donde);
+    if (f.hayMotivo || /Cada campaña, según/.test(f.motivo)) faltan.add('la ficha de ' + que + ' todavía dice "Cada campaña, según su objetivo": ' + donde);
+    if (esp.nota && f.metVal !== String(esp.nota)) faltan.add('la ficha de ' + que + ' muestra ' + f.metVal + ' y la nota es ' + esp.nota + ': ' + donde);
+    if (!esp.nota && f.pillStyle.indexOf('#F4F4F4') < 0) faltan.add('"Sin referencia" tiene que ir en gris en la ficha de ' + que + ': ' + donde);
+    if (esp.nota && f.pillStyle.indexOf('background:#') < 0) faltan.add('la píldora de la ficha de ' + que + ' no tiene color: ' + donde);
+    mapaN.notaSets = (mapaN.notaSets || 0) + 1;
+  };
   const revisarMapa = (v, donde) => {
     mapaN.vistas++;
     if (!v.pasoMapa) faltan.add(`el Mapa no está a la vista: ${donde}`);
@@ -790,7 +804,7 @@ const mapaN = { vistas: 0, empezar: 0, elige: 0, aperturas: 0, directos: 0, colu
       if (v.mpFichas.length) { const f = v.mpFichas[0]; if (f.minis.map((l) => l.lab).slice(0, 3).join('|') !== 'Gasto|Impr.|Reacc.' || !/^\$/.test(f.minis[0].val) || !/ · /.test(f.sub) || !f.metLab || !(f.hayPill || f.hayMotivo) || (f.hayPill && /…/.test(f.pill))) faltan.add(`la ficha de métricas (con la píldora sin cortar) no tiene nombre, tipo y período, métrica con su marca, gasto, impresiones y reacciones: ${donde}`); } }
     if (v.mpHasMap && (v.mpMigas || []).length < 1) faltan.add(`faltan las migas: ${donde}`);
     // la jerarquía en lo que se ve: las migas nunca ponen Contenidos sin una Campaña justo antes
-    { const ms = v.mpMigas.map((x) => x.label); const iP = ms.indexOf('Contenidos'); if (iP >= 0 && ms[iP - 1] !== 'Campañas') faltan.add(`las migas ponen Contenidos sin Campañas antes (${ms.join(' › ')}): ${donde}`); }
+    { const ms = v.mpMigas.map((x) => x.label); const iP = ms.indexOf('Contenidos'); if (iP >= 0 && !ms.slice(0, iP).includes('Campañas')) faltan.add(`las migas ponen Contenidos sin Campañas antes (${ms.join(' › ')}): ${donde}`); }
     if (/alcanzad/i.test(JSON.stringify([v.mpTitle, v.mpSub, v.mpSum, v.mpEmptyTitle, v.mpEmptySub, v.mpPn.conn, v.mpPn.mkSub, v.mpPn.otras, v.mpPn.gastoNote, v.mpLeyenda.map((x) => x.label), v.mpNota.replace('Las personas alcanzadas no aparecen porque no se pueden sumar.', '')]))) faltan.add(`el Mapa habla de alcance: ${donde}`);
   };
   const lugaresDe = (canal) => [['todos', 'Todos los proyectos'], ...D.proyectos.filter((p) => (canal === 'General' ? p.general : p.canales[canal])).map((p) => [p.id, p.nombre])];
@@ -934,7 +948,7 @@ const mapaN = { vistas: 0, empezar: 0, elige: 0, aperturas: 0, directos: 0, colu
           // ---- jerarquía completa: todas las cadenas posibles de tipos (hasta 4 columnas), abriendo el primer nodo de cada columna; lo que se ofrece en cada paso sale de la jerarquía ----
           if (period === periodos[0] && nLug <= 3) {
             for (const chain of cadenas(L0)) {
-              if (chain.includes('p') && chain[chain.indexOf('p') - 1] !== 'c') { faltan.add(`la jerarquía arma una cadena con Contenidos sin Campaña justo arriba (${[L0, ...chain].join('›')}): ${donde}`); continue; }
+              if (chain.includes('p') && !chain.slice(0, chain.indexOf('p')).includes('c')) { faltan.add(`la jerarquía arma una cadena con Contenidos sin Campaña arriba (${[L0, ...chain].join('›')}): ${donde}`); continue; }
               // se baja por el primer nodo de cada columna y se abre el último, para que se vean todas las columnas de la cadena
               let Rx = Rprim, path = primero; const abre = { [primero]: true }; let ok = true; const kinds = [L0, ...chain];
               for (let i = 0; i < chain.length - 1 && ok; i++) { const lst = Object.entries(gastoPor(P, FK[chain[i]], Rx)).sort((x, y) => y[1] - x[1]); if (!lst.length) { ok = false; break; } const idn = lst[0][0]; Rx = Rx.filter((r) => r[FK[chain[i]]] === idn); path += SEP + idn; abre[path] = true; }
@@ -951,6 +965,44 @@ const mapaN = { vistas: 0, empezar: 0, elige: 0, aperturas: 0, directos: 0, colu
                 const migasT = vq2.mpMigas.map((x) => x.label).slice(0, kinds.length).join('|'); if (migasT !== [PLURAL[por], ...chain.map((k) => KN[k][1])].join('|')) faltan.add(`las migas no muestran los tipos ${kinds.join('›')} (son ${vq2.mpMigas.map((x) => x.label).join(' › ')}): ${donde}`); }
             }
           }
+          // ---- Contenidos con la Campaña en cualquier lugar de arriba: Eje › Campañas › Audiencias › Contenidos, Eje › Campañas › Activos › Contenidos, Activos › Campañas › Audiencias › Contenidos.
+          // Los contenidos son los del camino (los de la campaña que corrieron en esa audiencia o activo); si no hay cruce, no se inventa ----
+          for (const mid of ['u', 'a', 'e'].filter((k) => k !== L0)) {
+            const cid = campsPrim.find((id) => { const Rc0 = Rprim.filter((r) => r.c === id); return cuenta(Rc0, mid) > 0 && cuenta(Rc0, 'p') > 0 && Object.keys(gastoPor(P, FK[mid], Rc0)).some((x) => cuenta(Rc0.filter((r) => r[FK[mid]] === x), 'p') > 0); });
+            if (!cid) { mapaN.sinCruce = (mapaN.sinCruce || 0) + 1; continue; }
+            const Rc = Rprim.filter((r) => r.c === cid), m0 = Object.entries(gastoPor(P, FK[mid], Rc)).sort((x, y) => y[1] - x[1]).find(([id]) => cuenta(Rc.filter((r) => r[FK[mid]] === id), 'p') > 0)[0];
+            const Rcm = Rc.filter((r) => r[FK[mid]] === m0), pathC = primero + SEP + cid, pathM = pathC + SEP + m0, kindsM = [L0, 'c', mid];
+            st({ mpPor: por, mpCols: ['c', mid], mpAbre: { [primero]: true, [pathC]: true }, mpSel: pathM }); const vA = c.renderVals(); chequear(vA, donde + ' · ' + kindsM.join('›')); revisarMapa(vA, donde + ' · ' + kindsM.join('›'));
+            jerarquiaOk(kindsM, vA.mpOpciones.map((x) => x.label), donde + ' · Contenidos tras ' + KN[mid][1], faltan);
+            if (!vA.mpOpciones.some((x) => x.label === 'Contenidos')) { faltan.add('con la Campaña arriba (' + kindsM.join('›') + ') no se ofrece Contenidos: ' + donde); continue; }
+            vA.mpOpciones.find((x) => x.label === 'Contenidos').onClick(evento); mapaN.pCualquier = (mapaN.pCualquier || 0) + 1;
+            if (c.state.mpCols.join() !== 'c,' + mid + ',p') faltan.add('elegir Contenidos tras ' + KN[mid][1] + ' no fija las columnas c,' + mid + ',p (queda ' + c.state.mpCols.join() + '): ' + donde);
+            const vB = c.renderVals(); chequear(vB, donde + ' · ' + kindsM.join('›') + '›p'); revisarMapa(vB, donde + ' · ' + kindsM.join('›') + '›p');
+            const hdr = [PLURAL[por], 'Campañas', KN[mid][1], 'Contenidos'].map((x) => x + ' ▾').join('|'); if (vB.mpColumnas.map((x) => x.label).join('|') !== hdr) faltan.add('los encabezados no son ' + hdr + ' (son ' + vB.mpColumnas.map((x) => x.label).join(', ') + '): ' + donde);
+            // los contenidos que se ven son los del camino: los de la campaña que corrieron en ese nodo
+            const nomsP = [...new Set(Rcm.map((r) => r.p).filter(Boolean))].map((id) => P.names[id]), titulos = new Set(vB.mpDots.map((x) => x.title));
+            const n2 = cuenta(Rc, mid) <= CAMP_MAX ? cuenta(Rc, mid) : CAMP_MAX - 1, n3 = cuenta(Rcm, 'p') <= CAMP_MAX ? cuenta(Rcm, 'p') : CAMP_MAX - 1;
+            if (nomsP.length && !nomsP.some((nm) => titulos.has(nm))) faltan.add('los contenidos de ' + kindsM.join('›') + ' no son los del camino (se esperaban ' + nomsP.slice(0, 3).join(', ') + '): ' + donde);
+            const todosP = new Set(P.recs.filter((r) => r.c === cid && r.p).map((r) => P.names[r.p])), otrosNodos = new Set([...Object.keys(g).map((id) => P.names[id]), ...campsPrim.map((id) => P.names[id]), P.names[cid], ...Rc.map((r) => P.names[r[FK[mid]]])]), fuera = vB.mpDots.filter((x) => todosP.has(x.title) && !nomsP.includes(x.title) && !otrosNodos.has(x.title));
+            if (fuera.length) faltan.add('aparecen contenidos de la campaña que no corrieron en ' + KN[mid][0] + ' (' + fuera.map((x) => x.title).slice(0, 2).join(', ') + '): ' + donde);
+            const n11 = partes(vB).nodosL.filter((x) => px(x.style, 'font-size') === 11.5).length; if (n11 !== n2 + n3) faltan.add('el camino ' + kindsM.join('›') + '›p muestra ' + n11 + ' nodos del tercer y cuarto nivel y deberían ser ' + (n2 + n3) + ': ' + donde);
+            mapaN.pCruce = (mapaN.pCruce || 0) + 1;
+            // "Según objetivo" dentro del camino: la nota usa solo las campañas de ese camino (el nodo del medio y el contenido)
+            { const p0 = Object.keys(gastoPor(P, 'p', Rcm)).sort((x, y) => gastoPor(P, 'p', Rcm)[y] - gastoPor(P, 'p', Rcm)[x])[0], pathP = pathM + SEP + p0;
+              st({ mpPor: por, kpiSel: 'obj', mpCols: ['c', mid, 'p'], mpAbre: { [primero]: true, [pathC]: true, [pathM]: true }, mpSel: pathP, mpFichas: { [pathM]: true, [pathP]: true } }); const vS = c.renderVals(); chequear(vS, donde + ' · nota en el camino'); revisarMapa(vS, donde + ' · nota en el camino');
+              if (vS.mpFichas.length !== 2) faltan.add('en el camino ' + kindsM.join('›') + '›p faltan fichas (hay ' + vS.mpFichas.length + '): ' + donde); else { revisaFichaNota(vS.mpFichas[0], notaEsp(P, Rcm), donde, KN[mid][0] + ' dentro del camino'); revisaFichaNota(vS.mpFichas[1], notaEsp(P, Rcm.filter((r) => r.p === p0)), donde, 'contenido dentro del camino'); } }
+          }
+          // ---- "Según objetivo": ninguna ficha de conjunto queda sin nota y el color de la burbuja coincide con la nota ----
+          { const rootsIds = Object.keys(g).sort((x, y) => g[y] - g[x]).slice(0, Math.min(3, esperadosN)), fich = {}; rootsIds.forEach((id) => { fich[id] = true; });
+            st({ mpPor: por, kpiSel: 'obj', mpFichas: fich }); const vN = c.renderVals(); chequear(vN, donde + ' · nota de los conjuntos'); revisarMapa(vN, donde + ' · nota de los conjuntos');
+            const pN = partes(vN);
+            rootsIds.forEach((id, i) => { const esp = notaEsp(P, P.recs.filter((r) => r[fld] === id)); const f = vN.mpFichas[i]; if (!f) { faltan.add('falta la ficha de ' + (P.names[id] || id) + ': ' + donde); return; }
+              revisaFichaNota(f, esp, donde, PLURAL[por].toLowerCase() + ' ' + (P.names[id] || id));
+              const iL = pN.raicesL.findIndex((x) => pN.nom(x) === tr(P.names[id] || id)); const dot = iL >= 0 && pN.dotsN[pN.nodosL.indexOf(pN.raicesL[iL])];
+              const colEsp = esp.nota ? NT_COL[esp.nota] : '#A6AAA9'; if (!dot) faltan.add('no se encuentra la burbuja de ' + (P.names[id] || id) + ': ' + donde); else if (id !== 'a:otras' && dot.style.toLowerCase().indexOf('background:' + colEsp.toLowerCase()) < 0) faltan.add('la burbuja de ' + (P.names[id] || id) + ' no tiene el color de su nota (' + (esp.nota || 'sin referencia') + ' = ' + colEsp + '): ' + donde); else if (dot) mapaN.notaBurbujas = (mapaN.notaBurbujas || 0) + 1; });
+            // con otra métrica sigue como está: la ficha no habla de Rendimiento ni de la nota
+            st({ mpPor: por, kpiSel: 'cpm', mpFichas: fich }); const vM = c.renderVals(); if (vM.mpFichas.some((f) => f.metLab === 'Rendimiento' || f.haySub2)) faltan.add('con otra métrica la ficha de un conjunto no debería mostrar la nota: ' + donde);
+            Object.assign(c.state, { kpiSel: 'obj' }); }
           // ---- Métrica: define el número y el color de cada burbuja ----
           { const KPIS = ['obj', 'cr', 'cpm', 'ctr', 'etrV', 'etrI', 'cv', 'ca'], CORTO = { cr: 'Costo/reacción', cpm: 'CPM', ctr: 'CTR', etrV: 'ETR videos', etrI: 'ETR imág.', cv: 'Costo/repr.', ca: 'CPM alcance' };
             for (const k of KPIS) { st({ mpPor: por, kpiSel: k, mpCols: ['c'], mpAbre: { [primero]: true } }); const vk = c.renderVals(); chequear(vk, donde + ' · métrica ' + k); revisarMapa(vk, donde + ' · métrica ' + k); mapaN.metricas2++; if (vk.mpMetric !== k) faltan.add(`el Mapa no sigue la Métrica ${k}: ${donde}`);
@@ -965,7 +1017,7 @@ const mapaN = { vistas: 0, empezar: 0, elige: 0, aperturas: 0, directos: 0, colu
               vf0.mpInfos[0].onClick(evento); if (!c.state.mpFichas[primero]) faltan.add(`el ícono no abre la ficha: ${donde}`); let vf = c.renderVals(); chequear(vf, donde + ' · ficha'); revisarMapa(vf, donde + ' · ficha'); mapaN.fichas++;
               if (vf.mpFichas.length !== 1) faltan.add(`hay ${vf.mpFichas.length} fichas y debería haber 1: ${donde}`);
               else { const ff = vf.mpFichas[0], lf = [ff.titulo, ff.sub, ...ff.minis.map((l) => l.lab + ' ' + l.val), ff.metLab, ff.metVal, ff.pill, ff.motivo].join(' | '); if (/alcanzad/i.test(lf)) faltan.add(`la ficha habla de alcance: ${donde}`); if (!/\d/.test(lf)) faltan.add(`la ficha no tiene números: ${donde}`); if (/\d\.\d{3}\.\d{3}/.test(ff.minis.map((l) => l.val).join(' '))) faltan.add(`la ficha no usa "mil" y "M": ${donde}`);
-                if (ff.hayPill && !/^(Bueno|Regular|Malo|Sin referencia)/.test(ff.pill)) faltan.add(`la píldora de la ficha no dice Bueno, Regular o Malo: ${donde}`); }
+                if (ff.hayPill && !/^(Muy bueno|Muy malo|Bueno|Regular|Malo|Sin referencia)/.test(ff.pill)) faltan.add(`la píldora de la ficha no dice Bueno, Regular o Malo: ${donde}`); }
               if (vf.mpInfos.length > 1) { vf.mpInfos[1].onClick(evento); vf = c.renderVals(); chequear(vf, donde + ' · dos fichas'); revisarMapa(vf, donde + ' · dos fichas'); if (vf.mpFichas.length !== 2) faltan.add(`no se pueden tener dos fichas abiertas: ${donde}`); else if (!vf.mpFichas[1].minis.some((l) => l.lab === 'Al aire')) faltan.add(`la ficha de una campaña no dice los días al aire: ${donde}`); }
               const n0 = vf.mpFichas.length; vf.mpFichas[0].onClose(evento); const vc2 = c.renderVals(); if (vc2.mpFichas.length !== n0 - 1) faltan.add(`la × no cierra la ficha: ${donde}`); else mapaN.cierraFicha++;
               if (vc2.mpFichas.length) vc2.mpFichas[0].onClose(evento); if (c.renderVals().mpFichas.length) faltan.add(`quedan fichas abiertas: ${donde}`); }
@@ -1021,7 +1073,7 @@ const mapaN = { vistas: 0, empezar: 0, elige: 0, aperturas: 0, directos: 0, colu
               const ejeRecuadro = t === 'e' && por !== 'eje', esperaLargo = ejeRecuadro ? 2 : t === raizLet ? 1 : t === 'c' ? 2 : 3;
               if ((ejeRecuadro ? !(segs[1] || '').startsWith('c:') || 'e:' + P.camps[segs[1]].eje !== id : segs[segs.length - 1] !== id) || segs.length !== esperaLargo) faltan.add(`buscar "${P.names[id]}" no arma el camino de ${esperaLargo} tramos (${segs.length}): ${donde}`);
               if (c.state.mpCols.join() !== segs.slice(1).map((x) => x[0]).join() || segs.slice(0, -1).some((_, i) => !c.state.mpAbre[segs.slice(0, i + 1).join(SEP)])) faltan.add(`buscar "${P.names[id]}" no fija los tipos de columna del camino ni abre cada tramo: ${donde}`);
-              if (c.state.mpCols.includes('p') && c.state.mpCols[c.state.mpCols.indexOf('p') - 1] !== 'c') faltan.add(`buscar "${P.names[id]}" deja Contenidos sin Campaña arriba: ${donde}`);
+              if (c.state.mpCols.includes('p') && !c.state.mpCols.slice(0, c.state.mpCols.indexOf('p')).includes('c')) faltan.add(`buscar "${P.names[id]}" deja Contenidos sin Campaña arriba: ${donde}`);
               if (!vf.mpHasSel || !vf.mpFlashList.length) faltan.add(`buscar "${P.names[id]}" no lo elige ni lo ubica con el destello: ${donde}`);
               if (!ejeRecuadro && !vf.mpDots.some((x) => x.title === P.names[id])) faltan.add(`buscar "${P.names[id]}" no lo deja a la vista: ${donde}`);
             }
@@ -1039,8 +1091,8 @@ const mapaN = { vistas: 0, empezar: 0, elige: 0, aperturas: 0, directos: 0, colu
     }
   }
   c.setState = setOrig; c.state.tab = 'campañas'; c.state.paso = 'explora'; c.state.w = 1400; c.state.hv = 900;
-  console.log(`Mapa: escala más chica en 1600 × 780 ${Math.round(mapaN.escalaMin * 100)} % (con un nodo y una campaña abiertos ${Math.round(mapaN.escalaAbierta * 100)} %, ${mapaN.abiertasSinAjuste} casos que pasan del alto y se mueven con el zoom) · ${mapaN.vistas} vistas · ${mapaN.rotulos} rótulos · ${mapaN.empezar} cambios de "Empezar por" · ${mapaN.elige} "Abrir por" · ${mapaN.aperturas} tipos elegidos · ${mapaN.directos} nodos que se abren directo con el tipo de su columna · ${mapaN.columnas} vistas con encabezados · ${mapaN.cierraDer} cambios de columna que cierran las de la derecha · ${mapaN.cadenas} cadenas de tipos (${mapaN.cuatro} de 4 columnas) · ${mapaN.cierres} cierres · ${mapaN.hojas} hojas tocadas · ${mapaN.migas} migas · ${mapaN.reinicios} "Volver a empezar" · ${mapaN.busquedas} búsquedas · ${mapaN.filtros} filtros · ${mapaN.pills} con "+N" · ${mapaN.otras} con "otras redes" · ${mapaN.terminadas} con terminadas en gris · ${mapaN.detalleCamp} "Ver en Detalle" · ${mapaN.tabla} "Ver en la tabla" · ${mapaN.metricas2} métricas · ${mapaN.fichas} fichas (${mapaN.fichasP} de contenidos) · ${mapaN.cierraFicha} cierres con × · ${mapaN.cajas} con recuadros de eje · ${mapaN.ordenes} órdenes · ${mapaN.zoom} zooms`);
-  if (!mapaN.elige || !mapaN.aperturas || !mapaN.directos || !mapaN.cierraDer || !mapaN.cadenas || !mapaN.cuatro || !mapaN.cierres || !mapaN.hojas || !mapaN.pills || !mapaN.otras || !mapaN.terminadas || !mapaN.detalleCamp || !mapaN.tabla || !mapaN.filtros || !mapaN.busquedas || !mapaN.migas || !mapaN.fichas || !mapaN.fichasP || !mapaN.cajas || !mapaN.cierraFicha) faltan.add('el Mapa no se probó completo ("Abrir por", tipo por columna, encabezados, cadenas de la jerarquía, cierres, hojas, "+N", otras redes, terminadas, Detalle, tabla, filtros, buscador, migas, fichas, recuadros)');
+  console.log(`Mapa: escala más chica en 1600 × 780 ${Math.round(mapaN.escalaMin * 100)} % (con un nodo y una campaña abiertos ${Math.round(mapaN.escalaAbierta * 100)} %, ${mapaN.abiertasSinAjuste} casos que pasan del alto y se mueven con el zoom) · ${mapaN.vistas} vistas · ${mapaN.rotulos} rótulos · ${mapaN.empezar} cambios de "Empezar por" · ${mapaN.elige} "Abrir por" · ${mapaN.aperturas} tipos elegidos · ${mapaN.directos} nodos que se abren directo con el tipo de su columna · ${mapaN.columnas} vistas con encabezados · ${mapaN.cierraDer} cambios de columna que cierran las de la derecha · ${mapaN.cadenas} cadenas de tipos (${mapaN.cuatro} de 4 columnas) · ${mapaN.notaSets || 0} fichas de conjunto con nota y ${mapaN.notaBurbujas || 0} burbujas con el color de su nota · ${mapaN.pCualquier || 0} Contenidos con la Campaña en cualquier lugar de arriba (${mapaN.pCruce || 0} con sus contenidos del cruce, ${mapaN.sinCruce || 0} sin datos del cruce) · ${mapaN.cierres} cierres · ${mapaN.hojas} hojas tocadas · ${mapaN.migas} migas · ${mapaN.reinicios} "Volver a empezar" · ${mapaN.busquedas} búsquedas · ${mapaN.filtros} filtros · ${mapaN.pills} con "+N" · ${mapaN.otras} con "otras redes" · ${mapaN.terminadas} con terminadas en gris · ${mapaN.detalleCamp} "Ver en Detalle" · ${mapaN.tabla} "Ver en la tabla" · ${mapaN.metricas2} métricas · ${mapaN.fichas} fichas (${mapaN.fichasP} de contenidos) · ${mapaN.cierraFicha} cierres con × · ${mapaN.cajas} con recuadros de eje · ${mapaN.ordenes} órdenes · ${mapaN.zoom} zooms`);
+  if (!mapaN.elige || !mapaN.aperturas || !mapaN.directos || !mapaN.cierraDer || !mapaN.cadenas || !mapaN.cuatro || !mapaN.pCualquier || !mapaN.pCruce || !mapaN.notaSets || !mapaN.notaBurbujas || !mapaN.cierres || !mapaN.hojas || !mapaN.pills || !mapaN.otras || !mapaN.terminadas || !mapaN.detalleCamp || !mapaN.tabla || !mapaN.filtros || !mapaN.busquedas || !mapaN.migas || !mapaN.fichas || !mapaN.fichasP || !mapaN.cajas || !mapaN.cierraFicha) faltan.add('el Mapa no se probó completo ("Abrir por", tipo por columna, encabezados, cadenas de la jerarquía, cierres, hojas, "+N", otras redes, terminadas, Detalle, tabla, filtros, buscador, migas, fichas, recuadros)');
 }
 // ---- cambiar de proyecto desde la ruta de arriba (06/10): el proyecto es un desplegable; se mantiene el paso, la pestaña, el período y el canal ----
 const cambioN = { clics: 0, canalCambiado: 0, desdeCampana: 0 };

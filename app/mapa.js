@@ -36,12 +36,15 @@ const MP_FICHA_W = 232;       // ancho de la ficha de métricas pegada a una bur
 const MP_KINDS = ['c', 'a', 'e', 'u', 'p'];
 const MP_FK = { c: 'c', a: 'a', e: 'eje', u: 'u', p: 'p' };
 const MP_KN = { c: ['Campaña', 'Campañas'], a: ['Activo', 'Activos'], e: ['Eje', 'Ejes'], u: ['Audiencia', 'Audiencias'], p: ['Contenidos', 'Contenidos'] };
-// Jerarquía (decisión de Juan Pablo, 15/10): qué se puede abrir desde cada tipo. Contenidos es siempre una subcategoría de Campaña: solo cuelga de una Campaña.
-//   Eje, Activo y Audiencia contienen campañas: se abren por Campaña o por otro de esos tres que no esté en el camino.
-//   Campaña se abre por Contenidos, Activo, Audiencia o Eje (los que no estén en el camino). Contenido se abre por Audiencia o Activo (donde corrió).
-const MP_SIGUE = { e: ['c', 'e', 'a', 'u'], a: ['c', 'e', 'a', 'u'], u: ['c', 'e', 'a', 'u'], c: ['p', 'a', 'u', 'e'], p: ['a', 'u'] };
-// tipos válidos para abrir lo que sigue; kinds = el tipo de cada columna hasta la actual (el último es el del nodo); salen en el orden de los botones
-const mpValidos = (kinds) => MP_KINDS.filter((k) => MP_SIGUE[kinds[kinds.length - 1]].includes(k) && !kinds.includes(k));
+// Jerarquía (decisión de Juan Pablo, 15/10 y 16/10). Lo que se ofrece en cada columna sale del CAMINO COMPLETO (el tipo de cada columna hasta la actual), no solo del nodo de arriba:
+//   - Eje, Activo y Audiencia contienen campañas: se abren por Campaña o por otro de esos tres que no esté en el camino.
+//   - Campaña se abre por Contenidos, Activo, Audiencia o Eje (los que no estén en el camino).
+//   - Contenidos es siempre una subcategoría de Campaña: se ofrece si hay una Campaña EN CUALQUIER lugar de arriba del camino y Contenidos todavía no está
+//     (Eje › Campañas › Audiencias › Contenidos, Activos › Campañas › Audiencias › Contenidos…). Sin Campaña arriba, nunca.
+//   - Desde un Contenido se sigue por Audiencia o Activo (si no están en el camino): en qué audiencias y activos corrió.
+// Los hijos son siempre los del camino: los registros de cada nodo ya vienen filtrados por todo lo de arriba (Campaña X › Audiencia Y › Contenidos = los contenidos de X que corrieron en Y).
+// kinds = el tipo de cada columna hasta la actual (el último es el del nodo); salen en el orden de los botones
+const mpValidos = (kinds) => { const ult = kinds[kinds.length - 1]; return MP_KINDS.filter((k) => !kinds.includes(k) && (k === 'p' ? kinds.includes('c') : ult === 'p' ? k === 'a' || k === 'u' : true)); };
 const MP_OPC_W = 124;         // lugar de los botones "Abrir por" que salen a la derecha de un nodo
 const MP_CORTO = { cr: 'Costo/reacción', cpm: 'CPM', ctr: 'CTR', etrV: 'ETR videos', etrI: 'ETR imág.', cv: 'Costo/repr.', ca: 'CPM alcance' };
 // lo que ocupa la pantalla fuera del mapa (encabezado, pasos, pestañas, barra de búsqueda, bordes): el resto es del mapa
@@ -138,11 +141,20 @@ class MapaVista {
   reset() { return { ejeF: '', actF: '', sel: null, abre: {}, cols: [], menuCol: null, fichas: {}, expZ: {}, notice: '', q: '', qOpen: false, flash: null }; }
   recsFor(s) { let R = this.P.recs; if (s.ejeF) R = R.filter((r) => r.eje === s.ejeF); if (s.actF) R = R.filter((r) => r.a === s.actF); return R; }
 
+  // nota de 1 a 5 de un conjunto de campañas con "Según objetivo" (igual que Mis proyectos): promedio de la nota de cada campaña ponderado por gasto, redondeado; las que no tienen nota no entran.
+  // cg = { campaña: gasto dentro del camino }. rep = cuántas campañas tiene cada nota; sin = campañas sin referencia; n = campañas.
+  notaDeCg(cg) {
+    let g = 0, sm = 0, n = 0, sin = 0; const rep = {};
+    Object.keys(cg).forEach((cid) => { const c = this.P.camps[cid], nt = c && c.raw.nt; n++; if (!(nt >= 1)) { sin++; return; } const w = Math.max(cg[cid], 0) || 0.001; g += w; sm += w * nt; rep[nt] = (rep[nt] || 0) + 1; });
+    return { nota: g ? Math.min(5, Math.max(1, Math.round(sm / g))) : null, rep, n, sin };
+  }
+  cgDe(Rx) { const cg = {}; Rx.forEach((r) => { cg[r.c] = (cg[r.c] || 0) + r.v; }); return cg; }
+
   // ---- lista ordenada de nodos de un tipo a partir de un conjunto de registros (con su gasto y su marca) ----
   lista(Rx, fld) {
     const P = this.P, m = new Map();
-    Rx.forEach((r) => { const id = r[fld]; if (!id) return; let it = m.get(id); if (!it) { it = { id, v: 0, w: {} }; m.set(id, it); } it.v += r.v; const mk = this.mkOf(P.camps[r.c]); it.w[mk] = (it.w[mk] || 0) + r.v; });
-    const arr = [...m.values()].map((it) => ({ id: it.id, v: it.v, mk: it.id[0] === 'c' ? this.mkOf(P.camps[it.id]) : mpArgmax(it.w) }));
+    Rx.forEach((r) => { const id = r[fld]; if (!id) return; let it = m.get(id); if (!it) { it = { id, v: 0, w: {}, cg: {} }; m.set(id, it); } it.v += r.v; it.cg[r.c] = (it.cg[r.c] || 0) + r.v; const mk = this.mkOf(P.camps[r.c]); it.w[mk] = (it.w[mk] || 0) + r.v; });
+    const obj = this.metric === 'obj', arr = [...m.values()].map((it) => ({ id: it.id, v: it.v, mk: it.id[0] === 'c' ? this.mkOf(P.camps[it.id]) : mpArgmax(it.w), nt: obj && it.id[0] !== 'c' ? this.notaDeCg(it.cg).nota : null }));
     // orden elegido: Gasto (mayor a menor, el de siempre), Nombre (A–Z) o Cómo rinde (de lo que mejor rinde a lo que peor; a igual marca, el que más gastó)
     const modo = this.S.orden, nom = (id) => P.names[id] || id;
     const porGasto = (a, b) => b.v - a.v || (a.id < b.id ? -1 : 1);
@@ -209,12 +221,13 @@ class MapaVista {
     const nodo = (it, path, depth, Rx, vmax) => {
       const k = it.id[0], c = k === 'c' ? P.camps[it.id] : null, nom = P.names[it.id] || it.id, enCamino = kinds.slice(0, depth + 1);
       const opts = mpValidos(enCamino), hijoK = S.cols[depth], open = !!S.abre[path] && hijoK !== undefined && opts.includes(hijoK), exp = opts.length > 0;
+      const ntInfo = this.metric === 'obj' && k !== 'c' ? this.notaDeCg(this.cgDe(Rx)) : null;   // con "Según objetivo", un conjunto se mide por la nota de sus campañas
       const met = this.metricaDe(Rx, it.id, depth);
       const num = met && met.v != null ? `${MP_CORTO[met.col.k]} ${met.col.fmt(met.v)}` : mpFmt(it.v);
       const txt = mpTrunc(nom, 22) + ' · ' + num;
       const ficha = !!S.fichas[path], elige = exp && !open && S.sel === path && hijoK === undefined;
-      const n = { t: 'n', path, id: it.id, k, depth, v: it.v, mk: it.mk, r: depth >= 2 ? 4 + 4 * Math.sqrt(it.v / Math.max(vmax, 1)) : 5 + 8 * Math.sqrt(it.v / Math.max(vmax, 1)), name: nom, txt, lw: txt.length * 6.9 + 4, term: !!(c && c.termino), exp, open, kids: [], info: true, ficha, elige, opts, hijoK: open ? hijoK : null };
-      if (ficha) { n.fl = this.ficha(Rx, it, met, c, nom); n.fh = n.fl.alto; }
+      const n = { t: 'n', path, id: it.id, k, depth, v: it.v, mk: it.mk, r: depth >= 2 ? 4 + 4 * Math.sqrt(it.v / Math.max(vmax, 1)) : 5 + 8 * Math.sqrt(it.v / Math.max(vmax, 1)), nt: ntInfo ? ntInfo.nota : null, objSet: !!ntInfo, name: nom, txt, lw: txt.length * 6.9 + 4, term: !!(c && c.termino), exp, open, kids: [], info: true, ficha, elige, opts, hijoK: open ? hijoK : null };
+      if (ficha) { n.fl = this.ficha(Rx, it, met, c, nom, ntInfo); n.fh = n.fl.alto; }
       n.ex = n.fh ? n.fh + 8 : 0;
       if (!open) return n;
       const fld = MP_FK[hijoK], arr = this.lista(Rx, fld), plural = MP_KN[hijoK][1];
@@ -237,11 +250,12 @@ class MapaVista {
   // color fijo de cada eje en todo el mapa (borde y fondo suaves)
   colorEje(e) { const i = this.P.ejes.indexOf(e); return e === 'e:Sin eje' || i < 0 ? ['#C8C8C8', '#F6F6F6'] : MP_EJE_COL[i % MP_EJE_COL.length]; }
   // la ficha de métricas pegada a una burbuja: la métrica elegida con la marca y su comparación, y debajo gasto, impresiones, reacciones y (campañas) días al aire
-  ficha(Rx, it, met, c, nom) {
+  ficha(Rx, it, met, c, nom, ntInfo) {
     const g = Rx.reduce((a, r) => a + r.v, 0), i = Rx.reduce((a, r) => a + (r.i || 0), 0), re = Rx.reduce((a, r) => a + (r.r || 0), 0);
     const minis = [{ lab: 'Gasto', val: mpFmt(g) }, { lab: 'Impr.', val: fCant(i) }, { lab: 'Reacc.', val: fCant(re) }];
     if (c) minis.push({ lab: 'Al aire', val: c.dias ? mpPl(c.dias, 'día', 'días') : '—' });
     const mm = MP_MK[it.mk] || MP_MK.sin_referencia, marcaTxt = { mejor: 'Bueno', normal: 'Regular', peor: 'Malo' }[it.mk] || 'Sin referencia';
+    let pillBgN = null;
     let metLab = 'Métrica', metVal = '—', pill = '', motivo = (met && met.motivo) || 'Sin métrica para esto';
     if (met && met.col) {
       metLab = met.col.label;
@@ -251,9 +265,18 @@ class MapaVista {
         else pill = marcaTxt === 'Sin referencia' ? 'Sin referencia' : marcaTxt;
       }
     }
-    const tipo = { e: 'Eje', c: 'Campaña', a: 'Activo', u: 'Audiencia' }[it.id[0]] || '';
+    const tipo = { e: 'Eje', c: 'Campaña', a: 'Activo', u: 'Audiencia', p: 'Contenido' }[it.id[0]] || '';
+    // "Según objetivo" en un conjunto: la nota de 1 a 5 (Rendimiento) con su píldora y, debajo, el reparto de sus campañas
+    let sub2 = '', marcaColor = mm.c;
+    if (ntInfo) {
+      const NT = typeof NOTA !== 'undefined' ? NOTA : { 5: ['Muy bueno', '#1F8A4C', '#D6EEDF'], 4: ['Bueno', '#46C678', '#E5F6EC'], 3: ['Regular', '#FCB942', '#FEF3DC'], 2: ['Malo', '#F7444C', '#FDE6E7'], 1: ['Muy malo', '#B3141B', '#F6D3D5'] };
+      metLab = 'Rendimiento'; motivo = '';
+      const partesR = [5, 4, 3, 2, 1].filter((x) => ntInfo.rep[x]).map((x) => ntInfo.rep[x] + ' ' + NT[x][0]); if (ntInfo.sin) partesR.push(ntInfo.sin + ' sin referencia');
+      if (ntInfo.nota) { metVal = String(ntInfo.nota); pill = NT[ntInfo.nota][0]; pillBgN = NT[ntInfo.nota][2]; marcaColor = NT[ntInfo.nota][1]; sub2 = mpPl(ntInfo.n, 'campaña', 'campañas') + ': ' + partesR.join(' · '); }
+      else { metVal = '—'; pill = 'Sin referencia'; pillBgN = '#F4F4F4'; marcaColor = '#A6AAA9'; sub2 = mpPl(ntInfo.n, 'campaña sin referencia', 'campañas sin referencia'); }
+    }
     const nota = '';
-    return { titulo: mpTrunc(nom, 24), sub: tipo + ' · ' + this.periodoTxt, minis, metLab, metVal, pill, hayPill: !!pill, pillBg: pill ? mm.bg : 'transparent', motivo, hayMotivo: !!motivo, nota, hayNota: !!nota, marcaColor: mm.c, alto: 161 };
+    return { titulo: mpTrunc(nom, 24), sub: tipo + ' · ' + this.periodoTxt, minis, metLab, metVal, pill, hayPill: !!pill, pillBg: pill ? (pillBgN || mm.bg) : 'transparent', motivo, hayMotivo: !!motivo, nota, hayNota: !!nota, sub2, haySub2: !!sub2, sub2Alto: sub2.length > 34 ? 28 : 14, marcaColor, alto: 161 + (sub2 ? (sub2.length > 34 ? 30 : 16) : 0) };
   }
 
   // ---- disposición: columnas de izquierda a derecha (un nivel por columna); cada nodo abierto reparte sus hijos a su derecha; el selector "Abrir por" y la ficha ocupan su lugar debajo del nodo ----
@@ -451,8 +474,8 @@ class MapaVista {
         const esSel = n.path === sel, term = n.term, otra = n.id === 'a:otras';
         if (n.exp) flechas.push({ style: mpCss({ position: 'absolute', left: (n.cx + n.r + 24 + n.lw) + 'px', top: (n.cy - 9) + 'px', width: '14px', height: '18px', 'text-align': 'center', 'font-size': '15px', 'line-height': '17px', 'font-weight': 600, color: n.open || esSel ? '#3C3C3C' : '#A6AAA9', transform: n.open ? 'rotate(90deg)' : 'none', transition: 'transform .15s ease, color .15s ease', cursor: 'pointer' }), label: '›', abierta: n.open, title: n.open ? 'Cerrar' : 'Abrir por…', onClick: this.tapFn(n.path) });
         if (n.info) infos.push({ style: mpCss({ position: 'absolute', left: (n.cx + n.r + 4) + 'px', top: (n.cy - 8) + 'px', width: '16px', height: '16px', 'border-radius': '50%', border: '1px solid ' + (n.ficha ? '#3C3C3C' : '#A6AAA9'), background: n.ficha ? '#3C3C3C' : '#FFFFFF', color: n.ficha ? '#FFFFFF' : '#808080', 'font-size': '10px', 'font-weight': 700, 'font-style': 'italic', 'text-align': 'center', 'line-height': '14px', 'box-sizing': 'border-box', cursor: 'pointer' }), onClick: (e) => { if (e && e.stopPropagation) e.stopPropagation(); if (MP_MOVIDO) return; this.set({ fichas: { ...S.fichas, [n.path]: !S.fichas[n.path] } }); }, label: 'i', title: n.ficha ? 'Cerrar las métricas' : 'Ver métricas' });
-        if (n.ficha) fichas.push({ style: mpCss({ position: 'absolute', left: (n.cx + n.r + 27) + 'px', top: (n.cy + n.h / 2 + 4) + 'px', width: MP_FICHA_W + 'px', height: n.fl.alto + 'px', 'box-sizing': 'border-box', background: '#FFFFFF', border: '1px solid #E4E4E4', 'border-radius': '10px', 'box-shadow': '0 1px 6px rgba(0,0,0,0.08)', padding: '12px', color: '#3C3C3C', cursor: 'default', 'z-index': 2 }), titulo: n.fl.titulo, sub: n.fl.sub, minis: n.fl.minis, metLab: n.fl.metLab, metVal: n.fl.metVal, pill: n.fl.pill, hayPill: n.fl.hayPill, pillStyle: mpCss({ 'font-size': '10px', padding: '2px 8px', 'border-radius': '999px', background: n.fl.pillBg, color: '#3C3C3C', 'white-space': 'nowrap', overflow: 'hidden', 'text-overflow': 'ellipsis', 'min-width': 0, 'line-height': '14px' }), motivo: n.fl.motivo, hayMotivo: n.fl.hayMotivo, nota: n.fl.nota, hayNota: n.fl.hayNota, marcaDot: mpCss({ width: '8px', height: '8px', 'border-radius': '999px', background: n.fl.marcaColor, flex: 'none' }), miniCols: 'repeat(' + n.fl.minis.length + ',1fr)', alto: n.fl.alto, onStop: (e) => { if (e && e.stopPropagation) e.stopPropagation(); }, onClose: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.set({ fichas: { ...S.fichas, [n.path]: false } }); } });
-        const fill = n.k === 'p' ? '#BFC3C2' : term ? MP_TERM : mpColor(n.mk);
+        if (n.ficha) fichas.push({ style: mpCss({ position: 'absolute', left: (n.cx + n.r + 27) + 'px', top: (n.cy + n.h / 2 + 4) + 'px', width: MP_FICHA_W + 'px', height: n.fl.alto + 'px', 'box-sizing': 'border-box', background: '#FFFFFF', border: '1px solid #E4E4E4', 'border-radius': '10px', 'box-shadow': '0 1px 6px rgba(0,0,0,0.08)', padding: '12px', color: '#3C3C3C', cursor: 'default', 'z-index': 2 }), titulo: n.fl.titulo, sub: n.fl.sub, minis: n.fl.minis, sub2: n.fl.sub2, haySub2: n.fl.haySub2, sub2Style: mpCss({ 'font-size': '10.5px', 'line-height': '14px', color: '#808080', height: n.fl.sub2Alto + 'px', overflow: 'hidden', 'white-space': 'normal' }), metLab: n.fl.metLab, metVal: n.fl.metVal, pill: n.fl.pill, hayPill: n.fl.hayPill, pillStyle: mpCss({ 'font-size': '10px', padding: '2px 8px', 'border-radius': '999px', background: n.fl.pillBg, color: '#3C3C3C', 'white-space': 'nowrap', overflow: 'hidden', 'text-overflow': 'ellipsis', 'min-width': 0, 'line-height': '14px' }), motivo: n.fl.motivo, hayMotivo: n.fl.hayMotivo, nota: n.fl.nota, hayNota: n.fl.hayNota, marcaDot: mpCss({ width: '8px', height: '8px', 'border-radius': '999px', background: n.fl.marcaColor, flex: 'none' }), miniCols: 'repeat(' + n.fl.minis.length + ',1fr)', alto: n.fl.alto, onStop: (e) => { if (e && e.stopPropagation) e.stopPropagation(); }, onClose: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.set({ fichas: { ...S.fichas, [n.path]: false } }); } });
+        const NT0 = typeof NOTA !== 'undefined' ? NOTA : null, fill = n.objSet && NT0 ? (n.nt ? NT0[n.nt][1] : '#A6AAA9') : n.k === 'p' ? '#BFC3C2' : term ? MP_TERM : mpColor(n.mk);
         const forma = n.k === 'c' ? { 'border-radius': '50%', border: '0' } : n.k === 'e' ? { 'border-radius': '50%', border: '2.5px solid #3C3C3C' } : n.k === 'a' ? (otra ? { 'border-radius': '4px', border: '2px dashed #3C3C3C' } : { 'border-radius': '4px', border: '0' }) : n.k === 'u' ? { 'border-radius': '50%', border: '2px dashed #3C3C3C' } : { 'border-radius': '2px', border: '0', transform: 'rotate(45deg)' };
         const rr = n.k === 'p' ? n.r * 0.8 : n.r;
         dots.push({ style: mpCss({ position: 'absolute', left: (n.cx - rr) + 'px', top: (n.cy - rr) + 'px', width: (2 * rr) + 'px', height: (2 * rr) + 'px', background: otra ? '#FFFFFF' : fill, ...forma, 'box-sizing': 'border-box', 'box-shadow': esSel ? '0 0 0 3px rgba(60,60,60,0.35)' : 'none', cursor: 'pointer', transition: MP_MOV }), onClick: this.tapFn(n.path), label: '', title: n.name });
@@ -514,6 +537,7 @@ class MapaVista {
       { dot: forma({ 'border-radius': '3px' }), label: 'Activo' },
       { dot: forma({ 'border-radius': '50%', border: '2px dashed #3C3C3C' }), label: 'Audiencia' },
       { dot: forma({ 'border-radius': '1px', width: '8px', height: '8px', transform: 'rotate(45deg)' }), label: 'Contenido' }];
+    if (this.metric === 'obj' && typeof NOTA !== 'undefined') leyenda.push({ dot: mpCss({ width: '9px', height: '9px', 'border-radius': '999px', background: NOTA[5][1] }), label: 'Nota 5 (conjuntos)' }, { dot: mpCss({ width: '9px', height: '9px', 'border-radius': '999px', background: NOTA[1][1] }), label: 'Nota 1' });
     const vacioTit = empty ? 'No hay gasto en este período.' : !R.length ? 'No hay gasto con estos filtros.' : `No hay ${plural.toLowerCase()} con gasto en este período.`;
     return {
       mpProyecto: proyNombre,
